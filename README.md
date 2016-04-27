@@ -1,5 +1,5 @@
 # Bingos!
-Implementation of United and Bally bingo pinball machines built using pyprocgame and real E.M. hardware.
+Implementation of United and Bally bingo pinball machines built using pyprocgame and real E.M. hardware.  Score and instruction cards dynamically update by sending SSH commands to local network of Raspberry Pi computers.
 
 Dependencies:
 * pygame
