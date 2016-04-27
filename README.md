@@ -1,7 +1,11 @@
 # Bingos!
-Implementation of United and Bally bingos built using pyprocgame and real E.M. hardware.
+Implementation of United and Bally bingo pinball machines built using pyprocgame and real E.M. hardware.
 
-Note that you need pygame, libpinproc, pypinproc, and pyprocgame to successfully load this.
+Dependencies:
+* pygame
+* libpinproc
+* pypinproc
+* pyprocgame
 
 Where I have done the artwork for the games, assets will be included.  Otherwise, I will not
 be able to include the backglass images without express permission from the person who completed
