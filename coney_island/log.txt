@@ -1,0 +1,9 @@
+Desktop init begun.
+****************
+WINDOW SET
+****************
+Using a virtual DMD ONLY - no physical DMD output will be sent
+Using a virtual DMD ONLY - no physical DMD output will be sent
+Using a virtual DMD ONLY - no physical DMD output will be sent
+Using a virtual DMD ONLY - no physical DMD output will be sent
+CTRL-C detected, quiting...

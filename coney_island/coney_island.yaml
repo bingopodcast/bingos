@@ -1,0 +1,198 @@
+PRGame:
+    machineType: pdb
+    numBalls: 8
+PRSwitches:
+    # **** Format ****
+    # name:
+    #   number: <number>
+    #   type: <type>
+    #
+    #   <number> can be: SDx (Dedicated switch, x = P-ROC input) (valid x's are 0-32)
+    #                    c/r (Matrix switch, c = column, r = row
+    #                        Note - valid columns are 0-7, valid rows are 0-15
+    #   <type> can be: 'NO' (normally open.  This is the default; so no need to use this)
+    #                  'NC' (normally closed.  Common for optos)
+
+    trough1:
+        number: SD0
+    trough2:
+        number: SD1
+    trough3:
+        number: SD2
+    trough4:
+        number: SD3
+    trough5:
+        number: SD4
+    trough6:
+        number: SD5
+    startButton:
+        number: SD6
+    green:
+        number: SD7
+    blue:
+        number: SD8
+    yellow:
+        number: SD9
+    tilt:
+        number: SD10
+    replay0:
+        number: SD11
+    shutter:
+        number: SD12
+    enter:
+        number: SD13
+    shooter:
+        number: SD18
+    gate:
+        number: SD19
+    hole1:
+         number: 0/0
+    hole2:
+        number: 0/1
+    hole3:
+        number: 0/2
+    hole4:
+        number: 0/3
+    hole5:
+        number: 0/4
+    hole6:
+        number: 0/5
+    hole7:
+        number: 0/6
+    hole8:
+        number: 0/7
+    hole9:
+        number: 0/8
+    hole10:
+        number: 0/9
+    hole11:
+        number: 0/10
+    hole12:
+        number: 0/11
+    hole13:
+        number: 0/12
+    hole14:
+        number: 0/13
+    hole15:
+        number: 0/14
+    hole16:
+        number: 1/0
+    hole17:
+        number: 1/1
+    hole18:
+        number: 1/2
+    hole19:
+        number: 1/3
+    hole20:
+        number: 1/4
+    hole21:
+        number: 1/5
+    hole22:
+        number: 1/6
+    hole23:
+        number: 1/7
+    hole24:
+        number: 1/8
+    hole25:
+        number: 1/9
+    ballLift:
+        number: SD20
+    slamTilt:
+        number: SD21
+    coin:
+        number: SD22
+
+# Coil numbering format: Ax-By-z:
+
+# Capital letters are required, lower case letters represent the numbers:
+# x : Board address (0-7)
+# y : Bank address (0 for A, 1 for B)
+# z : Output number (0-7)
+
+PRCoils:
+    trough:
+        number: A0-B1-0
+    shutterMotor:
+        number: A0-B1-1
+    registerUp:
+        number: A0-B1-2
+    registerDown:
+        number: A0-B1-3
+
+# Lamp numbering format: C-Ax-By-z:R-Am-Bn-p:
+
+# Capital letters are required, lower case letters represent the numbers:
+# For Columns (Source circuits - represented by the 'C')
+# x : Column board address (0-7)
+# y : Column bank address (0 for A, 1 for B)
+# z : Output number (0-7)
+
+# For Rows (Sink circuits - represented by the 'R')
+# m : Row board address (0-7)
+# n : Row bank address (0 for A, 1 for B)
+# p : Output number (0-7)
+
+
+PRLamps:
+#   ballyHole:
+#       number: C-A1-B0-0:R-A1-B1-0
+#   corners:
+#       number: C-A1-B0-0:R-A1-B1-0
+#   squaresTeaser1:
+#       number: C-A1-B0-0:
+#    shootAgain:
+#        number: C-A1-B0-0:R-A1-B1-0
+#    VUK_right_b:
+#        number: C-A1-B0-0:R-A1-B1-1
+#    VUK_right_g:
+#        number: C-A1-B0-0:R-A1-B1-2
+#    VUK_left_g:
+#        number: C-A1-B0-0:R-A1-B1-3
+#    VUK_left_b:
+#        number: C-A1-B0-0:R-A1-B1-4
+#    VUK_left_r:
+#        number: C-A1-B0-0:R-A1-B1-5
+
+PRDriverGlobals:
+    lamp_matrix_strobe_time: 200
+    use_watchdog: True
+    watchdog_time: 1000
+
+
+#font_path:
+#    - ./assets/dmd/
+#config_path:
+#    - ./config/
+#dmd_path: ./assets/dmd/
+#sound_path: ./assets/sound/
+#voice_dir: voice/ # i.e., this is assets/sound/voice/
+#sfx_dir: sfx/
+#music_dir: music/
+#hdfont_path: ./assets/fonts/
+
+#default_modes:  # these are the default provided modes by SkeletonGame; turn them off here.
+#    score_display: False
+#    bonus_tally: False
+#    osc_input: True
+#    service_mode: False
+
+pinproc_class: procgame.fakepinproc.FakePinPROC # comment out this line when using a real P-ROC. 
+
+# all of this is for the hdDMD
+#use_virtual_dmd_only: True          # don't try to talk to the real DMD (seriously, don't)
+#dmd_grid_path: /assets/dmd/        # where to find the dmdgrid32x32.png file
+#dmd_dots_w: 540                     # the display width in virtual dots
+#dmd_dots_h: 630                     # the display height in virtual donts
+#dmd_dot_filter: False                # enable to virtual dot effect; false disables dot separation
+#dmd_fullscreen: False               # Full-screen mode scales the contents to fit the full display; may not look right
+#desktop_dmd_scale: 1                # the dmd scale is the multiplier per dot.  At 5 each dot is 5x5 pixels
+#dmd_framerate: 30
+#screen_position_x: 123              # an offset for where the window should be located on launch -- 1366x768 is me, so 
+#screen_position_y: 104              # 224*5x112*5 = 1120x560; the difference is 246x208 hence the offsets 123x104
+#dmd_window_border: False             # show a window border?  In the machine, go without it, and with black wallpaper
+
+#PYSDL2_DLL_PATH: c:\P-ROC\DLLs\ # where to find the sdl2.dll
+
+#vp_game_map_file: /P-ROC/shared/vp_game_map.yaml  # relevant for Visual Pinball (only)
+
+
