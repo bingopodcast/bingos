@@ -1,0 +1,387 @@
+import logging
+logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+import pinproc
+import procgame.game, sys, os
+import procgame.config
+import threading
+
+sys.path.insert(0,os.path.pardir)
+from bingo_emulator.units import units
+from bingo_emulator.graphics import methods as graphics
+
+class MulticardBingo(procgame.game.Mode):
+    def __init__(self, game):
+        super(MulticardBingo, self).__init__(game=game, priority=5)
+        self.startup()
+        print("Started")
+        #threading.Thread(graphics.main_render("coney_island", [], []))
+
+
+    def game_started(self):
+        print("In game_started")
+        for switch in self.game.switches:
+            if switch.is_active():
+                self.logger.info("Initial Active Switch|%s|", switch.name)
+
+	if self.game.switches.trough6.is_active() and self.game.switches.lane.is_inactive():
+            self.layer = self.game.animations['card_empty']
+            self.game.coils.trough.pulse()
+	    selector.step()
+	    self.game.animations['selector_%s'] % (selector.position)
+	    ball_count.step()
+	    if self.game.switches.shutter.is_active():
+        	self.game.coils.shutter.pulse()
+                timer.step()
+	    reflex.decrease()
+	    timer.step()
+	    if self.game.switches.coin.is_active() or self.game.switches.replay0.is_inactive() and self.game.start.is_active():
+                if selector.position <= 3:
+	            replay_step_down()
+		    selector.step()
+		    self.game.animations['card_%s'] % (selector.position)
+		    reflex.decrease()
+		else:
+		    pass
+	    if self.game.switches.gate.is_inactive():
+                standard_play()
+
+    def standard_play(self):
+	self.game.coils.shutter.pulse()
+
+        if self.game.switches.trough5.is_inactive():
+            print("inactive")
+
+	if self.game.switches.lane.is_inactive() and self.game.trough4.is_active():
+	    self.game.coils.trough.pulse()
+		
+            # Now we need to light a number on the cards - has to light all three cards regardless of position of selector unit.
+            # Unfortunately, doing so is going to be difficult.  We have the switches wired to a matrix, but we really still need
+            # a huge silly conditional to determine the number to light.  This is extremely ugly, and there must be a better way,
+            # but at the moment, I'm in an airplane with a baby who is well behaved but shouting directly in my ear, and in front 
+            # is a guy who slammed into my knees at the earliest opportunity and is comfortably resting there while I can no longer
+            # feel my toes.  This is as good as it gets for now.
+            if self.game.switches.hole_1.is_active():
+                search(1)
+            if self.game.switches.hole_2.is_active():
+                search(2)
+            if self.game.switches.hole_3.is_active():
+                search(3)
+            if self.game.switches.hole_4.is_active():
+                search(4)
+            if self.game.switches.hole_5.is_active():
+                search(5)
+            if self.game.switches.hole_6.is_active():
+                search(6)
+            if self.game.switches.hole_7.is_active():
+                search(7)
+            if self.game.switches.hole_8.is_active():
+                search(8)
+            if self.game.switches.hole_9.is_active():
+                seach(9)
+            if self.game.switches.hole_10.is_active():
+                search(10)
+            if self.game.switches.hole_11.is_active():
+                search(11)
+            if self.game.switches.hole_12.is_active():
+                search(12)
+            if self.game.switches.hole_13.is_active():
+                search(13)
+            if self.game.switches.hole_14.is_active():
+                search(14)
+            if self.game.switches.hole_15.is_active():
+                search(15)
+            if self.game.switches.hole_16.is_active():
+                search(16)
+            if self.game.switches.hole_17.is_active():
+                search(17)
+            if self.game.switches.hole_18.is_active():
+                search(18)
+            if self.game.switches.hole_19.is_active():
+                search(19)
+            if self.game.switches.hole_20.is_active():
+                search(20)
+            if self.game.switches.hole_21.is_active():
+                search(21)
+            if self.game.switches.hole_22.is_active():
+                search(22)
+            if self.game.switches.hole_23.is_active():
+                search(23)
+            if self.game.switches.hole_24.is_active():
+                search(24)
+            if self.game.switches.hole_25.is_active():
+                search(25)
+
+    def search(self, n):
+        # The search workflow/logic will determine if you actually have a winner, but it is a bit tricky.
+        # if the ball is in a particular hole, the search relays need to click and/or clack, and 
+        # when you have at least three going at once, it should latch on the search index and score.
+        # This scoring is tempered by the selection disc.  You have to have the card enabled that you're
+        # winning on.  This whole process will have to happen on a rotational basis.  The search should really
+        # begin immediately upon the first ball landing in the hole.
+        # I suspect that the best, fastest way to complete the search is actually to reimplement the mechanical
+        # search activity.  For each revolution of the search disc (which happens about every 5-7 seconds), the
+        # game will activate() each search relay for each 'hot' rivet on the search disc.  This can be on a different
+        # wiper finger for each set of rivets on the search disc.  Note that also, this means that I will need to 
+        # untangle the really sticky search relay logic on the schematic :-)
+        # Replay counters also need to be implemented to prevent the supplemental searches from scoring.
+        # n must be a dictionary or list (mutable) as I will need to pass that to the connected_rivets() function.
+
+        while search.position <= 49:
+            # connected_rivets() needs to return a list [] or dictionary {} of rivets that are currently connected on the disc.
+            rivets = search.connected_rivets(self, n)
+            
+            # This also needs to implement a list [] or dictionary {} (whichever is mutable), and return it.
+            r = closed_search_relays(rivets, self)
+
+            # From here, I need to determine based on the value of r, whether to latch the search index and score. For Coney Island,
+            # I need to determine the best winner on each card.  To do this, I must compare the position of the replay counter before
+            # determining the winner. Reminder that my replay counters are a 1:1 representation.
+            w = determine_winner(r)
+            
+            # Once I've determined this, I need to actually step up the register and replay counters.  This will prevent it from scoring again.
+            # I also need to release() the search index, which will allow the search disc to continue moving.
+            
+
+            card = w.slice(0,1)
+            row = w.slice(1,1)
+            
+            if row == 3:
+                if card%s_replay_counter.position < 4 (card):
+                    while card%s_replay_counter.position < 4 (card):
+                        card%s_replay_counter.step() (card)
+                        self.game.coils.sounder.pulse()
+            if row == 4:
+                if card%s_replay_counter.position < 16 (card):
+                    while card%s_replay_counter.position < 16 (card):
+                        card%s_replay_counter.step() (card)
+                        self.game.coils.sounder.pulse()
+            if row == 5:
+                if card%s_replay_counter.position < 100 (card):
+                    while card%s_replay_counter.position < 100 (card):
+                        card%s_replay_counter.step() (card)
+                        self.game.coils.sounder.pulse()
+            search.spin()
+
+    def closed_search_relays(rivets, self):
+        # This function is critical, as it will determine which card is returned, etc.  I need to check both the position of the
+        # replay counter for the card, as well as the selection unit to ensure that the card is selected.
+        pos_1 = {5:1, 1:2, 9:3, 25:4, 3:5}
+        pos_2 = {8:1, 22:2, 10:3, 19:4, 7:5}
+        pos_3 = {6:1, 18:2, 16:3, 11:4, 17:5}
+        pos_4 = {24:1, 21:2, 14:3, 20:4, 13:5}
+        pos_5 = {12:1, 23:2, 2:3, 4:4, 15:5}
+        pos_6 = {5:1, 8:2, 6:3, 24:4, 12:5}
+        pos_7 = {1:1, 22:2, 18:3, 21:4, 23:5}
+        pos_8 = {9:1, 10:2, 16:3, 14:4, 2:5}
+        pos_9 = {25:1, 19:2, 11:3, 20:4, 4:5}
+        pos_10 = {3:1, 7:2, 17:3, 13:4, 15:5}
+        pos_11 = {5:1, 22:2, 16:3, 20:4, 15:5}
+        pos_12 = {3:1, 19:2, 16:3, 21:4, 12:5}
+        
+        # There are five blank positions in between cards.  Early games have less to search!
+        pos_18 = {9:1, 24:2, 16:3, 4:4, 6:5}
+        pos_19 = {13:1, 19:2, 14:3, 20:4, 25:5}
+        pos_20 = {2:1, 18:2, 15:3, 12:4, 17:5}
+        pos_21 = {1:1, 22:2, 11:3, 21:4, 8:5}
+        pos_22 = {10:1, 7:2, 5:3, 23:4, 3:5}
+        pos_23 = {9:1, 13:2, 2:3, 1:4, 10:5}
+        pos_24 = {24:1, 19:2, 18:3, 22:4, 7:5}
+        pos_25 = {16:1, 15:2, 15:3, 11:4, 5:5}
+        pos_26 = {4:1, 20:2, 12:3, 21:4, 23:5}
+        pos_27 = {6:1, 25:2, 17:3, 8:4, 3:5}
+        pos_28 = {9:1, 19:2, 15:3, 21:4, 3:5}
+        pos_29 = {6:1, 20:2, 15:3, 22:4, 10:5}
+
+        #Another five blank positions.  Can you believe it?
+        pos_35 = {3:1, 7:2, 10:3, 4:4, 9:5}
+        pos_36 = {24:1, 21:2, 18:3, 22:4, 8:5}
+        pos_37 = {15:1, 14:2, 17:3, 11:4, 2:5}
+        pos_38 = {13:1, 20:2, 12:3, 19:4, 23:5}
+        pos_39 = {6:1, 25:2, 16:3, 1:4, 5:5}
+        pos_40 = {3:1, 24:2, 15:3, 13:4, 6:5}
+        pos_41 = {7:1, 21:2, 14:3, 20:4, 25:5}
+        pos_42 = {10:1, 18:2, 17:3, 12:4, 16:5}
+        pos_43 = {4:1, 22:2, 11:3, 19:4, 1:5}
+        pos_44 = {9:1, 8:2, 2:3, 23:4, 5:5}
+        pos_45 = {3:1, 21:2, 17:3, 19:4, 5:5}
+        pos_46 = {9:1, 22:2, 17:3, 20:4, 6:5}
+
+        return pos_1
+		
+					
+    def eb_play(self):
+        # The logic to determine if you can actually press the yellow button is a bit complex.
+        # I note that it will only get more difficult from here.
+        # The game must have credits on the meter, or wait for a coin drop, along with the timer
+        # being below the 40th step, the 5th ball has to have been shot (normally determined by 
+        # the position of the ball count unit on the game, but I am going to use the same method
+        # I will use to determine eligibility for the 8 step timer games (fourth trough switch is open).
+        if self.game.switches.yellow.is_active():
+            if self.game.switches.trough4.is_inactive():
+                if timer.position < 40:
+                    if extra_ball.position < 3:
+                        if self.game.switches.replay0.is_inactive() or self.game.switches.coin.is_active():
+                            scan_eb()
+
+    def tilt(self):
+        #roughly every 9 seconds the game will need to step the timer to eventually tilt out the game.
+        if self.game.switches.trough4.is_inactive():
+            import time
+            starttime=time.time()
+            while timer.position < 40:
+                timer.step()
+                time.sleep(9.0 - ((time.time() - starttime) % 9.0))
+        
+        if timer.position == 40:
+            tilt.engage()
+            evt_game_ending()
+
+    def scan_eb(self):
+        animate_eb_scan()
+        decrease_reflex()
+        replay_step_down()
+        p = eb_probability()
+        if p == 1:
+            if extra_ball.position < 4:
+                extra_ball.step()
+                # Timer resets to 0 position on ball count increasing.  We are fudging this since we will have
+                # no good way to measure balls as they return back to the trough.
+                # TODO: implement thunk noises into the units.py to automatically play the noises.
+                timer.reset()
+        else:
+            # TODO: play thunk noise of EB search bearing no fruit.
+            pass
+
+    def animate_eb_scan(self):
+        pass
+
+    def scan_all(self):
+        if self.game.switches.replay0.is_inactive() or self.game.switches.coin.is_active():
+            if self.game.switches.startButton.is_active():
+                animate_scan()
+                decrease_reflex()
+                replay_step_down()
+
+    def eb_probability(self):
+        if reflex.connected_rivet() == 4:
+            return 1
+        elif reflex.connected_rivet() == 3 and mixer.connected_rivet() == 3:
+            return 1
+        elif reflex.connected_rivet() == 2 and mixer.connected_rivet() == 2:
+            return 1
+        elif reflex.connected_rivet() == 1 and mixer.connected_rivet() == 1:
+            return 1
+        else:
+            return 0
+
+    def light_number(self, new_number):
+        if new_number == 0:
+            if new_number > 0:
+                self.layer = self.game.animations['card_%s'] % (new_number)
+    
+    # Define reset as the knock-off, anti-cheat relay disabled, and replay reset enabled.  Motors turn while credits are knocked off.
+    # When meter reaches zero and the zero limit switch is hit, turn off motor sound and leave backglass gi on, but with tilt displayed.
+
+    def startup(self):        
+        #Every bingo requires the meter to register '0' 
+        #before allowing coin entry - does the framework do this
+        #on power up or game start?!?
+	if self.game.switches.coin.is_active() or self.game.switches.replay0.is_inactive() and self.game.switches.startButton.is_active():
+            pass
+        #else:
+            #self.replay_reset.engage() # resets the replays to 0
+            #if (self.game.switches.replay0.is_active):
+            #    self.replay_reset.disengage()
+
+        self.game.timer.reset()
+        self.game.selector.reset()
+        self.game.ebselector.reset()
+        self.game.extra_ball.reset()
+        self.game_started()
+
+
+
+
+class ConeyIsland(procgame.game.BasicGame):
+    """ Coney Island was the second bingo produced by Bally """
+    def __init__(self, machine_type):
+        super(ConeyIsland, self).__init__(machine_type)
+        # NOTE: trough_count only counts the number of switches present in the  trough.  It does _not_ count
+        #       the number of balls present.   In this game, there  should  be  8  balls.
+        self.trough_count = 6
+
+        # Subclass my units unique to this game -  modifications must be made to set up mixers and steppers unique to the game
+        # NOTE: 'top' positions are indexed using a 0 index, so the top on a 24 position unit is actually 23.
+
+        # Initialize reflex(es) and mixers unique to this game
+        # NOTE: reflex unit drawing was not available for this game, so until I convince
+        #       another Coney Island owner to take their game apart, I'll note that there
+        #       are four lugs, three of which provides another path to the mixer, and one which is always connected
+        #       and bypasses the mixer entirely.  There are no games from 1951 or 52 that have the reflex documented.
+        self.reflex = units.Reflex("primary", 200)
+       
+        #Initialize the mixer units
+	# NOTE: the mixers are not documented for this game either.  However, there are three different lugs connected.
+	#	I will guess that 3/24 of all lugs are blanks, though looking at the docs for Bally Beauty shows that
+	#	only 3/24 positions are not connected. Many of the other early games show similar patterns.
+        self.mixer = units.Mixer("mixer", 23)
+
+        #Initialize stepper units used to keep track of features or timing.
+        self.selector = units.Stepper("selector", 3)
+        self.ebselector = units.Stepper("ebselector", 7)
+        self.timer = units.Stepper("timer", 40)
+        self.ball_count = units.Stepper("ball_count", 7)
+        self.extra_ball = units.Stepper("extra_ball", 4)
+
+        #Check for status of the replay register zero switch.  If positive
+        #and machine is just powered on, this will zero out the replays.
+        self.replay_reset = units.Relay("replay_reset")
+        
+        #When engage()d, light 6v circuit, and enable game features, scoring,
+        #etc. Disengage()d means that the machine is 'soft' tilted. 
+        self.anti_cheat = units.Relay("anti_cheat")
+
+        #When engage()d, spin.
+        self.start = units.Relay("start")
+
+        # When engage()d, allow for play for EB.  Engages with the press of the yellow button.
+	# does not allow for play if there are no credits on the meter, nor if the EB unit is
+	# at the top. Also does not allow for play if the timer has shut off.  You cannot revive
+	# older games with a press of a yellow button like you can with games with an 8 step timer.
+	self.eb_play = units.Relay("eb_play")      
+
+        #Tilt is separate from anti-cheat in that the trip will move the shutter
+        #when the game is tilted with 1st ball in the lane.  Also prevents you
+        #from picking back up by killing the anti-cheat.  Can be engaged by 
+        #tilt bob, slam tilt switches, or timer at 39th step.
+        #Immediately kills motors.
+        self.tilt = units.Relay("tilt")
+
+        
+        # Optional definition for 'auto-closed' switches
+        # Saving this for testing without a cabinet
+        #self.osc_closed_switches = ['trough1','trough2','trough3','trough4','trough5','trough6']
+
+        # call reset (to reset the machine/modes/etc)
+        #self.reset()
+
+    def reset(self):
+        super(ConeyIsland, self).reset()
+        self.logger = logging.getLogger('game')
+        self.load_config('coney_island.yaml')
+        main_mode = MulticardBingo(self)
+        self.modes.add(main_mode)
+    
+        
+    #def startup(self, replay_reset):
+    #    for sw in self.switches:
+    #        if (sw.name == replay0):
+    #            if (sw.is_inactive):
+    #                coinup.allow()#hmm.
+    #                if (sw.name == coin):
+    #                    pass 
+
+    
+game = ConeyIsland(machine_type='pdb')
+game.reset()
+game.run_loop()
