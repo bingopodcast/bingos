@@ -16,4 +16,10 @@ There is a small menu system in place that will allow you to choose a game.
 
 Games Emulated:
 * Bright Lights
+* Broadway '51
 * Coney Island
+
+In progress:
+* Spot-Lite
+* Zingo
+
