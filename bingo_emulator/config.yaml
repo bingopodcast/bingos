@@ -1,0 +1,58 @@
+font_path:
+    - fonts
+
+PRDriverGlobals:
+    lamp_matrix_strobe_time: 200
+    use_watchdog: True
+    watchdog_time: 1000
+
+pinproc_class: procgame.fakepinproc.FakePinPROC # comment out this line when using a real P-ROC. 
+
+keyboard_switch_map:                                # this is the mapping of keyboard keys to switch matrix keys
+#    0: "trough1" #Trough 1
+#1: "trough2" #Trough 2
+    2: "trough8" #Trough 3
+    3: "trough4" #Trough 4
+    4: "trough5" #Trough 5
+    5: "blue" #Trough 6 (ball 8)
+    6: "startButton" #Red Button / Start
+    7: "green" #Green Button
+    8: "yellow" #Blue Button
+#9: "yellow" #Yellow Button
+    t: "tilt" #Tilt
+    r: "hole12" #Replay 0 switch
+    s: "hole24" #Shutter open Switch
+#    1 "73742053: SD13    
+    q: "hole1" #Hole 1
+    w: "hole2" #Hole 2
+    e: "hole3" #Hole 3
+    y: "hole4" #Hole 4
+    u: "hole5" #Hole 5
+    i: "hole6" #Hole 6
+    o: "hole7" #Hole 7
+    p: "hole8" #Hole 8
+    a: "hole9" #Hole 9
+    d: "hole10" #Hole 10
+    f: "hole11" #Hole 11
+    g: "gate" #Gate
+    h: "hole13" #Hole 13
+    j: "hole14" #Hole 14
+    k: "hole15" #Hole 15
+    l: "hole16" #Hole 16
+    z: "hole17" #Hole 17
+    x: "hole18" #Hole 18
+    1: "hole19" #Hole 19
+    v: "hole20" #Hole 20
+    b: "hole21" #Hole 21
+    n: "hole22" #Hole 22
+    m: "hole23" #Hole 23
+    $: "slamTilt" # slam tilt
+    /: "left" # left
+    \: "right" # right
+    -: "coin" # coin
+    0: "enter"
+    =: "yellowstar"
+    9: "redstar"
+    #,: "yellow_star"
+
+log_destination: ./log.text
