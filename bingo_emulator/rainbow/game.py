@@ -321,14 +321,14 @@ class MulticardBingo(procgame.game.Mode):
         if number > 0:
             if number > 1:
                 self.game.replays -= 1
-                graphics.replay_step_down(self.game.replays, graphics.rainbow.reel1, graphics.rainbow.reel10, graphics.rainbow.reel100)
+                graphics.replay_step_down(self.game.replays, graphics.rainbow.reel1, graphics.rainbow.reel10, graphics.rainbow.reel100, graphics.rainbow.reel1000)
                 self.game.coils.registerDown.pulse()
                 number -= 1
                 graphics.rainbow.display(self)
                 self.delay(name="replay_reset", delay=0.0, handler=self.replay_step_down, param=number)
             elif number == 1:
                 self.game.replays -= 1
-                graphics.replay_step_down(self.game.replays, graphics.rainbow.reel1, graphics.rainbow.reel10, graphics.rainbow.reel100)
+                graphics.replay_step_down(self.game.replays, graphics.rainbow.reel1, graphics.rainbow.reel10, graphics.rainbow.reel100, graphics.rainbow.reel1000)
                 self.game.coils.registerDown.pulse()
                 number -= 1
                 graphics.rainbow.display(self)
@@ -336,17 +336,18 @@ class MulticardBingo(procgame.game.Mode):
         else: 
             if self.game.replays > 0:
                 self.game.replays -= 1
-                graphics.replay_step_down(self.game.replays, graphics.rainbow.reel1, graphics.rainbow.reel10, graphics.rainbow.reel100)
+                graphics.replay_step_down(self.game.replays, graphics.rainbow.reel1, graphics.rainbow.reel10, graphics.rainbow.reel100, graphics.rainbow.reel1000)
                 self.delay(name="display", delay=0.1, handler=graphics.rainbow.display, param=self)
             self.game.coils.registerDown.pulse()
 
     def replay_step_up(self):
-        if self.game.replays < 899:
+        if self.game.replays < 8999:
             self.game.replays += 1
-            graphics.replay_step_up(self.game.replays, graphics.rainbow.reel1, graphics.rainbow.reel10, graphics.rainbow.reel100)
+            graphics.replay_step_up(self.game.replays, graphics.rainbow.reel1, graphics.rainbow.reel10, graphics.rainbow.reel100, graphics.rainbow.reel1000)
+        self.game.reflex.increase()
         self.game.coils.registerUp.pulse()
         graphics.rainbow.display(self)
- 
+
     def search(self):
         # The search workflow/logic will determine if you actually have a winner, but it is a bit tricky.
         # if the ball is in a particular hole, the search relays need to click and/or clack, and 
@@ -393,7 +394,7 @@ class MulticardBingo(procgame.game.Mode):
 #        self.delay(name="blink_title", delay=3, handler=self.blink_title)
 
     def find_winner(self, relays, card):
-        if self.game.search_index.status == False and self.game.replays < 899:
+        if self.game.search_index.status == False and self.game.replays < 8999:
             if card == 1:
                 if relays == 3:
                     if self.game.card1_replay_counter.position < 4:
@@ -417,9 +418,9 @@ class MulticardBingo(procgame.game.Mode):
                         self.game.search_index.engage(self.game)
                         self.card2_replay_step_up(20 - self.game.card2_replay_counter.position)
                 if relays == 5:
-                    if self.game.card2_replay_counter.position < 100:
+                    if self.game.card2_replay_counter.position < 120:
                         self.game.search_index.engage(self.game)
-                        self.card2_replay_step_up(100 - self.game.card2_replay_counter.position)
+                        self.card2_replay_step_up(120 - self.game.card2_replay_counter.position)
             if card == 3:
                 if relays == 3:
                     if self.game.card3_replay_counter.position < 4:
@@ -430,9 +431,9 @@ class MulticardBingo(procgame.game.Mode):
                         self.game.search_index.engage(self.game)
                         self.card3_replay_step_up(20 - self.game.card3_replay_counter.position)
                 if relays == 5:
-                    if self.game.card3_replay_counter.position < 100:
+                    if self.game.card3_replay_counter.position < 140:
                         self.game.search_index.engage(self.game)
-                        self.card3_replay_step_up(100 - self.game.card3_replay_counter.position)
+                        self.card3_replay_step_up(140 - self.game.card3_replay_counter.position)
             if card == 4:
                 if relays == 3:
                     if self.game.card4_replay_counter.position < 4:
@@ -443,9 +444,9 @@ class MulticardBingo(procgame.game.Mode):
                         self.game.search_index.engage(self.game)
                         self.card4_replay_step_up(20 - self.game.card4_replay_counter.position)
                 if relays == 5:
-                    if self.game.card4_replay_counter.position < 100:
+                    if self.game.card4_replay_counter.position < 160:
                         self.game.search_index.engage(self.game)
-                        self.card4_replay_step_up(100 - self.game.card4_replay_counter.position)
+                        self.card4_replay_step_up(160 - self.game.card4_replay_counter.position)
             if card == 5:
                 if relays == 3:
                     if self.game.card5_replay_counter.position < 4:
@@ -456,9 +457,9 @@ class MulticardBingo(procgame.game.Mode):
                         self.game.search_index.engage(self.game)
                         self.card5_replay_step_up(20 - self.game.card5_replay_counter.position)
                 if relays == 5:
-                    if self.game.card5_replay_counter.position < 100:
+                    if self.game.card5_replay_counter.position < 180:
                         self.game.search_index.engage(self.game)
-                        self.card5_replay_step_up(100 - self.game.card5_replay_counter.position)
+                        self.card5_replay_step_up(180 - self.game.card5_replay_counter.position)
             if card == 6:
                 if relays == 3:
                     if self.game.card6_replay_counter.position < 4:
@@ -469,16 +470,16 @@ class MulticardBingo(procgame.game.Mode):
                         self.game.search_index.engage(self.game)
                         self.card6_replay_step_up(20 - self.game.card6_replay_counter.position)
                 if relays == 5:
-                    if self.game.card6_replay_counter.position < 100:
+                    if self.game.card6_replay_counter.position < 200:
                         self.game.search_index.engage(self.game)
-                        self.card6_replay_step_up(100 - self.game.card6_replay_counter.position)
+                        self.card6_replay_step_up(200 - self.game.card6_replay_counter.position)
 
     def card1_replay_step_up(self, number):
         if number >= 1:
             self.game.card1_replay_counter.step()
             number -= 1
             self.replay_step_up()
-            if self.game.replays == 899:
+            if self.game.replays == 8999:
                 number = 0
             self.delay(name="card1_replay_step_up", delay=0.1, handler=self.card1_replay_step_up, param=number)
         else:
@@ -491,7 +492,7 @@ class MulticardBingo(procgame.game.Mode):
             self.game.card2_replay_counter.step()
             number -= 1
             self.replay_step_up()
-            if self.game.replays == 899:
+            if self.game.replays == 8999:
                 number = 0
             self.delay(name="card2_replay_step_up", delay=0.1, handler=self.card2_replay_step_up, param=number)
         else:
@@ -504,7 +505,7 @@ class MulticardBingo(procgame.game.Mode):
             self.game.card3_replay_counter.step()
             number -= 1
             self.replay_step_up()
-            if self.game.replays == 899:
+            if self.game.replays == 8999:
                 number = 0
             self.delay(name="card3_replay_step_up", delay=0.1, handler=self.card3_replay_step_up, param=number)
         else:
@@ -517,7 +518,7 @@ class MulticardBingo(procgame.game.Mode):
             self.game.card4_replay_counter.step()
             number -= 1
             self.replay_step_up()
-            if self.game.replays == 899:
+            if self.game.replays == 8999:
                 number = 0
             self.delay(name="card4_replay_step_up", delay=0.1, handler=self.card4_replay_step_up, param=number)
         else:
@@ -530,7 +531,7 @@ class MulticardBingo(procgame.game.Mode):
             self.game.card5_replay_counter.step()
             number -= 1
             self.replay_step_up()
-            if self.game.replays == 899:
+            if self.game.replays == 8999:
                 number = 0
             self.delay(name="card5_replay_step_up", delay=0.1, handler=self.card5_replay_step_up, param=number)
         else:
@@ -543,7 +544,7 @@ class MulticardBingo(procgame.game.Mode):
             self.game.card6_replay_counter.step()
             number -= 1
             self.replay_step_up()
-            if self.game.replays == 899:
+            if self.game.replays == 8999:
                 number = 0
             self.delay(name="card6_replay_step_up", delay=0.1, handler=self.card6_replay_step_up, param=number)
         else:

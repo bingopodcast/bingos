@@ -549,7 +549,7 @@ class SinglecardBingo(procgame.game.Mode):
         self.game.sound.stop_music()
         self.game.sound.play_music('search', -1)
        
-        if self.game.magic_screen.position <= 6:
+        if self.game.magic_screen.position <= 10:
             for i in range(0, 13):
                 self.r = self.closed_search_relays(self.game.searchdisc.position)
                 self.game.searchdisc.spin()
@@ -1392,7 +1392,7 @@ class TheTwist(procgame.game.BasicGame):
 
         #This is a disc which has 50 positions
         #and will randomly complete paths through the various mixers to allow for odds or feature step.
-        self.spotting = units.Spotting("spotting", 25)
+        self.spotting = units.Motor("spotting", 25)
 
         #Check for status of the replay register zero switch.  If positive
         #and machine is just powered on, this will zero out the replays.
