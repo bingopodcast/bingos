@@ -642,29 +642,31 @@ class SinglecardBingo(procgame.game.Mode):
         if number > 0:
             if number > 1:
                 self.game.replays -= 1
-                graphics.replay_step_down(self.game.replays, graphics.malibu_beach.reel1, graphics.malibu_beach.reel10, graphics.malibu_beach.reel100)
+                graphics.replay_step_down(self.game.replays, graphics.malibu_beach.reel1, graphics.malibu_beach.reel10, graphics.malibu_beach.reel100, graphics.malibu_beach.reel1000)
                 self.game.coils.registerDown.pulse()
                 number -= 1
-                self.delay(name="display", delay=0, handler=graphics.malibu_beach.display, param=self)
+                graphics.malibu_beach.display(self)
                 self.delay(name="replay_reset", delay=0.0, handler=self.replay_step_down, param=number)
             elif number == 1:
                 self.game.replays -= 1
-                graphics.replay_step_down(self.game.replays, graphics.malibu_beach.reel1, graphics.malibu_beach.reel10, graphics.malibu_beach.reel100)
+                graphics.replay_step_down(self.game.replays, graphics.malibu_beach.reel1, graphics.malibu_beach.reel10, graphics.malibu_beach.reel100, graphics.malibu_beach.reel1000)
                 self.game.coils.registerDown.pulse()
                 number -= 1
-                self.delay(name="display", delay=0, handler=graphics.malibu_beach.display, param=self)
+                graphics.malibu_beach.display(self)
                 self.cancel_delayed(name="replay_reset")
         else: 
             if self.game.replays > 0:
                 self.game.replays -= 1
-                graphics.replay_step_down(self.game.replays, graphics.malibu_beach.reel1, graphics.malibu_beach.reel10, graphics.malibu_beach.reel100)
+                graphics.replay_step_down(self.game.replays, graphics.malibu_beach.reel1, graphics.malibu_beach.reel10, graphics.malibu_beach.reel100, graphics.malibu_beach.reel1000)
                 self.delay(name="display", delay=0.1, handler=graphics.malibu_beach.display, param=self)
             self.game.coils.registerDown.pulse()
+
+
 
     def replay_step_up(self):
         if self.game.replays < 8999:
             self.game.replays += 1
-            graphics.replay_step_up(self.game.replays, graphics.malibu_beach.reel1, graphics.malibu_beach.reel10, graphics.malibu_beach.reel100)
+            graphics.replay_step_up(self.game.replays, graphics.malibu_beach.reel1, graphics.malibu_beach.reel10, graphics.malibu_beach.reel100, graphics.malibu_beach.reel1000)
         self.game.coils.registerUp.pulse()
         self.game.reflex.increase()
         graphics.malibu_beach.display(self)

@@ -388,10 +388,10 @@ class MulticardBingo(procgame.game.Mode):
         self.cancel_delayed(name="research")
         for i in range(0, 100):
             if i <= 50:
-                self.r = self.closed_search_relays(self.game.searchdisc.position)
+                self.r = self.closed_search_relays(self.game.searchdisc.position, 1, 1, 1)
                 self.game.searchdisc.spin()
             if i >= 51:
-                self.r = self.closed_search_relays(self.game.searchdisc2.position + 50)
+                self.r = self.closed_search_relays(self.game.searchdisc2.position + 50, 1, 1, 1)
                 self.game.searchdisc2.spin()
             self.wipers = self.r[0]
             self.card = self.r[1]
@@ -644,59 +644,83 @@ class MulticardBingo(procgame.game.Mode):
             if dp == True:
                 if i[0] == 1:
                     self.game.card1_double.engage(self.game)
+                    self.game.double_win.engage(self.game)
                     self.card1_replay_step_up((i[1] * 2) - self.game.card1_replay_counter.position)
                 elif i[0] == 2:
                     self.game.card2_double.engage(self.game)
+                    self.game.double_win.engage(self.game)
                     self.card2_replay_step_up((i[1] * 2) - self.game.card2_replay_counter.position)
                 elif i[0] == 3:
                     self.game.card3_double.engage(self.game)
+                    self.game.double_win.engage(self.game)
                     self.card3_replay_step_up((i[1] * 2) - self.game.card3_replay_counter.position)
                 elif i[0] == 4:
                     self.game.card4_double.engage(self.game)
+                    self.game.double_win.engage(self.game)
                     self.card4_replay_step_up((i[1] * 2) - self.game.card4_replay_counter.position)
                 elif i[0] == 5:
                     self.game.card5_double.engage(self.game)
+                    self.game.double_win.engage(self.game)
                     self.card5_replay_step_up((i[1] * 2) - self.game.card5_replay_counter.position)
                 elif i[0] == 6:
                     self.game.card6_double.engage(self.game)
+                    self.game.double_win.engage(self.game)
                     self.card6_replay_step_up((i[1] * 2) - self.game.card6_replay_counter.position)
                 self.delay(name="display", delay=0.1, handler=graphics.venus.display, param=self)
             else:
                 if i[0] == 1:
                     self.game.card1_missed.engage(self.game)
+                    self.game.nothing.engage(self.game)
+                    self.delay(name="display", delay=0, handler=graphics.venus.display, param=self)
                     self.game.search_index.disengage()
                     self.cancel_delayed(name="blink_double")
                     self.delay(name="display", delay=0.1, handler=graphics.venus.display, param=self)
+                    self.game.nothing.disengage()
                     self.delay(name="research", delay=1, handler=self.search)
                 elif i[0] == 2:
                     self.game.card2_missed.engage(self.game)
+                    self.game.nothing.engage(self.game)
+                    self.delay(name="display", delay=0, handler=graphics.venus.display, param=self)
                     self.game.search_index.disengage()
                     self.cancel_delayed(name="blink_double")
                     self.delay(name="display", delay=0.1, handler=graphics.venus.display, param=self)
+                    self.game.nothing.disengage()
                     self.delay(name="research", delay=1, handler=self.search)
                 elif i[0] == 3:
                     self.game.card3_missed.engage(self.game)
+                    self.game.nothing.engage(self.game)
+                    self.delay(name="display", delay=0, handler=graphics.venus.display, param=self)
                     self.game.search_index.disengage()
                     self.cancel_delayed(name="blink_double")
                     self.delay(name="display", delay=0.1, handler=graphics.venus.display, param=self)
+                    self.game.nothing.disengage()
                     self.delay(name="research", delay=1, handler=self.search)
                 elif i[0] == 4:
                     self.game.card4_missed.engage(self.game)
+                    self.game.nothing.engage(self.game)
+                    self.delay(name="display", delay=0, handler=graphics.venus.display, param=self)
                     self.game.search_index.disengage()
                     self.cancel_delayed(name="blink_double")
                     self.delay(name="display", delay=0.1, handler=graphics.venus.display, param=self)
+                    self.game.nothing.disengage()
                     self.delay(name="research", delay=1, handler=self.search)
                 elif i[0] == 5:
                     self.game.card5_missed.engage(self.game)
+                    self.game.nothing.engage(self.game)
+                    self.delay(name="display", delay=0, handler=graphics.venus.display, param=self)
                     self.game.search_index.disengage()
                     self.cancel_delayed(name="blink_double")
                     self.delay(name="display", delay=0.1, handler=graphics.venus.display, param=self)
+                    self.game.nothing.disengage()
                     self.delay(name="research", delay=1, handler=self.search)
                 elif i[0] == 6:
                     self.game.card6_missed.engage(self.game)
+                    self.game.nothing.engage(self.game)
+                    self.delay(name="display", delay=0, handler=graphics.venus.display, param=self)
                     self.game.search_index.disengage()
                     self.cancel_delayed(name="blink_double")
                     self.delay(name="display", delay=0.1, handler=graphics.venus.display, param=self)
+                    self.game.nothing.disengage()
                     self.delay(name="research", delay=1, handler=self.search)
 
     def check_double_probability(self):
@@ -719,6 +743,7 @@ class MulticardBingo(procgame.game.Mode):
             self.delay(name="card1_replay_step_up", delay=0.1, handler=self.card1_replay_step_up, param=number)
         else:
             self.game.search_index.disengage()
+            self.game.double_win.disengage()
             self.cancel_delayed(name="card1_replay_step_up")
             self.search()
 
@@ -732,6 +757,7 @@ class MulticardBingo(procgame.game.Mode):
             self.delay(name="card2_replay_step_up", delay=0.1, handler=self.card2_replay_step_up, param=number)
         else:
             self.game.search_index.disengage()
+            self.game.double_win.disengage()
             self.cancel_delayed(name="card2_replay_step_up")
             self.search()
 
@@ -745,6 +771,7 @@ class MulticardBingo(procgame.game.Mode):
             self.delay(name="card3_replay_step_up", delay=0.1, handler=self.card3_replay_step_up, param=number)
         else:
             self.game.search_index.disengage()
+            self.game.double_win.disengage()
             self.cancel_delayed(name="card3_replay_step_up")
             self.search()
 
@@ -758,6 +785,7 @@ class MulticardBingo(procgame.game.Mode):
             self.delay(name="card4_replay_step_up", delay=0.1, handler=self.card4_replay_step_up, param=number)
         else:
             self.game.search_index.disengage()
+            self.game.double_win.disengage()
             self.cancel_delayed(name="card4_replay_step_up")
             self.search()
 
@@ -771,6 +799,7 @@ class MulticardBingo(procgame.game.Mode):
             self.delay(name="card5_replay_step_up", delay=0.1, handler=self.card5_replay_step_up, param=number)
         else:
             self.game.search_index.disengage()
+            self.game.double_win.disengage()
             self.cancel_delayed(name="card5_replay_step_up")
             self.search()
 
@@ -784,6 +813,7 @@ class MulticardBingo(procgame.game.Mode):
             self.delay(name="card6_replay_step_up", delay=0.1, handler=self.card6_replay_step_up, param=number)
         else:
             self.game.search_index.disengage()
+            self.game.double_win.disengage()
             self.cancel_delayed(name="card6_replay_step_up")
             self.search()
 
@@ -1029,7 +1059,7 @@ class Venus(procgame.game.BasicGame):
         #The probability disc handles the dispersion of corners for each card
         #upon coin or button press.  It also handles the probability for
         #the double or nothing routine.
-        self.probability = units.Spotting("probability", 50)
+        self.probability = units.Motor("probability", 50)
 
         #Tilt is separate from anti-cheat in that the trip will move the shutter
         #when the game is tilted with 1st ball in the lane.  Also prevents you
@@ -1066,6 +1096,9 @@ class Venus(procgame.game.BasicGame):
         self.card4_missed = units.Relay("card4_missed")
         self.card5_missed = units.Relay("card5_missed")
         self.card6_missed = units.Relay("card6_missed")
+
+        self.double_win = units.Relay("double_win")
+        self.nothing = units.Relay("nothing")
 
         self.returned = False
 

@@ -104,6 +104,42 @@ import starlet
 import caravan
 import stardust
 import touchdown
+import acapulco
+import palm_springs
+import surf_club
+import shoot_a_line
+import shoot_a_line_63
+import abc
+import bolero
+import u345
+import serenade
+import ice_frolics
+import surf_club
+import crosswords
+import spelling_bee
+import hi_fi
+import gayety
+import gay_time
+import border_beauty
+import beauty_beach
+import folies_bergeres
+import bahama_beach
+import zodiac
+import orient
+import venice
+import london
+import safari
+import super_7
+import bonus_7
+import double_up
+import hawaii_2
+import mystic_gate
+import tahiti_2
+import big_wheel
+import magic_ring
+import miss_universe
+import continental_18
+import galaxy
 
 
 def replay_step_up(pos, reel1, reel10, reel100, reel1000=False):

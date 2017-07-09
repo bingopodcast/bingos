@@ -12,7 +12,7 @@ keyboard_switch_map:                                # this is the mapping of key
 #    0: "trough1" #Trough 1
 #1: "trough2" #Trough 2
     2: "trough8" #Trough 3
-    3: "trough4" #Trough 4
+    3: "hole25" #Trough 4
     4: "trough5" #Trough 5
     5: "blue" #Trough 6 (ball 8)
     6: "startButton" #Red Button / Start

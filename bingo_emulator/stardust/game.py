@@ -70,9 +70,9 @@ class MulticardBingo(procgame.game.Mode):
 
     def sw_left_active(self, sw):
         max_ball = 4
-        if self.game.roto_feature.position == 6:
+        if self.game.roto_feature_step.position == 6:
             max_ball = 5
-        if self.game.roto_feature.position >= 4:
+        if self.game.roto_feature_step.position >= 4:
             if self.game.ball_count.position < max_ball:
                 self.game.roto.step()
 
@@ -80,9 +80,9 @@ class MulticardBingo(procgame.game.Mode):
 
     def sw_right_active(self, sw):
         max_ball = 4
-        if self.game.roto_feature.position == 6:
+        if self.game.roto_feature_step.position == 6:
             max_ball = 5
-        if self.game.roto_feature.position >= 4:
+        if self.game.roto_feature_step.position >= 4:
             if self.game.ball_count.position < max_ball:
                 self.game.roto2.step()
 
@@ -161,7 +161,7 @@ class MulticardBingo(procgame.game.Mode):
             self.game.coils.redROLamp.disable()
             self.game.coils.yellowROLamp.disable()
             self.game.odds.reset()
-            self.game.roto_feature.reset()
+            self.game.roto_feature_step.reset()
             self.game.roto.step()
             self.game.roto2.step()
             graphics.stardust.display(self)
@@ -489,7 +489,7 @@ class MulticardBingo(procgame.game.Mode):
         self.game.special_pocket.disengage()
         self.game.red_star.disengage()
         self.game.yellow_star.disengage()
-        self.game.roto_feature.reset()
+        self.game.roto_feature_step.reset()
         self.game.coils.redROLamp.disable()
         self.game.coils.yellowROLamp.disable()
         self.game.odds.reset()
@@ -1287,9 +1287,9 @@ class MulticardBingo(procgame.game.Mode):
             self.game.cornerstwo_four.engage(self.game)
         if sd == 18:
             self.game.special_pocket.engage(self.game)
-            if self.game.roto_feature.position < 5:
-                if self.game.roto_feature.position < 4:
-                    self.step_roto(4 - self.game.roto_feature.position)
+            if self.game.roto_feature_step.position < 5:
+                if self.game.roto_feature_step.position < 4:
+                    self.step_roto(4 - self.game.roto_feature_step.position)
                 else:
                     self.step_roto(1)
             else:
@@ -1394,8 +1394,8 @@ class MulticardBingo(procgame.game.Mode):
     def step_roto(self, number):
         if number > 0:
             number -= 1
-            self.game.roto_feature.step()
-            if self.game.roto_feature.position == 5:
+            self.game.roto_feature_step.step()
+            if self.game.roto_feature_step.position == 5:
                 self.holes.append(18)
             self.delay(name="display", delay=0, handler=graphics.stardust.display, param=self)
             self.delay(name="step_roto", delay=0.1, handler=self.step_roto, param=number)
@@ -1499,7 +1499,7 @@ class Stardust(procgame.game.BasicGame):
         self.s5 = units.Relay("s5")
         self.search_index = units.Relay("search_index")
 
-        self.roto_feature = units.Stepper("roto_feature", 6)
+        self.roto_feature_step = units.Stepper("roto_feature_step", 6)
         self.roto = units.Stepper("roto", 7, 'stardust', "continuous")
         self.roto2 = units.Stepper("roto2", 7, 'stardust', "continuous")
 

@@ -54,6 +54,7 @@ class MulticardBingo(procgame.game.Mode):
     def sw_trough8_inactive_for_1ms(self, sw):
         if self.game.start.status == False:
             self.game.ball_count.position -= 1
+            print self.game.ball_count.position
             self.game.returned = True
             self.check_lifter_status()
 
@@ -61,6 +62,13 @@ class MulticardBingo(procgame.game.Mode):
         if self.game.switches.left.is_active() and self.game.switches.right.is_active():
             self.game.end_run_loop()
             os.system("/home/nbaldridge/proc/bingo_emulator/start_game.sh shoot_a_line")
+        else:
+            if self.game.ball_count.position >= 4:
+                self.game.sound.stop_music()
+                if self.game.search_index.status == False:
+                    self.game.sound.play('search')
+                    self.search()
+
 
     def check_shutter(self, start=0):
         if start == 1:
@@ -113,15 +121,15 @@ class MulticardBingo(procgame.game.Mode):
     def check_lifter_status(self):
         if self.game.tilt.status == False:
             if self.game.switches.trough8.is_inactive() and self.game.switches.trough5.is_active() and self.game.switches.trough4.is_active() and self.game.switches.trough3.is_active() and self.game.switches.trough2.is_active():
-                if self.game.switches.shooter.is_inactive():
+                if self.game.switches.shooter.is_active():
                     self.game.coils.lifter.enable()
             else:
                 if self.game.switches.trough4.is_active():
-                    if self.game.switches.shooter.is_inactive():
+                    if self.game.switches.shooter.is_active():
                         if self.game.switches.gate.is_active():
                             self.game.coils.lifter.enable()
             if self.game.returned == True and self.game.ball_count.position == 4:
-                if self.game.switches.shooter.is_inactive():
+                if self.game.switches.shooter.is_active():
                     self.game.coils.lifter.enable()
                     self.game.returned = False
         self.delay(name="lifter_status", delay=0, handler=self.check_lifter_status)
@@ -133,23 +141,21 @@ class MulticardBingo(procgame.game.Mode):
             self.check_shutter()
 
     def sw_trough1_active(self, sw):
-        if self.game.switches.shooter.is_active():
+        if self.game.switches.shooter.is_inactive():
             self.game.coils.lifter.disable()
 
     def sw_ballLift_active_for_500ms(self, sw):
         if self.game.tilt.status == False:
-            if self.game.switches.shooter.is_inactive():
+            if self.game.switches.shooter.is_active():
                 if self.game.ball_count.position < 5:
                     self.game.coils.lifter.enable()
 
-    def sw_gate_inactive_for_1ms(self, sw):
+    def sw_gate_inactive_for_25ms(self, sw):
         self.game.start.disengage()
         if self.game.switches.shutter.is_active():
             self.game.coils.shutter.enable()
         self.game.ball_count.step()
-        if self.game.ball_count.position >= 4:
-            if self.game.search_index.status == False:
-                self.search()
+        print self.game.ball_count.position
 
     # This is really nasty, but it is how we render graphics for each individual hole.
     # numbers are added (or removed from) a list.  In this way, I can re-use the same
@@ -158,226 +164,142 @@ class MulticardBingo(procgame.game.Mode):
     def sw_hole1_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(1)
-            if self.game.ball_count.position >= 4:
-                if self.game.search_index.status == False:
-                    self.search()
             self.delay(name="display", delay=0.1, handler=graphics.shoot_a_line.display, param=self)
 
     def sw_hole2_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(2)
-            if self.game.ball_count.position >= 4:
-                if self.game.search_index.status == False:
-                    self.search()
             self.delay(name="display", delay=0.1, handler=graphics.shoot_a_line.display, param=self)
 
     def sw_hole3_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(3)
-            if self.game.ball_count.position >= 4:
-                if self.game.search_index.status == False:
-                    self.search()
             self.delay(name="display", delay=0.1, handler=graphics.shoot_a_line.display, param=self)
 
     def sw_hole4_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(4)
-            if self.game.ball_count.position >= 4:
-                if self.game.search_index.status == False:
-                    self.search()
             self.delay(name="display", delay=0.1, handler=graphics.shoot_a_line.display, param=self)
 
     def sw_hole5_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(5)
-            if self.game.ball_count.position >= 4:
-                if self.game.search_index.status == False:
-                    self.search()
             self.delay(name="display", delay=0.1, handler=graphics.shoot_a_line.display, param=self)
 
     def sw_hole6_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(6)
-            if self.game.ball_count.position >= 4:
-                if self.game.search_index.status == False:
-                    self.search()
             self.delay(name="display", delay=0.1, handler=graphics.shoot_a_line.display, param=self)
 
     def sw_hole7_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(7)
-            if self.game.ball_count.position >= 4:
-                if self.game.search_index.status == False:
-                    self.search()
             self.delay(name="display", delay=0.1, handler=graphics.shoot_a_line.display, param=self)
 
     def sw_hole8_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(8)
-            if self.game.ball_count.position >= 4:
-                if self.game.search_index.status == False:
-                    self.search()
             self.delay(name="display", delay=0.1, handler=graphics.shoot_a_line.display, param=self)
 
     def sw_hole9_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(9)
-            if self.game.ball_count.position >= 4:
-                if self.game.search_index.status == False:
-                    self.search()
             self.delay(name="display", delay=0.1, handler=graphics.shoot_a_line.display, param=self)
 
     def sw_hole10_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(10)
-            if self.game.ball_count.position >= 4:
-                if self.game.search_index.status == False:
-                    self.search()
             self.delay(name="display", delay=0.1, handler=graphics.shoot_a_line.display, param=self)
 
     def sw_hole11_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(11)
-            if self.game.ball_count.position >= 4:
-                if self.game.search_index.status == False:
-                    self.search()
             self.delay(name="display", delay=0.1, handler=graphics.shoot_a_line.display, param=self)
 
     def sw_hole12_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(12)
-            if self.game.ball_count.position >= 4:
-                if self.game.search_index.status == False:
-                    self.search()
             self.delay(name="display", delay=0.1, handler=graphics.shoot_a_line.display, param=self)
 
     def sw_hole13_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(13)
-            if self.game.ball_count.position >= 4:
-                if self.game.search_index.status == False:
-                    self.search()
             self.delay(name="display", delay=0.1, handler=graphics.shoot_a_line.display, param=self)
 
     def sw_hole14_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(14)
-            if self.game.ball_count.position >= 4:
-                if self.game.search_index.status == False:
-                    self.search()
             self.delay(name="display", delay=0.1, handler=graphics.shoot_a_line.display, param=self)
 
     def sw_hole15_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(15)
-            if self.game.ball_count.position >= 4:
-                if self.game.search_index.status == False:
-                    self.search()
             self.delay(name="display", delay=0.1, handler=graphics.shoot_a_line.display, param=self)
 
     def sw_hole16_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(16)
-            if self.game.ball_count.position >= 4:
-                if self.game.search_index.status == False:
-                    self.search()
             self.delay(name="display", delay=0.1, handler=graphics.shoot_a_line.display, param=self)
 
     def sw_hole17_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(17)
-            if self.game.ball_count.position >= 4:
-                if self.game.search_index.status == False:
-                    self.search()
             self.delay(name="display", delay=0.1, handler=graphics.shoot_a_line.display, param=self)
 
     def sw_hole18_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(18)
-            if self.game.ball_count.position >= 4:
-                if self.game.search_index.status == False:
-                    self.search()
             self.delay(name="display", delay=0.1, handler=graphics.shoot_a_line.display, param=self)
 
     def sw_hole19_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(19)
-            if self.game.ball_count.position >= 4:
-                if self.game.search_index.status == False:
-                    self.search()
             self.delay(name="display", delay=0.1, handler=graphics.shoot_a_line.display, param=self)
 
 
     def sw_hole20_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(20)
-            if self.game.ball_count.position >= 4:
-                if self.game.search_index.status == False:
-                    self.search()
             self.delay(name="display", delay=0.1, handler=graphics.shoot_a_line.display, param=self)
 
     def sw_hole21_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(21)
-            if self.game.ball_count.position >= 4:
-                if self.game.search_index.status == False:
-                    self.search()
             self.delay(name="display", delay=0.1, handler=graphics.shoot_a_line.display, param=self)
 
     def sw_hole22_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(22)
-            if self.game.ball_count.position >= 4:
-                if self.game.search_index.status == False:
-                    self.search()
             self.delay(name="display", delay=0.1, handler=graphics.shoot_a_line.display, param=self)
 
     def sw_hole23_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(23)
-            if self.game.ball_count.position >= 4:
-                if self.game.search_index.status == False:
-                    self.search()
             self.delay(name="display", delay=0.1, handler=graphics.shoot_a_line.display, param=self)
 
     def sw_hole24_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(24)
-            if self.game.ball_count.position >= 4:
-                if self.game.search_index.status == False:
-                    self.search()
             self.delay(name="display", delay=0.1, handler=graphics.shoot_a_line.display, param=self)
 
     def sw_hole25_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(25)
-            if self.game.ball_count.position >= 4:
-                if self.game.search_index.status == False:
-                    self.search()
             self.delay(name="display", delay=0.1, handler=graphics.shoot_a_line.display, param=self)
 
     def sw_hole26_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(26)
-            if self.game.ball_count.position >= 4:
-                if self.game.search_index.status == False:
-                    self.search()
             self.delay(name="display", delay=0.1, handler=graphics.shoot_a_line.display, param=self)
 
     def sw_hole27_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(27)
-            if self.game.ball_count.position >= 4:
-                if self.game.search_index.status == False:
-                    self.search()
             self.delay(name="display", delay=0.1, handler=graphics.shoot_a_line.display, param=self)
 
     def sw_hole28_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(28)
-            if self.game.ball_count.position >= 4:
-                if self.game.search_index.status == False:
-                    self.search()
             self.delay(name="display", delay=0.1, handler=graphics.shoot_a_line.display, param=self)
 
     def sw_replayReset_active(self, sw):
@@ -427,12 +349,14 @@ class MulticardBingo(procgame.game.Mode):
         if number > 0:
             if number > 1:
                 self.game.replays -= 1
+                graphics.replay_step_down(self.game.replays, graphics.shoot_a_line.reel1, graphics.shoot_a_line.reel10, graphics.shoot_a_line.reel100, graphics.shoot_a_line.reel1000)
                 self.game.coils.registerDown.pulse()
                 number -= 1
                 graphics.shoot_a_line.display(self)
                 self.delay(name="replay_reset", delay=0.0, handler=self.replay_step_down, param=number)
             elif number == 1:
                 self.game.replays -= 1
+                graphics.replay_step_down(self.game.replays, graphics.shoot_a_line.reel1, graphics.shoot_a_line.reel10, graphics.shoot_a_line.reel100, graphics.shoot_a_line.reel1000)
                 self.game.coils.registerDown.pulse()
                 number -= 1
                 graphics.shoot_a_line.display(self)
@@ -440,6 +364,7 @@ class MulticardBingo(procgame.game.Mode):
         else: 
             if self.game.replays > 0:
                 self.game.replays -= 1
+                graphics.replay_step_down(self.game.replays, graphics.shoot_a_line.reel1, graphics.shoot_a_line.reel10, graphics.shoot_a_line.reel100, graphics.shoot_a_line.reel1000)
                 self.delay(name="display", delay=0.1, handler=graphics.shoot_a_line.display, param=self)
             self.game.coils.registerDown.pulse()
 
@@ -952,7 +877,7 @@ class ShootALine(procgame.game.BasicGame):
         #Initialize stepper units used to keep track of features or timing.
         self.selector = units.Stepper("selector", 6)
         self.timer = units.Stepper("timer", 40)
-        self.ball_count = units.Stepper("ball_count", 7)
+        self.ball_count = units.Stepper("ball_count", 5)
 
         #Check for status of the replay register zero switch.  If positive
         #and machine is just powered on, this will zero out the replays.

@@ -1679,7 +1679,7 @@ class BlueChip(procgame.game.BasicGame):
         #upon coin or button press.  It also handles the probability for
         #the double or nothing routine. In Ticker Tape, it's called the
         #'Random Disc' and is driven by a motor.
-        self.probability = units.Spotting("probability", 24)
+        self.probability = units.Motor("probability", 24)
 
         #Tilt is separate from anti-cheat in that the trip will move the shutter
         #when the game is tilted with 1st ball in the lane.  Also prevents you

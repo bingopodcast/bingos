@@ -5,6 +5,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(level
 import procgame.game, sys, os
 import procgame.config
 import random
+import procgame.sound
 
 sys.path.insert(0,os.path.pardir)
 import bingo_emulator.common.units as units
@@ -18,15 +19,24 @@ class MulticardBingo(procgame.game.Mode):
         self.holes = []
         self.game.anti_cheat.engage(self.game)
         self.startup()
+        self.game.sound.register_music('motor', "audio/six_card_motor.wav")
+        self.game.sound.register_music('search', "audio/six_card_search_old.wav")
+        self.game.sound.register_sound('add', "audio/six_card_add_card.wav")
+        self.game.sound.register_sound('tilt', "audio/tilt.wav")
+        self.game.sound.register_sound('step', "audio/step.wav")
+        self.game.sound.register_sound('eb_search', "audio/EB_Search.wav")
 
     def sw_coin_active(self, sw):
         self.game.tilt.disengage()
         self.regular_play()
+        self.game.sound.stop('add')
+        self.game.sound.play('add')
         self.delay(name="display", delay=0.1, handler=graphics.barrel_o_fun.display, param=self)
 
     def sw_startButton_active(self, sw):
         if self.game.replays > 0 or self.game.switches.freeplay.is_active():
-            self.regular_play()
+            self.game.tilt.disengage()
+            self.sw_coin_active(sw)
             self.delay(name="display", delay=0.1, handler=graphics.barrel_o_fun.display, param=self)
 
     def sw_trough4_active_for_1s(self, sw):
@@ -50,8 +60,7 @@ class MulticardBingo(procgame.game.Mode):
     def sw_enter_active(self, sw):
         if self.game.switches.left.is_active() and self.game.switches.right.is_active():
             self.game.end_run_loop()
-            import bingo_emulator.menu as menu
-            menu.main('barrel_o_fun')
+            os.system("/home/nbaldridge/proc/bingo_emulator/start_game.sh barrel_o_fun")
 
     def check_shutter(self, start=0):
         if start == 1:
@@ -78,14 +87,14 @@ class MulticardBingo(procgame.game.Mode):
         self.game.coils.counter.pulse()
         self.game.returned = False
         if self.game.start.status == True:
-            self.game.selector.step()
-            if self.game.cu == 1:
-                self.game.spotting.step()
-            self.game.coils.sounder.pulse()
-            if self.game.switches.shutter.is_inactive():
-                self.game.coils.shutter.enable()
-            self.replay_step_down()
-            self.check_lifter_status()
+            if self.game.selector.position < 6:
+                self.game.selector.step()
+                self.replay_step_down()
+                if self.game.cu == 1:
+                    self.game.spotting.step()
+                if self.game.switches.shutter.is_inactive():
+                    self.game.coils.shutter.enable()
+                self.check_lifter_status()
         else:
             self.game.start.engage(self.game)
             self.game.card1_replay_counter.reset()
@@ -96,8 +105,9 @@ class MulticardBingo(procgame.game.Mode):
             self.game.card6_replay_counter.reset()
             self.game.start.engage(self.game)
             self.game.selector.reset()
-            self.game.timer.reset()
             self.game.ball_count.reset()
+            self.game.timer.reset()
+            self.game.sound.play_music('motor', -1)
             self.regular_play()
         self.delay(name="display", delay=0.1, handler=graphics.barrel_o_fun.display, param=self)
         self.game.tilt.disengage()
@@ -112,11 +122,10 @@ class MulticardBingo(procgame.game.Mode):
                     if self.game.switches.shooter.is_inactive():
                         if self.game.switches.gate.is_active():
                             self.game.coils.lifter.enable()
-                if self.game.returned == True and self.game.ball_count.position == 4:
-                        if self.game.switches.shooter.is_inactive():
-                            self.game.coils.lifter.enable()
-                            self.game.returned = False
-
+            if self.game.returned == True and self.game.ball_count.position == 4:
+                if self.game.switches.shooter.is_inactive():
+                    self.game.coils.lifter.enable()
+                    self.game.returned = False
         self.delay(name="lifter_status", delay=0, handler=self.check_lifter_status)
 
     def sw_smRunout_active_for_1ms(self, sw):
@@ -137,6 +146,8 @@ class MulticardBingo(procgame.game.Mode):
 
     def sw_gate_inactive_for_1ms(self, sw):
         self.game.start.disengage()
+        if self.game.ball_count.position == 0:
+            self.check_spotting()
         if self.game.switches.shutter.is_active():
             self.game.coils.shutter.enable()
         self.game.ball_count.step()
@@ -152,7 +163,7 @@ class MulticardBingo(procgame.game.Mode):
         if self.game.spotting.position == 0:
             if 22 not in self.holes:
                 self.holes.append(22)
-        if self.game.spotting.position == 4:
+        if self.game.spotting.position == 4 or self.game.spotting.position == 6:
             if 20 not in self.holes:
                 self.holes.append(20)
         elif self.game.spotting.position == 9:
@@ -170,15 +181,12 @@ class MulticardBingo(procgame.game.Mode):
         elif self.game.spotting.position == 18:
             if 21 not in self.holes:
                 self.holes.append(21)
-        elif self.game.spotting.position == 21:
+        elif self.game.spotting.position == 23:
             if 16 not in self.holes:
                 self.holes.append(16)
-        elif self.game.spotting.position == 24:
+        elif self.game.spotting.position == 26:
             if 21 not in self.holes:
                 self.holes.append(21)
-        elif self.game.spotting.position == 26:
-            if 17 not in self.holes:
-                self.holes.append(17)
         elif self.game.spotting.position == 28:
             if 16 not in self.holes:
                 self.holes.append(16)
@@ -208,7 +216,7 @@ class MulticardBingo(procgame.game.Mode):
                 self.holes.append(16)
         self.delay(name="display", delay=0.1, handler=graphics.barrel_o_fun.display, param=self)
 
-    def sw_hole1_active(self, sw):
+    def sw_hole1_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(1)
             if self.game.ball_count.position >= 4:
@@ -216,7 +224,7 @@ class MulticardBingo(procgame.game.Mode):
                     self.search()
             self.delay(name="display", delay=0.1, handler=graphics.barrel_o_fun.display, param=self)
 
-    def sw_hole2_active(self, sw):
+    def sw_hole2_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(2)
             if self.game.ball_count.position >= 4:
@@ -224,7 +232,7 @@ class MulticardBingo(procgame.game.Mode):
                     self.search()
             self.delay(name="display", delay=0.1, handler=graphics.barrel_o_fun.display, param=self)
 
-    def sw_hole3_active(self, sw):
+    def sw_hole3_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(3)
             if self.game.ball_count.position >= 4:
@@ -232,7 +240,7 @@ class MulticardBingo(procgame.game.Mode):
                     self.search()
             self.delay(name="display", delay=0.1, handler=graphics.barrel_o_fun.display, param=self)
 
-    def sw_hole4_active(self, sw):
+    def sw_hole4_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(4)
             if self.game.ball_count.position >= 4:
@@ -240,7 +248,7 @@ class MulticardBingo(procgame.game.Mode):
                     self.search()
             self.delay(name="display", delay=0.1, handler=graphics.barrel_o_fun.display, param=self)
 
-    def sw_hole5_active(self, sw):
+    def sw_hole5_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(5)
             if self.game.ball_count.position >= 4:
@@ -248,7 +256,7 @@ class MulticardBingo(procgame.game.Mode):
                     self.search()
             self.delay(name="display", delay=0.1, handler=graphics.barrel_o_fun.display, param=self)
 
-    def sw_hole6_active(self, sw):
+    def sw_hole6_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(6)
             if self.game.ball_count.position >= 4:
@@ -256,7 +264,7 @@ class MulticardBingo(procgame.game.Mode):
                     self.search()
             self.delay(name="display", delay=0.1, handler=graphics.barrel_o_fun.display, param=self)
 
-    def sw_hole7_active(self, sw):
+    def sw_hole7_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(7)
             if self.game.ball_count.position >= 4:
@@ -264,7 +272,7 @@ class MulticardBingo(procgame.game.Mode):
                     self.search()
             self.delay(name="display", delay=0.1, handler=graphics.barrel_o_fun.display, param=self)
 
-    def sw_hole8_active(self, sw):
+    def sw_hole8_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(8)
             if self.game.ball_count.position >= 4:
@@ -272,7 +280,7 @@ class MulticardBingo(procgame.game.Mode):
                     self.search()
             self.delay(name="display", delay=0.1, handler=graphics.barrel_o_fun.display, param=self)
 
-    def sw_hole9_active(self, sw):
+    def sw_hole9_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(9)
             if self.game.ball_count.position >= 4:
@@ -280,7 +288,7 @@ class MulticardBingo(procgame.game.Mode):
                     self.search()
             self.delay(name="display", delay=0.1, handler=graphics.barrel_o_fun.display, param=self)
 
-    def sw_hole10_active(self, sw):
+    def sw_hole10_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(10)
             if self.game.ball_count.position >= 4:
@@ -288,7 +296,7 @@ class MulticardBingo(procgame.game.Mode):
                     self.search()
             self.delay(name="display", delay=0.1, handler=graphics.barrel_o_fun.display, param=self)
 
-    def sw_hole11_active(self, sw):
+    def sw_hole11_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(11)
             if self.game.ball_count.position >= 4:
@@ -296,7 +304,7 @@ class MulticardBingo(procgame.game.Mode):
                     self.search()
             self.delay(name="display", delay=0.1, handler=graphics.barrel_o_fun.display, param=self)
 
-    def sw_hole12_active(self, sw):
+    def sw_hole12_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(12)
             if self.game.ball_count.position >= 4:
@@ -304,7 +312,7 @@ class MulticardBingo(procgame.game.Mode):
                     self.search()
             self.delay(name="display", delay=0.1, handler=graphics.barrel_o_fun.display, param=self)
 
-    def sw_hole13_active(self, sw):
+    def sw_hole13_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(13)
             if self.game.ball_count.position >= 4:
@@ -312,7 +320,7 @@ class MulticardBingo(procgame.game.Mode):
                     self.search()
             self.delay(name="display", delay=0.1, handler=graphics.barrel_o_fun.display, param=self)
 
-    def sw_hole14_active(self, sw):
+    def sw_hole14_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(14)
             if self.game.ball_count.position >= 4:
@@ -320,7 +328,7 @@ class MulticardBingo(procgame.game.Mode):
                     self.search()
             self.delay(name="display", delay=0.1, handler=graphics.barrel_o_fun.display, param=self)
 
-    def sw_hole15_active(self, sw):
+    def sw_hole15_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(15)
             if self.game.ball_count.position >= 4:
@@ -328,7 +336,7 @@ class MulticardBingo(procgame.game.Mode):
                     self.search()
             self.delay(name="display", delay=0.1, handler=graphics.barrel_o_fun.display, param=self)
 
-    def sw_hole16_active(self, sw):
+    def sw_hole16_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(16)
             if self.game.ball_count.position >= 4:
@@ -336,7 +344,7 @@ class MulticardBingo(procgame.game.Mode):
                     self.search()
             self.delay(name="display", delay=0.1, handler=graphics.barrel_o_fun.display, param=self)
 
-    def sw_hole17_active(self, sw):
+    def sw_hole17_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(17)
             if self.game.ball_count.position >= 4:
@@ -344,7 +352,7 @@ class MulticardBingo(procgame.game.Mode):
                     self.search()
             self.delay(name="display", delay=0.1, handler=graphics.barrel_o_fun.display, param=self)
 
-    def sw_hole18_active(self, sw):
+    def sw_hole18_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(18)
             if self.game.ball_count.position >= 4:
@@ -352,7 +360,7 @@ class MulticardBingo(procgame.game.Mode):
                     self.search()
             self.delay(name="display", delay=0.1, handler=graphics.barrel_o_fun.display, param=self)
 
-    def sw_hole19_active(self, sw):
+    def sw_hole19_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(19)
             if self.game.ball_count.position >= 4:
@@ -360,7 +368,8 @@ class MulticardBingo(procgame.game.Mode):
                     self.search()
             self.delay(name="display", delay=0.1, handler=graphics.barrel_o_fun.display, param=self)
 
-    def sw_hole20_active(self, sw):
+
+    def sw_hole20_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(20)
             if self.game.ball_count.position >= 4:
@@ -368,7 +377,7 @@ class MulticardBingo(procgame.game.Mode):
                     self.search()
             self.delay(name="display", delay=0.1, handler=graphics.barrel_o_fun.display, param=self)
 
-    def sw_hole21_active(self, sw):
+    def sw_hole21_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(21)
             if self.game.ball_count.position >= 4:
@@ -376,7 +385,7 @@ class MulticardBingo(procgame.game.Mode):
                     self.search()
             self.delay(name="display", delay=0.1, handler=graphics.barrel_o_fun.display, param=self)
 
-    def sw_hole22_active(self, sw):
+    def sw_hole22_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(22)
             if self.game.ball_count.position >= 4:
@@ -384,7 +393,7 @@ class MulticardBingo(procgame.game.Mode):
                     self.search()
             self.delay(name="display", delay=0.1, handler=graphics.barrel_o_fun.display, param=self)
 
-    def sw_hole23_active(self, sw):
+    def sw_hole23_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(23)
             if self.game.ball_count.position >= 4:
@@ -392,7 +401,7 @@ class MulticardBingo(procgame.game.Mode):
                     self.search()
             self.delay(name="display", delay=0.1, handler=graphics.barrel_o_fun.display, param=self)
 
-    def sw_hole24_active(self, sw):
+    def sw_hole24_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(24)
             if self.game.ball_count.position >= 4:
@@ -400,7 +409,7 @@ class MulticardBingo(procgame.game.Mode):
                     self.search()
             self.delay(name="display", delay=0.1, handler=graphics.barrel_o_fun.display, param=self)
 
-    def sw_hole25_active(self, sw):
+    def sw_hole25_active_for_40ms(self, sw):
         if self.game.tilt.status == False and self.game.start.status == False:
             self.holes.append(25)
             if self.game.ball_count.position >= 4:
@@ -411,8 +420,10 @@ class MulticardBingo(procgame.game.Mode):
     def sw_replayReset_active(self, sw):
         self.game.anti_cheat.disengage()
         self.holes = []
-        graphics.barrel_o_fun.display(self)
+#        self.cancel_delayed(name="blink_title")
+        graphics.barrel_o_fun.display(self, 0)
         self.tilt_actions()
+#        self.delay(name="blink_title", delay=1, handler=self.blink_title)
         self.replay_step_down(self.game.replays)
 
     def tilt_actions(self):
@@ -433,39 +444,42 @@ class MulticardBingo(procgame.game.Mode):
         self.game.ball_count.reset()
         self.game.anti_cheat.engage(game)
         self.game.tilt.engage(self.game)
+        self.game.sound.stop_music()
+        self.game.sound.play('tilt')
         # displays "Tilt" on the backglass, you have to recoin.
         self.delay(name="display", delay=0.1, handler=graphics.barrel_o_fun.display, param=self)
+
+    def sw_tilt_active(self, sw):
+        if self.game.tilt.status == False:
+            self.tilt_actions()
+
+    def replay_step_up(self):
+        if self.game.replays < 200:
+            self.game.replays += 1
+        self.game.coils.registerUp.pulse()
+        graphics.barrel_o_fun.display(self)
 
     def replay_step_down(self, number=0):
         if number > 0:
             if number > 1:
                 self.game.replays -= 1
-                graphics.replay_step_down(self.game.replays, graphics.barrel_o_fun.reel1, graphics.barrel_o_fun.reel10, graphics.barrel_o_fun.reel100)
-                self.game.coils.sounder.pulse()
+                self.game.coils.registerDown.pulse()
                 number -= 1
                 graphics.barrel_o_fun.display(self)
                 self.delay(name="replay_reset", delay=0.0, handler=self.replay_step_down, param=number)
             elif number == 1:
                 self.game.replays -= 1
-                graphics.replay_step_down(self.game.replays, graphics.barrel_o_fun.reel1, graphics.barrel_o_fun.reel10, graphics.barrel_o_fun.reel100)
-                self.game.coils.sounder.pulse()
+                self.game.coils.registerDown.pulse()
                 number -= 1
                 graphics.barrel_o_fun.display(self)
                 self.cancel_delayed(name="replay_reset")
         else: 
             if self.game.replays > 0:
                 self.game.replays -= 1
-                graphics.replay_step_down(self.game.replays, graphics.barrel_o_fun.reel1, graphics.barrel_o_fun.reel10, graphics.barrel_o_fun.reel100)
                 self.delay(name="display", delay=0.1, handler=graphics.barrel_o_fun.display, param=self)
-                self.game.coils.sounder.pulse()
+            self.game.coils.registerDown.pulse()
 
-    def replay_step_up(self):
-        self.game.replays += 1
-        graphics.replay_step_up(self.game.replays, graphics.barrel_o_fun.reel1, graphics.barrel_o_fun.reel10, graphics.barrel_o_fun.reel100)
-        self.game.coils.sounder.pulse()
-        graphics.barrel_o_fun.display(self.holes, self.game)
-
-    def search(self, n):
+    def search(self):
         # The search workflow/logic will determine if you actually have a winner, but it is a bit tricky.
         # if the ball is in a particular hole, the search relays need to click and/or clack, and 
         # when you have at least three going at once, it should latch on the search index and score.
@@ -476,8 +490,11 @@ class MulticardBingo(procgame.game.Mode):
         # search activity.  For each revolution of the search disc (which happens about every 5-7 seconds), the
         # game will activate() each search relay for each 'hot' rivet on the search disc.  This can be on a different
         # wiper finger for each set of rivets on the search disc.
+#        self.cancel_delayed(name="blink_title")
+        self.game.sound.stop_music()
+        self.game.sound.play_music('search', -1)
 
-        if self.game.search_index.status == False:
+        if self.game.search_index.status == False and self.game.replays < 200:
             for i in range(0, 100):
                 if i <= 50:
                     self.r = self.closed_search_relays(self.game.searchdisc.position)
@@ -500,160 +517,161 @@ class MulticardBingo(procgame.game.Mode):
                             self.match.append(self.wipers[key])
                             relays = sorted(set(self.match))
                             #TODO Play sound for each relay closure.
-                            #for i in relays:
-                            #    pass
                             s = functions.count_seq(relays)
                             if self.game.selector.position >= self.card:
                                 if s >= 3:
-                                    self.find_winner(s, self.card)
-                                break
+                                    self.find_winner(s, self.card, self.super_line)
+                                    break
+#        self.delay(name="blink_title", delay=3, handler=self.blink_title)
 
     def find_winner(self, relays, card, super_line):
-        #Implemented per S/I card 24-100
-        if card == 1:
-            if relays == 3:
-                if self.super_line == 1:
-                    if self.game.card1_replay_counter.position < 12:
-                        self.game.search_index.engage(self.game)
-                        self.card1_replay_step_up(12 - self.game.card1_replay_counter.position)
-                else:
-                    if self.game.card1_replay_counter.position < 4:
-                        self.game.search_index.engage(self.game)
-                        self.card1_replay_step_up(4 - self.game.card1_replay_counter.position)
-            if relays == 4:
-                if self.super_line == 1:
-                    if self.game.card1_replay_counter.position < 60:
-                        self.game.search_index.engage(self.game)
-                        self.card1_replay_step_up(60 - self.game.card1_replay_counter.position)
-                    else:
-                        if self.game.card1_replay_counter.position < 24:
+        if self.game.search_index.status == False and self.game.replays < 200:
+            if card == 1:
+                if relays == 3:
+                    if self.super_line == 1:
+                        if self.game.card1_replay_counter.position < 12:
                             self.game.search_index.engage(self.game)
-                            self.card1_replay_step_up(24 - self.game.card1_replay_counter.position)
-            if relays == 5:
-                if self.game.card1_replay_counter.position < 100:
-                    self.game.search_index.engage(self.game)
-                    self.card1_replay_step_up(100 - self.game.card1_replay_counter.position)
-        if card == 2:
-            if relays == 3:
-                if self.super_line == 1:
-                    if self.game.card2_replay_counter.position < 12:
+                            self.card1_replay_step_up(12 - self.game.card1_replay_counter.position)
+                    else:
+                        if self.game.card1_replay_counter.position < 4:
+                            self.game.search_index.engage(self.game)
+                            self.card1_replay_step_up(4 - self.game.card1_replay_counter.position)
+                if relays == 4:
+                    if self.super_line == 1:
+                        if self.game.card1_replay_counter.position < 60:
+                            self.game.search_index.engage(self.game)
+                            self.card1_replay_step_up(60 - self.game.card1_replay_counter.position)
+                    else:
+                        if self.game.card1_replay_counter.position < 20:
+                            self.game.search_index.engage(self.game)
+                            self.card1_replay_step_up(20 - self.game.card1_replay_counter.position)
+                if relays == 5:
+                    if self.game.card1_replay_counter.position < 100:
                         self.game.search_index.engage(self.game)
-                        self.card2_replay_step_up(12 - self.game.card2_replay_counter.position)
-                else:
-                    if self.game.card2_replay_counter.position < 4:
+                        self.card1_replay_step_up(100 - self.game.card1_replay_counter.position)
+            if card == 2:
+                if relays == 3:
+                    if self.super_line == 1:
+                        if self.game.card2_replay_counter.position < 12:
+                            self.game.search_index.engage(self.game)
+                            self.card2_replay_step_up(12 - self.game.card2_replay_counter.position)
+                    else:
+                        if self.game.card2_replay_counter.position < 4:
+                            self.game.search_index.engage(self.game)
+                            self.card2_replay_step_up(4 - self.game.card2_replay_counter.position)
+                if relays == 4:
+                    if self.super_line == 1:
+                        if self.game.card2_replay_counter.position < 60:
+                            self.game.search_index.engage(self.game)
+                            self.card2_replay_step_up(60 - self.game.card2_replay_counter.position)
+                    else:
+                        if self.game.card2_replay_counter.position < 20:
+                            self.game.search_index.engage(self.game)
+                            self.card2_replay_step_up(20 - self.game.card2_replay_counter.position)
+                if relays == 5:
+                    if self.game.card2_replay_counter.position < 100:
                         self.game.search_index.engage(self.game)
-                        self.card2_replay_step_up(4 - self.game.card2_replay_counter.position)
-            if relays == 4:
-                if self.super_line == 1:
-                    if self.game.card2_replay_counter.position < 60:
+                        self.card2_replay_step_up(100 - self.game.card2_replay_counter.position)
+            if card == 3:
+                if relays == 3:
+                    if self.super_line == 1:
+                        if self.game.card3_replay_counter.position < 12:
+                            self.game.search_index.engage(self.game)
+                            self.card3_replay_step_up(12 - self.game.card3_replay_counter.position)
+                    else:
+                        if self.game.card3_replay_counter.position < 4:
+                            self.game.search_index.engage(self.game)
+                            self.card3_replay_step_up(4 - self.game.card3_replay_counter.position)
+                if relays == 4:
+                    if self.super_line == 1:
+                        if self.game.card3_replay_counter.position < 60:
+                            self.game.search_index.engage(self.game)
+                            self.card3_replay_step_up(60 - self.game.card3_replay_counter.position)
+                    else:
+                        if self.game.card3_replay_counter.position < 20:
+                            self.game.search_index.engage(self.game)
+                            self.card3_replay_step_up(20 - self.game.card3_replay_counter.position)
+                if relays == 5:
+                    if self.game.card3_replay_counter.position < 100:
                         self.game.search_index.engage(self.game)
-                        self.card2_replay_step_up(60 - self.game.card2_replay_counter.position)
-                else:
-                    if self.game.card2_replay_counter.position < 24:
+                        self.card3_replay_step_up(100 - self.game.card3_replay_counter.position)
+            if card == 4:
+                if relays == 3:
+                    if self.super_line == 1:
+                        if self.game.card4_replay_counter.position < 12:
+                            self.game.search_index.engage(self.game)
+                            self.card4_replay_step_up(12 - self.game.card4_replay_counter.position)
+                    else:
+                        if self.game.card4_replay_counter.position < 4:
+                            self.game.search_index.engage(self.game)
+                            self.card4_replay_step_up(4 - self.game.card4_replay_counter.position)
+                if relays == 4:
+                    if self.super_line == 1:
+                        if self.game.card4_replay_counter.position < 60:
+                            self.game.search_index.engage(self.game)
+                            self.card4_replay_step_up(60 - self.game.card4_replay_counter.position)
+                    else:
+                        if self.game.card4_replay_counter.position < 20:
+                            self.game.search_index.engage(self.game)
+                            self.card4_replay_step_up(20 - self.game.card4_replay_counter.position)
+                if relays == 5:
+                    if self.game.card4_replay_counter.position < 100:
                         self.game.search_index.engage(self.game)
-                        self.card2_replay_step_up(24 - self.game.card2_replay_counter.position)
-            if relays == 5:
-                if self.game.card2_replay_counter.position < 100:
-                    self.game.search_index.engage(self.game)
-                    self.card2_replay_step_up(100 - self.game.card2_replay_counter.position)
-        if card == 3:
-            if relays == 3:
-                if self.super_line == 1:
-                    if self.game.card3_replay_counter.position < 12:
+                        self.card4_replay_step_up(100 - self.game.card4_replay_counter.position)
+            if card == 5:
+                if relays == 3:
+                    if self.super_line == 1:
+                        if self.game.card5_replay_counter.position < 12:
+                            self.game.search_index.engage(self.game)
+                            self.card5_replay_step_up(12 - self.game.card5_replay_counter.position)
+                    else:
+                        if self.game.card5_replay_counter.position < 4:
+                            self.game.search_index.engage(self.game)
+                            self.card5_replay_step_up(4 - self.game.card5_replay_counter.position)
+                if relays == 4:
+                    if self.super_line == 1:
+                        if self.game.card5_replay_counter.position < 60:
+                            self.game.search_index.engage(self.game)
+                            self.card5_replay_step_up(60 - self.game.card5_replay_counter.position)
+                    else:
+                        if self.game.card5_replay_counter.position < 20:
+                            self.game.search_index.engage(self.game)
+                            self.card5_replay_step_up(20 - self.game.card5_replay_counter.position)
+                if relays == 5:
+                    if self.game.card5_replay_counter.position < 100:
                         self.game.search_index.engage(self.game)
-                        self.card3_replay_step_up(12 - self.game.card3_replay_counter.position)
-                else:
-                    if self.game.card3_replay_counter.position < 4:
+                        self.card5_replay_step_up(100 - self.game.card5_replay_counter.position)
+            if card == 6:
+                if relays == 3:
+                    if self.super_line == 1:
+                        if self.game.card6_replay_counter.position < 12:
+                            self.game.search_index.engage(self.game)
+                            self.card6_replay_step_up(12 - self.game.card6_replay_counter.position)
+                    else:
+                        if self.game.card6_replay_counter.position < 4:
+                            self.game.search_index.engage(self.game)
+                            self.card6_replay_step_up(4 - self.game.card6_replay_counter.position)
+                if relays == 4:
+                    if self.super_line == 1:
+                        if self.game.card6_replay_counter.position < 60:
+                            self.game.search_index.engage(self.game)
+                            self.card6_replay_step_up(60 - self.game.card6_replay_counter.position)
+                    else:
+                        if self.game.card6_replay_counter.position < 20:
+                            self.game.search_index.engage(self.game)
+                            self.card6_replay_step_up(20 - self.game.card6_replay_counter.position)
+                if relays == 5:
+                    if self.game.card6_replay_counter.position < 100:
                         self.game.search_index.engage(self.game)
-                        self.card3_replay_step_up(4 - self.game.card3_replay_counter.position)
-            if relays == 4:
-                if self.super_line == 1:
-                    if self.game.card3_replay_counter.position < 60:
-                        self.game.search_index.engage(self.game)
-                        self.card3_replay_step_up(60 - self.game.card3_replay_counter.position)
-                else:
-                    if self.game.card3_replay_counter.position < 24:
-                        self.game.search_index.engage(self.game)
-                        self.card3_replay_step_up(24 - self.game.card3_replay_counter.position)
-            if relays == 5:
-                if self.game.card3_replay_counter.position < 100:
-                    self.game.search_index.engage(self.game)
-                    self.card3_replay_step_up(100 - self.game.card3_replay_counter.position)
-        if card == 4:
-            if relays == 3:
-                if self.super_line == 1:
-                    if self.game.card4_replay_counter.position < 12:
-                        self.game.search_index.engage(self.game)
-                        self.card4_replay_step_up(12 - self.game.card4_replay_counter.position)
-                else:
-                    if self.game.card4_replay_counter.position < 4:
-                        self.game.search_index.engage(self.game)
-                        self.card4_replay_step_up(4 - self.game.card4_replay_counter.position)
-            if relays == 4:
-                if self.super_line == 1:
-                    if self.game.card4_replay_counter.position < 60:
-                        self.game.search_index.engage(self.game)
-                        self.card4_replay_step_up(60 - self.game.card4_replay_counter.position)
-                else:
-                    if self.game.card4_replay_counter.position < 24:
-                        self.game.search_index.engage(self.game)
-                        self.card4_replay_step_up(24 - self.game.card4_replay_counter.position)
-            if relays == 5:
-                if self.game.card4_replay_counter.position < 100:
-                    self.game.search_index.engage(self.game)
-                    self.card4_replay_step_up(100 - self.game.card4_replay_counter.position)
-        if card == 5:
-            if relays == 3:
-                if self.super_line == 1:
-                    if self.game.card5_replay_counter.position < 12:
-                        self.game.search_index.engage(self.game)
-                        self.card5_replay_step_up(12 - self.game.card5_replay_counter.position)
-                else:
-                    if self.game.card5_replay_counter.position < 4:
-                        self.game.search_index.engage(self.game)
-                        self.card5_replay_step_up(4 - self.game.card5_replay_counter.position)
-            if relays == 4:
-                if self.super_line == 1:
-                    if self.game.card5_replay_counter.position < 60:
-                        self.game.search_index.engage(self.game)
-                        self.card5_replay_step_up(60 - self.game.card5_replay_counter.position)
-                else:
-                    if self.game.card5_replay_counter.position < 24:
-                        self.game.search_index.engage(self.game)
-                        self.card5_replay_step_up(24 - self.game.card5_replay_counter.position)
-            if relays == 5:
-                if self.game.card5_replay_counter.position < 100:
-                    self.game.search_index.engage(self.game)
-                    self.card5_replay_step_up(100 - self.game.card5_replay_counter.position)
-        if card == 6:
-            if relays == 3:
-                if self.super_line == 1:
-                    if self.game.card6_replay_counter.position < 12:
-                        self.game.search_index.engage(self.game)
-                        self.card6_replay_step_up(12 - self.game.card6_replay_counter.position)
-                else:
-                    if self.game.card6_replay_counter.position < 4:
-                        self.game.search_index.engage(self.game)
-                        self.card6_replay_step_up(4 - self.game.card6_replay_counter.position)
-            if relays == 4:
-                if self.super_line == 1:
-                    if self.game.card6_replay_counter.position < 60:
-                        self.game.search_index.engage(self.game)
-                        self.card6_replay_step_up(60 - self.game.card6_replay_counter.position)
-                else:
-                    if self.game.card6_replay_counter.position < 24:
-                        self.game.search_index.engage(self.game)
-                        self.card6_replay_step_up(24 - self.game.card6_replay_counter.position)
-            if relays == 5:
-                if self.game.card6_replay_counter.position < 100:
-                    self.game.search_index.engage(self.game)
-                    self.card6_replay_step_up(100 - self.game.card6_replay_counter.position)
+                        self.card6_replay_step_up(100 - self.game.card6_replay_counter.position)
 
     def card1_replay_step_up(self, number):
         if number >= 1:
             self.game.card1_replay_counter.step()
             number -= 1
             self.replay_step_up()
+            if self.game.replays == 200:
+                number = 0
             self.delay(name="card1_replay_step_up", delay=0.1, handler=self.card1_replay_step_up, param=number)
         else:
             self.game.search_index.disengage()
@@ -665,6 +683,8 @@ class MulticardBingo(procgame.game.Mode):
             self.game.card2_replay_counter.step()
             number -= 1
             self.replay_step_up()
+            if self.game.replays == 200:
+                number = 0
             self.delay(name="card2_replay_step_up", delay=0.1, handler=self.card2_replay_step_up, param=number)
         else:
             self.game.search_index.disengage()
@@ -676,6 +696,8 @@ class MulticardBingo(procgame.game.Mode):
             self.game.card3_replay_counter.step()
             number -= 1
             self.replay_step_up()
+            if self.game.replays == 200:
+                number = 0
             self.delay(name="card3_replay_step_up", delay=0.1, handler=self.card3_replay_step_up, param=number)
         else:
             self.game.search_index.disengage()
@@ -687,6 +709,8 @@ class MulticardBingo(procgame.game.Mode):
             self.game.card4_replay_counter.step()
             number -= 1
             self.replay_step_up()
+            if self.game.replays == 200:
+                number = 0
             self.delay(name="card4_replay_step_up", delay=0.1, handler=self.card4_replay_step_up, param=number)
         else:
             self.game.search_index.disengage()
@@ -698,6 +722,8 @@ class MulticardBingo(procgame.game.Mode):
             self.game.card5_replay_counter.step()
             number -= 1
             self.replay_step_up()
+            if self.game.replays == 200:
+                number = 0
             self.delay(name="card5_replay_step_up", delay=0.1, handler=self.card5_replay_step_up, param=number)
         else:
             self.game.search_index.disengage()
@@ -751,7 +777,7 @@ class MulticardBingo(procgame.game.Mode):
         self.pos[22] = {10:1, 7:2, 5:3, 23:4, 3:5}
         self.pos[23] = {9:1, 13:2, 2:3, 1:4, 10:5}
         self.pos[24] = {24:1, 19:2, 18:3, 22:4, 7:5}
-        self.pos[25] = {16:1, 15:2, 15:3, 11:4, 5:5}
+        self.pos[25] = {16:1, 14:2, 15:3, 11:4, 5:5}
         self.pos[26] = {4:1, 20:2, 12:3, 21:4, 23:5}
         self.pos[27] = {6:1, 25:2, 17:3, 8:4, 3:5}
         self.pos[28] = {9:1, 19:2, 15:3, 21:4, 3:5}
@@ -840,7 +866,6 @@ class MulticardBingo(procgame.game.Mode):
         self.pos[99] = {}
         self.pos[100] = {}
 
-
         super_line = 0
 
         if rivets in range(0,18):
@@ -872,17 +897,38 @@ class MulticardBingo(procgame.game.Mode):
 
         return (self.pos[rivets], card, super_line)
 
+    def blink_title(self):
+        title1 = random.randint(0,1)
+        title2 = random.randint(0,1)
+        if title1 == 1:
+            pos = [307,237]
+            image = pygame.image.load('barrel_o_fun/assets/title1_on.png').convert_alpha()
+            screen.blit(image, pos)
+        if title2 == 1:
+            pos = [423,237]
+            image = pygame.image.load('barrel_o_fun/assets/title2_on.png').convert_alpha()
+            screen.blit(image, pos)
+
+        pygame.display.update()
+        self.delay(name="display", delay=0.1, handler=graphics.barrel_o_fun.display, param=self)
+#        self.delay(name="blink_title", delay=3, handler=self.blink_title)
+
+
     # Define reset as the knock-off, anti-cheat relay disabled, and replay reset enabled.  Motors turn while credits are knocked off.
     # When meter reaches zero and the zero limit switch is hit, turn off motor sound and leave backglass gi on, but with tilt displayed.
 
     def startup(self):        
         self.tilt_actions()
+#        self.delay(name="blink_title", delay=1, handler=self.blink_title)
 
 
 class BarrelOFun(procgame.game.BasicGame):
-    """ Barrel O' Fun was an Ohio Dime Game with a replay button  """
+    """ Fun Spot was the first Ohio Dime Game to automatically play off replays """
     def __init__(self, machine_type):
         super(BarrelOFun, self).__init__(machine_type)
+        pygame.mixer.pre_init(44100,-16,2,512)
+        self.sound = procgame.sound.SoundController(self)
+        self.sound.set_volume(1.0)
         # NOTE: trough_count only counts the number of switches present in the  trough.  It does _not_ count
         #       the number of balls present.   In this game, there  should  be  8  balls.
         self.trough_count = 6
@@ -902,7 +948,7 @@ class BarrelOFun(procgame.game.BasicGame):
         self.search_index = units.Relay("search_index")
 
         #Spotting disc in Lotta Fun actually keeps track of spotted numbers
-        self.spotting = units.Stepper("spotting", 49, "Lotta Fun", "continuous")
+        self.spotting = units.Stepper("spotting", 49, "Fun Spot", "continuous")
         self.spotting.position = random.randint(0,49)
 
         #Replay Counter
@@ -918,6 +964,10 @@ class BarrelOFun(procgame.game.BasicGame):
         self.timer = units.Stepper("timer", 40)
         self.ball_count = units.Stepper("ball_count", 7)
 
+        #Check for status of the replay register zero switch.  If positive
+        #and machine is just powered on, this will zero out the replays.
+        self.replay_reset = units.Relay("replay_reset")
+        
         # Now, the control unit can be in one of two positions, essentially.
         # This alternates by coin, and is used to portion the Spotted Numbers.
         self.cu = 1

@@ -55,6 +55,15 @@ class SinglecardBingo(procgame.game.Mode):
             self.delay(name="display", delay=0.1, handler=graphics.variety.display, param=self)
 
     def sw_enter_active(self, sw):
+        #move numbers, play sound
+        if self.game.before_fourth.status == True:
+            max_ball = 4
+        elif self.game.before_fifth.status == True:
+            max_ball = 5
+        if self.game.magic_lines_feature.position == 4:
+            if self.game.ball_count.position < max_ball:
+                self.game.line3.step()
+                self.delay(name="display", delay=0.1, handler=graphics.variety.display, param=self)
         if self.game.switches.left.is_active() and self.game.switches.right.is_active():
             self.game.end_run_loop()
             os.system("/home/nbaldridge/proc/bingo_emulator/start_game.sh variety")
@@ -66,7 +75,6 @@ class SinglecardBingo(procgame.game.Mode):
     def timeout_actions(self):
         if (self.game.timer.position < 40):
             self.game.timer.step()
-            print self.game.timer.position
             self.delay(delay=5.0, handler=self.timeout_actions)
         else:
             self.tilt_actions()
@@ -79,10 +87,24 @@ class SinglecardBingo(procgame.game.Mode):
 
     def sw_left_active(self, sw):
             #move numbers, play sound
+            if self.game.before_fourth.status == True:
+                max_ball = 4
+            elif self.game.before_fifth.status == True:
+                max_ball = 5
+            if self.game.magic_lines_feature.position == 4:
+                if self.game.ball_count.position < max_ball:
+                    self.game.line1.step()
             self.delay(name="display", delay=0.1, handler=graphics.variety.display, param=self)
 
     def sw_right_active(self, sw):
             #move numbers, play sound
+            if self.game.before_fourth.status == True:
+                max_ball = 4
+            elif self.game.before_fifth.status == True:
+                max_ball = 5
+            if self.game.magic_lines_feature.position == 4:
+                if self.game.ball_count.position < max_ball:
+                    self.game.line2.step()
             self.delay(name="display", delay=0.1, handler=graphics.variety.display, param=self)
 
     def check_shutter(self, start=0):
@@ -139,13 +161,17 @@ class SinglecardBingo(procgame.game.Mode):
             self.game.before_fifth.disengage()
             self.game.odds.reset()
             self.game.timer.reset()
+            self.game.line1.reset()
+            self.game.line2.reset()
+            self.game.line3.reset()
+            self.game.magic_lines_feature.reset()
+            self.game.before_fourth.engage(self.game)
             self.game.sound.play_music('motor', -1)
             self.regular_play()
         self.delay(name="display", delay=0.1, handler=graphics.variety.display, param=self)
         self.game.tilt.disengage()
 
     def check_lifter_status(self):
-        print self.game.ball_count.position
         if self.game.tilt.status == False:
             if self.game.switches.trough8.is_inactive() and self.game.switches.trough5.is_active() and self.game.switches.trough4.is_active() and self.game.switches.trough3.is_active() and self.game.switches.trough2.is_active():
                 if self.game.switches.shooter.is_inactive():
@@ -465,15 +491,14 @@ class SinglecardBingo(procgame.game.Mode):
                 self.game.coils.shutter.enable()
         self.holes = []
         self.game.selector.reset()
-        self.game.select_spots.disengage()
         self.game.card1_replay_counter.reset()
         self.game.corners.disengage()
         self.game.corners_replay_counter.reset()
         self.game.super_card.reset()
         self.game.yellow_star.disengage()
         self.game.red_star.disengage()
-        self.game.redROLamp.disable()
-        self.game.yellowROLamp.disable()
+        self.game.coils.redROLamp.disable()
+        self.game.coils.yellowROLamp.disable()
         self.game.ball_count.reset()
         self.game.odds.reset()
         self.game.eb_play.disengage()
@@ -564,6 +589,7 @@ class SinglecardBingo(procgame.game.Mode):
             self.wipers = self.r[0]
             self.card = self.r[1]
             self.corners = self.r[2]
+            self.sc = self.r[3]
 
             # From here, I need to determine based on the value of r, whether to latch the search index and score. 
             # I need to determine the best winner on each card.  To do this, I must compare the position of the replay counter before
@@ -579,193 +605,88 @@ class SinglecardBingo(procgame.game.Mode):
                         s = functions.count_seq(relays)
                         if self.game.selector.position >= self.card:
                             if s >= 3:
-                                self.find_winner(s, self.card, self.corners)
+                                self.find_winner(s, self.card, self.corners, self.sc)
                                 break
 #        self.delay(name="blink_title", delay=3, handler=self.blink_title)
 
-    def find_winner(self, relays, card, corners):
+    def find_winner(self, relays, card, corners, sc):
+
+        if self.game.odds.position == 1:
+            threeodds = 4
+            fourodds = 16
+            fiveodds = 96
+        elif self.game.odds.position == 2:
+            threeodds = 6
+            fourodds = 20
+            fiveodds = 96
+        elif self.game.odds.position == 3:
+            threeodds = 8
+            fourodds = 24
+            fiveodds = 100
+        elif self.game.odds.position == 4:
+            threeodds = 12
+            fourodds = 32
+            fiveodds = 100
+        elif self.game.odds.position == 5:
+            threeodds = 18
+            fourodds = 48
+            fiveodds = 150
+        elif self.game.odds.position == 6:
+            threeodds = 36
+            fourodds = 72
+            fiveodds = 150
+        elif self.game.odds.position == 7:
+            threeodds = 48
+            fourodds = 100
+            fiveodds = 192
+        elif self.game.odds.position == 8:
+            threeodds = 64
+            fourodds = 200
+            fiveodds = 300
 
         if self.game.search_index.status == False and self.game.replays < 899:
-            if card == 1:
-                if relays == 3:
-                    if not corners:
-                        if self.game.super1.status == True:
-                            if self.game.odds.position == 1:
-                                hit = 6
-                            elif self.game.odds.position == 2:
-                                hit = 8
-                            elif self.game.odds.position == 3:
-                                hit = 12
-                            elif self.game.odds.position == 4:
-                                hit = 16
-                            elif self.game.odds.position == 5:
-                                hit = 24
-                        else:
-                            hit = 4
-                        if self.game.card1_replay_counter.position < hit:
-                            self.game.search_index.engage(self.game)
-                            self.card1_replay_step_up(hit - self.game.card1_replay_counter.position)
-                if relays == 4:
-                    if corners and self.game.corners.status == True:
-                        if self.game.corners_replay_counter.position < 200:
-                            self.game.search_index.engage(self.game)
-                            self.corners_replay_step_up(200 - self.game.corners_replay_counter.position)
+            if relays == 3:
+                if not corners:
+                    if sc > 0:
+                        if self.game.super_card.position >= 4:
+                            if sc == 1:
+                                if self.game.card1_replay_counter.position < fourodds:
+                                    self.game.search_index.engage(self.game)
+                                    self.card1_replay_step_up(fourodds - self.game.card1_replay_counter.position)
+                            elif sc == 2 and self.game.super_card.position == 8: 
+                                if self.game.card1_replay_counter.position < fourodds:
+                                    self.game.search_index.engage(self.game)
+                                    self.card1_replay_step_up(fourodds - self.game.card1_replay_counter.position)
                     else:
-                        if not corners:
-                            if self.game.super1.status == True:
-                                if self.game.odds.position == 1:
-                                    hit = 30
-                                elif self.game.odds.position == 2:
-                                    hit = 40
-                                elif self.game.odds.position == 3:
-                                    hit = 60
-                                elif self.game.odds.position == 4:
-                                    hit = 80
-                                elif self.game.odds.position == 5:
-                                    hit = 120
-                            else:
-                                hit = 20
-                            if self.game.card1_replay_counter.position < hit:
-                                self.game.search_index.engage(self.game)
-                                self.card1_replay_step_up(hit - self.game.card1_replay_counter.position)
-                if relays == 5:
-                    if self.game.super1.status == True:
-                        if self.game.odds.position == 1:
-                            hit = 96
-                        elif self.game.odds.position == 2:
-                            hit = 100
-                        elif self.game.odds.position == 3:
-                            hit = 150
-                        elif self.game.odds.position == 4:
-                            hit = 200
-                        elif self.game.odds.position == 5:
-                            hit = 300
-                    else:
-                        hit = 96
-
-                    if self.game.card1_replay_counter.position < hit:
+                        if self.game.card1_replay_counter.position < threeodds:
+                            self.game.search_index.engage(self.game)
+                            self.card1_replay_step_up(threeodds - self.game.card1_replay_counter.position)
+            if relays == 4:
+                if corners and self.game.corners.status == True:
+                    if self.game.corners_replay_counter.position < 200:
                         self.game.search_index.engage(self.game)
-                        self.card1_replay_step_up(hit - self.game.card1_replay_counter.position)
-            if card == 2:
-                if relays == 3:
+                        self.corners_replay_step_up(200 - self.game.corners_replay_counter.position)
+                else:
+                    if sc > 0:
+                        if corners:
+                            if self.game.super_card.position >= 4:
+                                if sc == 1:
+                                    if self.game.corners_replay_counter.position < 300:
+                                        self.game.search_index.engage(self.game)
+                                        self.corners_replay_step_up(300 - self.game.corners_replay_counter.position)
+                                elif sc == 2 and self.game.super_card.position == 8: 
+                                    if self.game.corners_replay_counter.position < 300:
+                                        self.game.search_index.engage(self.game)
+                                        self.corners_replay_step_up(300 - self.game.corners_replay_counter.position)
                     if not corners:
-                        if self.game.super2.status == True:
-                            if self.game.odds.position == 1:
-                                hit = 6
-                            elif self.game.odds.position == 2:
-                                hit = 8
-                            elif self.game.odds.position == 3:
-                                hit = 12
-                            elif self.game.odds.position == 4:
-                                hit = 16
-                            elif self.game.odds.position == 5:
-                                hit = 24
-                        else:
-                            hit = 4
-                        if self.game.card2_replay_counter.position < hit:
-                            self.game.search_index.engage(self.game)
-                            self.card2_replay_step_up(hit - self.game.card2_replay_counter.position)
-                if relays == 4:
-                    if corners and self.game.corners.status == True:
-                        if self.game.corners_replay_counter.position < 200:
-                            self.game.search_index.engage(self.game)
-                            self.corners_replay_step_up(200 - self.game.corners_replay_counter.position)
-                    else:
-                        if not corners:
-                            if self.game.super2.status == True:
-                                if self.game.odds.position == 1:
-                                    hit = 30
-                                elif self.game.odds.position == 2:
-                                    hit = 40
-                                elif self.game.odds.position == 3:
-                                    hit = 60
-                                elif self.game.odds.position == 4:
-                                    hit = 80
-                                elif self.game.odds.position == 5:
-                                    hit = 120
-                            else:
-                                hit = 20
-                            if self.game.card2_replay_counter.position < hit:
+                        if not sc:
+                            if self.game.card1_replay_counter.position < fourodds:
                                 self.game.search_index.engage(self.game)
-                                self.card2_replay_step_up(hit - self.game.card2_replay_counter.position)
-                if relays == 5:
-                    if self.game.super2.status == True:
-                        if self.game.odds.position == 1:
-                            hit = 96
-                        elif self.game.odds.position == 2:
-                            hit = 100
-                        elif self.game.odds.position == 3:
-                            hit = 150
-                        elif self.game.odds.position == 4:
-                            hit = 200
-                        elif self.game.odds.position == 5:
-                            hit = 300
-                    else:
-                        hit = 96
-
-                    if self.game.card2_replay_counter.position < hit:
-                        self.game.search_index.engage(self.game)
-                        self.card2_replay_step_up(hit - self.game.card2_replay_counter.position)
-            if card == 3:
-                if relays == 3:
-                    if not corners:
-                        if self.game.super3.status == True:
-                            if self.game.odds.position == 1:
-                                hit = 6
-                            elif self.game.odds.position == 2:
-                                hit = 8
-                            elif self.game.odds.position == 3:
-                                hit = 12
-                            elif self.game.odds.position == 4:
-                                hit = 16
-                            elif self.game.odds.position == 5:
-                                hit = 24
-                        else:
-                            hit = 4
-                        if self.game.card3_replay_counter.position < hit:
-                            self.game.search_index.engage(self.game)
-                            self.card3_replay_step_up(hit - self.game.card3_replay_counter.position)
-                if relays == 4:
-                    if corners and self.game.corners.status == True:
-                        if self.game.corners_replay_counter.position < 200:
-                            self.game.search_index.engage(self.game)
-                            self.corners_replay_step_up(200 - self.game.corners_replay_counter.position)
-                    else:
-                        if not corners:
-                            if self.game.super3.status == True:
-                                if self.game.odds.position == 1:
-                                    hit = 30
-                                elif self.game.odds.position == 2:
-                                    hit = 40
-                                elif self.game.odds.position == 3:
-                                    hit = 60
-                                elif self.game.odds.position == 4:
-                                    hit = 80
-                                elif self.game.odds.position == 5:
-                                    hit = 120
-                            else:
-                                hit = 20
-                            if self.game.card3_replay_counter.position < hit:
-                                self.game.search_index.engage(self.game)
-                                self.card3_replay_step_up(hit - self.game.card3_replay_counter.position)
-                if relays == 5:
-                    if self.game.super3.status == True:
-                        if self.game.odds.position == 1:
-                            hit = 96
-                        elif self.game.odds.position == 2:
-                            hit = 100
-                        elif self.game.odds.position == 3:
-                            hit = 150
-                        elif self.game.odds.position == 4:
-                            hit = 200
-                        elif self.game.odds.position == 5:
-                            hit = 300
-                    else:
-                        hit = 96
-
-                    if self.game.card3_replay_counter.position < hit:
-                        self.game.search_index.engage(self.game)
-                        self.card3_replay_step_up(hit - self.game.card3_replay_counter.position)
+                                self.card1_replay_step_up(fourodds - self.game.card1_replay_counter.position)
+            if relays == 5:
+                if self.game.card1_replay_counter.position < fiveodds:
+                    self.game.search_index.engage(self.game)
+                    self.card1_replay_step_up(fiveodds - self.game.card1_replay_counter.position)
 
 
     def card1_replay_step_up(self, number):
@@ -779,32 +700,6 @@ class SinglecardBingo(procgame.game.Mode):
         else:
             self.game.search_index.disengage()
             self.cancel_delayed(name="card1_replay_step_up")
-            self.search()
-
-    def card2_replay_step_up(self, number):
-        if number >= 1:
-            self.game.card2_replay_counter.step()
-            number -= 1
-            self.replay_step_up()
-            if self.game.replays == 899:
-                number = 0
-            self.delay(name="card2_replay_step_up", delay=0.1, handler=self.card2_replay_step_up, param=number)
-        else:
-            self.game.search_index.disengage()
-            self.cancel_delayed(name="card2_replay_step_up")
-            self.search()
-
-    def card3_replay_step_up(self, number):
-        if number >= 1:
-            self.game.card3_replay_counter.step()
-            number -= 1
-            self.replay_step_up()
-            if self.game.replays == 899:
-                number = 0
-            self.delay(name="card3_replay_step_up", delay=0.1, handler=self.card3_replay_step_up, param=number)
-        else:
-            self.game.search_index.disengage()
-            self.cancel_delayed(name="card3_replay_step_up")
             self.search()
 
     def corners_replay_step_up(self, number):
@@ -828,52 +723,162 @@ class SinglecardBingo(procgame.game.Mode):
         
         self.pos = {}
         # Card 1
+
+        self.p1 = 0
+        self.p2 = 0
+        self.p3 = 0
+        self.p4 = 0
+        self.p5 = 0
+        self.p11 = 0
+        self.p12 = 0
+        self.p13 = 0
+        self.p14 = 0
+        self.q1 = 0
+        self.q2 = 0
+        self.q3 = 0
+        self.q4 = 0
+        self.q5 = 0
+        self.q11 = 0
+        self.q12 = 0
+        self.r1 = 0
+        self.r2 = 0
+        self.r3 = 0
+        self.r4 = 0
+        self.r5 = 0
+        self.r11 = 0
+        self.r12 = 0
+
+        if self.game.line1.position == 0:
+            self.p1 = 9
+            self.p2 = 10
+            self.p3 = 2
+            self.p4 = 1
+            self.p5 = 11
+            self.pos[6] = {9:1, 10:2, 2:3, 1:4, 11:5}
+            self.p11 = 11
+            self.p12 = 9
+            self.p13 = 9
+            self.p14 = 11
+        elif self.game.line1.position == 1:
+            self.p1 = 11
+            self.p2 = 9
+            self.p3 = 10
+            self.p4 = 2
+            self.p5 = 1
+            self.pos[6] = {10:1, 2:2, 1:3, 11:4, 9:5}
+            self.p11 = 1
+            self.p12 = 11
+            self.p13 = 11
+            self.p14 = 1
+        elif self.game.line1.position == 2:
+            self.p1 = 10
+            self.p2 = 2
+            self.p3 = 1
+            self.p4 = 11
+            self.p5 = 9
+            self.pos[6] = {11:1, 9:2, 10:3, 2:4, 1:5}
+            self.p11 = 9
+            self.p12 = 10
+            self.p13 = 10
+            self.p14 = 9
+        if self.game.line2.position == 0:
+            self.q1 = 4
+            self.q2 = 19
+            self.q3 = 18
+            self.q4 = 22
+            self.q5 = 7
+            self.pos[7] = {4:1, 19:2, 18:3, 22:4, 7:5}
+            self.q11 = 22
+            self.q12 = 19
+        elif self.game.line2.position == 1:
+            self.q1 = 7
+            self.q2 = 4
+            self.q3 = 19
+            self.q4 = 18
+            self.q5 = 22
+            self.pos[7] = {7:1, 4:2, 19:3, 18:4, 22:5}
+            self.q11 = 18
+            self.q12 = 4
+        elif self.game.line2.position == 2:
+            self.q1 = 19
+            self.q2 = 18
+            self.q3 = 22
+            self.q4 = 7
+            self.q5 = 4
+            self.pos[7] = {19:1, 18:2, 22:3, 7:4, 4:5}
+            self.q11 = 7
+            self.q12 = 18
+        if self.game.line3.position == 0:
+            self.r1 = 15
+            self.r2 = 14
+            self.r3 = 16
+            self.r4 = 13
+            self.r5 = 5
+            self.pos[8] = {15:1, 14:2, 16:3, 13:4, 5:5}
+            self.r11 = 16
+            self.r12 = 16
+        elif self.game.line3.position == 1:
+            self.r1 = 5
+            self.r2 = 15
+            self.r3 = 14
+            self.r4 = 16
+            self.r5 = 13
+            self.pos[8] = {5:1, 15:2, 14:3, 16:4, 13:5}
+            self.r11 = 14
+            self.r12 = 14
+        elif self.game.line3.position == 2:
+            self.r1 = 14
+            self.r2 = 16
+            self.r3 = 13
+            self.r4 = 5
+            self.r5 = 15
+            self.pos[8] = {14:1, 16:2, 13:3, 5:4, 15:5}
+            self.r11 = 13
+            self.r12 = 13
+        
         self.pos[0] = {}
-        self.pos[1] = {5:1, 1:2, 9:3, 25:4, 3:5}
-        self.pos[2] = {8:1, 22:2, 10:3, 19:4, 7:5}
-        self.pos[3] = {6:1, 18:2, 16:3, 11:4, 17:5}
-        self.pos[4] = {24:1, 21:2, 14:3, 20:4, 13:5}
-        self.pos[5] = {12:1, 23:2, 2:3, 4:4, 15:5}
-        self.pos[6] = {5:1, 8:2, 6:3, 24:4, 12:5}
-        self.pos[7] = {1:1, 22:2, 18:3, 21:4, 23:5}
-        self.pos[8] = {9:1, 10:2, 16:3, 14:4, 2:5}
-        self.pos[9] = {25:1, 19:2, 11:3, 20:4, 4:5}
-        self.pos[10] = {3:1, 7:2, 17:3, 13:4, 15:5}
-        self.pos[11] = {3:1, 19:2, 16:3, 21:4, 12:5}
-        self.pos[12] = {5:1, 22:2, 16:3, 20:4, 15:5}
-        self.pos[13] = {5:1, 3:2, 15:3, 12:4}
+        self.pos[1] = {self.p1:1, self.q1:2, self.r1:3, 25:4, 3:5}
+        self.pos[2] = {self.p2:1, self.q2:2, self.r2:3, 19:4, 7:5}
+        self.pos[3] = {self.p3:1, self.q3:2, self.r3:3, 11:4, 17:5}
+        self.pos[4] = {self.p4:1, self.q4:2, self.r4:3, 20:4, 13:5}
+        self.pos[5] = {self.p5:1, self.q5:2, self.r5:3, 4:4, 15:5}
+        self.pos[9] = {24:1, 20:2, 12:3, 21:4, 23:5}
+        self.pos[10] = {6:1, 8:2, 25:3, 17:4, 3:5}
+        self.pos[11] = {self.p11:1, self.q11:2, self.r11:3, 21:4, 12:5}
+        self.pos[12] = {self.p12:1, self.q12:2, self.r12:3, 20:4, 15:5}
+        self.pos[13] = {self.p13:1, self.p14:2, 6:3, 3:4}
         self.pos[14] = {}
         self.pos[15] = {}
         self.pos[16] = {}
-        self.pos[17] = {9:1, 24:2, 16:3, 4:4, 6:5}
-        self.pos[18] = {13:1, 19:2, 14:3, 20:4, 25:5}
-        self.pos[19] = {2:1, 18:2, 15:3, 12:4, 17:5}
-        self.pos[20] = {1:1, 22:2, 11:3, 21:4, 8:5}
-        self.pos[21] = {10:1, 7:2, 5:3, 23:4, 3:5}
-        self.pos[22] = {9:1, 13:2, 2:3, 1:4, 10:5}
-        self.pos[23] = {24:1, 19:2, 18:3, 22:4, 7:5}
-        self.pos[24] = {16:1, 14:2, 15:3, 11:4, 5:5}
-        self.pos[25] = {4:1, 20:2, 12:3, 21:4, 23:5}
-        self.pos[26] = {6:1, 25:2, 17:3, 8:4, 3:5}
-        self.pos[27] = {6:1, 20:2, 15:3, 22:4, 10:5}
-        self.pos[28] = {9:1, 19:2, 15:3, 21:4, 3:5}
-        self.pos[29] = {9:1, 6:2, 3:3, 10:4}
-        self.pos[30] = {}
-        self.pos[31] = {}
-        self.pos[32] = {}
-        self.pos[33] = {24:1, 7:2, 10:3, 4:4, 9:5}
-        self.pos[34] = {3:1, 21:2, 18:3, 22:4, 8:5}
-        self.pos[35] = {15:1, 14:2, 17:3, 11:4, 2:5}
-        self.pos[36] = {13:1, 20:2, 12:3, 19:4, 23:5}
-        self.pos[37] = {25:1, 6:2, 16:3, 1:4, 5:5}
-        self.pos[38] = {24:1, 3:2, 15:3, 13:4, 25:5}
-        self.pos[39] = {7:1, 21:2, 14:3, 20:4, 6:5}
-        self.pos[40] = {10:1, 18:2, 17:3, 12:4, 16:5}
-        self.pos[41] = {4:1, 22:2, 11:3, 19:4, 1:5}
-        self.pos[42] = {9:1, 8:2, 2:3, 23:4, 5:5}
-        self.pos[43] = {9:1, 22:2, 17:3, 20:4, 25:5}
-        self.pos[44] = {24:1, 21:2, 17:3, 19:4, 5:5}
-        self.pos[45] = {24:1, 9:2, 5:3, 25:4}
+        self.pos[17] = {15:1, 7:2, 11:3}
+        self.pos[18] = {1:1, 10:2, 13:3}
+        self.pos[19] = {17:1, 4:2, 18:3}
+        self.pos[20] = {15:1, 1:2, 17:3}
+        self.pos[21] = {7:1, 10:2, 4:3}
+        self.pos[22] = {11:1, 13:2, 18:3}
+        self.pos[23] = {11:1, 10:2, 17:3}
+        self.pos[24] = {15:1, 10:2, 18:3}
+        self.pos[25] = {}
+        self.pos[26] = {15:1, 11:2, 18:2, 17:3}
+        self.pos[27] = {}
+        self.pos[28] = {}
+        self.pos[29] = {23:1, 3:2, 18:3}
+        self.pos[30] = {9:1, 25:2, 11:3}
+        self.pos[31] = {12:1, 24:2, 14:3}
+        self.pos[32] = {23:1, 9:2, 12:3}
+        self.pos[33] = {3:1, 25:2, 24:3}
+        self.pos[34] = {18:1, 11:2, 14:3}
+        self.pos[35] = {18:1, 25:2, 12:3}
+        self.pos[36] = {23:1, 25:2, 14:3}
+        self.pos[37] = {}
+        self.pos[38] = {23:1, 18:2, 14:3, 12:4}
+        self.pos[39] = {}
+        self.pos[40] = {}
+        self.pos[41] = {}
+        self.pos[42] = {}
+        self.pos[43] = {}
+        self.pos[44] = {}
+        self.pos[45] = {}
         self.pos[46] = {}
         self.pos[47] = {}
         self.pos[48] = {}
@@ -882,21 +887,22 @@ class SinglecardBingo(procgame.game.Mode):
 
         corners = False
         card = 0
+        sc = 0
 
         if rivets in range(0, 14):
             card = 1
         if rivets == 13:
             corners = True
-        if rivets in range(16, 30):
-            card = 2
-        if rivets == 29:
-            corners = True
-        if rivets in range(32, 46):
-            card = 3
-        if rivets == 45:
-            corners = True
+        if rivets in range(17, 27):
+            sc = 2
+            if rivets == 26:
+                corners = True
+        if rivets in range(29, 39):
+            sc = 1
+            if rivets == 38:
+                corners = True
 
-        return (self.pos[rivets], card, corners)
+        return (self.pos[rivets], card, corners, sc)
     
     def scan_all(self):
         #Animate scanning of everything - this happens through the spotting disc
@@ -953,74 +959,72 @@ class SinglecardBingo(procgame.game.Mode):
             return 0
 
     def odds_probability(self):
-        mix5 = self.game.mixer3.connected_rivet()
-        # Check position of Mixer 5, Mixer 4, and Mixer 3 and current 
-        # position of the odds, along with trip relays.
         # For first check, guaranteed single stepup.  Probability doesn't 
         # factor, so I will return as part of the initial check above.
-        if self.game.odds.position == 0:
+        if self.game.odds.position < 2:
             return 1
         else:
             m2 = self.check_mixer2()
             if m2 == True:
-                s = self.game.spotting.connected_rivet()
-                if s == 2 or s == 13 or s == 18:
-                    if self.game.odds.position == 4:
-                        if self.game.mixer3.position == 4:
-                            return 1
-                        else:
-                            return 0
-                    else:
+                m3 = self.check_mixer3()
+                if m3 == True:
+                    s = self.game.spotting.connected_rivet()
+                    o = self.game.odds.position
+                    if o < 4:
                         return 1
+                    elif o == 4:
+                        if s == 1 or s == 6 or s == 9 or s == 11 or s == 19 or s == 24 or s == 28 or s == 40 or s == 42 or s == 44 or s == 48 or s == 49:
+                            return 1
+                    elif o == 5:
+                        if s == 1 or s == 3 or s == 14 or s == 16 or s == 20 or s == 23 or s == 26 or s == 27 or s == 31 or s == 32 or s == 33 or s == 34 or s == 37 or s == 38 or s == 39 or s == 41 or s == 43:
+                            return 1
+                    elif o == 6:
+                        if s == 10 or s == 15 or s == 25 or s == 36:
+                            return 1
+                    elif o == 7:
+                        if s == 7 or s == 21 or s == 23 or s == 29 or s == 35 or s == 45:
+                            return 1
+                    else:
+                        return 0
                 else:
                     return 0
             else:
                 return 0
 
-
-
-    def check_sd(self):
-        sd = self.game.spotting.connected_rivet()
-        if self.game.odds.position == 4 or self.game.odds.position == 5:
-            if sd == 4 or sd == 6 or sd == 8 or sd == 9 or sd == 11 or sd == 12 or sd == 13 or sd == 19 or sd == 20 or sd == 22 or sd == 23 or sd == 25 or sd == 27 or sd == 29 or sd == 32 or sd == 35 or sd == 36 or sd == 38 or sd == 41 or sd == 45 or sd == 48 or sd == 50:
-                return 1
-            else:
-                return 0
-        elif self.game.odds.position == 6:
-            if sd == 2 or sd == 3 or sd == 14 or sd == 17 or sd == 24 or sd == 31 or sd == 39 or sd == 40 or sd == 46 or sd == 47:
-                return 1
-            else:
-                return 0
-        elif self.game.odds.position == 7:
-            if sd == 5 or sd == 7 or sd == 16 or sd == 26 or sd == 34 or sd == 37 or sd == 42:
-                return 1
-            else:
-                return 0
-        elif self.game.odds.position == 8:
-            if sd == 10 or sd == 16 or sd == 28 or sd == 44:
-                return 1
-            else:
-                return 0
-        elif self.game.odds.position == 9:
-            if sd == 18 or sd == 30 or sd == 43:
-                return 1
-            else:
-                return 0
-        else:
+    def check_mixer3(self):
+        m3 = self.game.mixer3.position
+        if self.game.super_card.position == 8:
             return 0
+        if m3 == 1 or m3 == 2 or m3 == 17 or m3 == 18 or m3 == 22 or m3 == 15 or m3 == 17 or m3 == 3 or m3 == 6 or m3 == 7 or m3 == 8 or m3 == 10 or m3 == 5 or m3 == 15 or m3 == 17:
+            return 1
+        if self.game.magic_lines_feature.position > 0:
+            if m3 == 3 or m3 == 5 or m3 == 10 or m3 == 11 or m3 == 13 or m3 == 17  or m3 == 19 or m3 == 21 or m3 == 22 or m3 == 1 or m3 == 10:
+                return 1
+        if self.game.spot_25.status == False:
+            if m3 == 14:
+                return 1
+        if self.game.before_fifth.status == False:
+            if m3 == 20 or m3 == 24 or m3 == 3 or m3 == 11:
+                return 1
+        if self.game.spot_10.status == False:
+            if m3 == 14 or m3 == 18:
+                return 1
+        return 0 
 
     def check_mixer2(self):
         mix2 = self.game.mixer2.connected_rivet()
-        if mix2 == 1 or mix2 == 4 or mix2 == 8 or mix2 == 9 or mix2 == 10 or mix2 == 13 or mix2 == 15 or mix2 == 16 or mix2 == 18 or mix2 == 19 or mix2 == 20:
-            return 1
-        elif self.game.super1.status == False:
-            if mix2 == 22:
+        o = self.game.odds.position
+        if o < 3:
+            if mix2 == 1 or mix2 == 3 or mix2 == 18  or mix2 == 22:
                 return 1
-        elif self.game.super2.status == False:
-            if mix2 == 3:
+        elif o == 3 or o == 4:
+            if mix2 == 2 or mix2 == 4 or mix2 == 5 or mix2 == 8 or mix2 == 11 or mix2 == 14 or mix2 == 15 or mix2 == 7 or mix2 == 13 or mix2 == 18 or mix2 == 1 or mix2 == 3:
                 return 1
-        elif self.game.super3.status == False:
-            if mix2 == 24:
+        elif o == 5 or o == 6:
+            if mix2 == 13 or mix2 == 11 or mix2 == 16 or mix2 == 17 or mix2 == 20 or mix2 == 22 or mix2 == 24 or mix2 == 4 or mix2 == 6:
+                return 1
+        elif o >= 7:
+            if mix2 == 9 or mix2 == 12 or mix2 == 16 or mix2 == 19 or mix2 == 24 or mix2 == 8:
                 return 1
         else:
             return 0
@@ -1031,81 +1035,48 @@ class SinglecardBingo(procgame.game.Mode):
     def features_probability(self):
         s = random.randint(1,7)
         self.animate_feature_scan(s)
-        mix2 = self.game.mixer2.connected_rivet()
-        mix3 = self.game.mixer3.connected_rivet()
-        if self.game.selector.position < 3:
-            if mix3 == 24 or mix3 == 1 or self.game.reflex.connected_rivet() == 4:
-                if self.game.odds.position == 0 or self.game.odds.position == 1:
-                    if self.game.spotting.position == 1:
-                        self.game.select_spots.engage(self.game)
-                    if self.game.spotting.position == 2:
-                        self.game.super1.engage(self.game)
-                    if self.game.spotting.position == 7:
-                        self.game.corners.engage(self.game)
-                    if self.game.spotting.position == 4:
-                        self.game.yellow_star.engage(self.game)
-                        self.game.coils.redROLamp.enable()
-                    if self.game.spotting.position == 12:
-                        self.game.super2.engage(self.game)
-                    if self.game.spotting.position == 8:
-                        self.game.red_star.engage(self.game)
-                        self.game.coils.yellowROLamp.enable()
-                    if self.game.spotting.position == 6:
-                        self.game.super3.engage(self.game)
+        m2 = self.check_mixer2()
+        if m2 == True:
+            m3 = self.check_mixer3()
+            if m3 == True:
+                s = self.game.spotting.connected_rivet()
+                if s == 1:
+                    if self.game.reflex.connected_rivet() == 4:
+                        self.step_magic_lines(4 - self.game.magic_lines_feature.position)
+                if s == 4:
+                    self.step_magic_lines(4 - self.game.magic_lines_feature.position)
+                if self.game.cu == 1:
+                    self.game.magic_lines_feature.step()
                 else:
-                    if mix2 == 1 or mix2 == 2 or mix2 == 3 or mix2 == 4 or mix2 == 21 or mix2 == 22 or mix2 == 23:
-                        if self.game.spotting.position == 1:
-                            self.game.select_spots.engage(self.game)
-                        if self.game.spotting.position == 2:
-                            self.game.super1.engage(self.game)
-                        if self.game.spotting.position == 7:
-                            self.game.corners.engage(self.game)
-                        if self.game.spotting.position == 4:
-                            self.game.yellow_star.engage(self.game)
-                            self.game.coils.redROLamp.enable()
-                        if self.game.spotting.position == 12:
-                            self.game.super2.engage(self.game)
-                        if self.game.spotting.position == 8:
-                            self.game.red_star.engage(self.game)
-                            self.game.coils.yellowROLamp.enable()
-                        if self.game.spotting.position == 6:
-                            self.game.super3.engage(self.game)
-        else:
-            if self.game.odds.position == 0 or self.game.odds.position == 1:
-                if self.game.spotting.position == 1:
-                    self.game.select_spots.engage(self.game)
-                if self.game.spotting.position == 2:
-                    self.game.super1.engage(self.game)
-                if self.game.spotting.position == 7:
-                    self.game.corners.engage(self.game)
-                if self.game.spotting.position == 4:
+                    self.game.super_card.step()
+                if s == 2:
+                    if self.game.super_card.position < 4:
+                        self.step_super(4 - self.game.super_card.position)
+                if s == 9:
+                    if self.game.super_card.position < 8:
+                        self.step_super(8 - self.game.super_card.position)
+                if s == 3:
+                    self.step_super(8 - self.game.super_card.position)
+                if s == 14:
                     self.game.yellow_star.engage(self.game)
                     self.game.coils.redROLamp.enable()
-                if self.game.spotting.position == 12:
-                    self.game.super2.engage(self.game)
-                if self.game.spotting.position == 8:
-                    self.game.red_star.engage(self.game)
-                    self.game.coils.yellowROLamp.enable()
-                if self.game.spotting.position == 6:
-                    self.game.super3.engage(self.game)
-            else:
-                if mix2 == 1 or mix2 == 2 or mix2 == 3 or mix2 == 4 or mix2 == 21 or mix2 == 22 or mix2 == 23:
-                    if self.game.spotting.position == 1:
-                        self.game.select_spots.engage(self.game)
-                    if self.game.spotting.position == 2:
-                        self.game.super1.engage(self.game)
-                    if self.game.spotting.position == 7:
-                        self.game.corners.engage(self.game)
-                    if self.game.spotting.position == 4:
+                if s == 42:
+                    if self.game.red_star.status == False:
                         self.game.yellow_star.engage(self.game)
                         self.game.coils.redROLamp.enable()
-                    if self.game.spotting.position == 12:
-                        self.game.super2.engage(self.game)
-                    if self.game.spotting.position == 8:
+                if s == 18:
+                    if self.game.yellow_star.status == False:
                         self.game.red_star.engage(self.game)
                         self.game.coils.yellowROLamp.enable()
-                    if self.game.spotting.position == 6:
-                        self.game.super3.engage(self.game)
+                if s == 6:
+                    self.game.red_star.engage(self.game)
+                    self.game.coils.yellowROLamp.enable()
+                if s == 15:
+                    if self.game.magic_lines_feature.position < 4:
+                        self.game.corners.engage(self.game)
+                if s == 7 or s == 19 or s == 33:
+                    self.game.before_fourth.disengage()
+                    self.game.before_fifth.engage(self.game)
 
     def scan_eb(self):
         s = random.randint(1,9)
@@ -1116,12 +1087,7 @@ class SinglecardBingo(procgame.game.Mode):
         p = self.eb_probability()
         if p == 1:
             if self.game.extra_ball.position < 9:
-                m = self.eb_mixer2()
-                if m == 1:
-                    t = self.eb_mixer3()
-                    if t == 1:
-                        print self.game.spotting.connected_rivet()
-                        s = self.eb_check()
+                s = self.eb_check()
 
         # Timer resets to 0 position on ball count increasing.  We are fudging this since we will have
         # no good way to measure balls as they return back to the trough.  The ball count unit cannot be
@@ -1174,102 +1140,21 @@ class SinglecardBingo(procgame.game.Mode):
         else:
             return 0
 
-    def eb_mixer2(self):
-        o = self.game.odds.position
-        mix2 = self.game.mixer2.connected_rivet()
-        if o >= 4:
-            if self.game.super1.status == False:
-                if mix2 == 22 or mix2 == 11 or mix2 == 5 or mix2 == 24 or mix2 == 6 or mix2 == 8:
-                    return 1
-            if self.game.super2.status == False:
-                if mix2 == 22 or mix2 == 13 or mix2 == 5 or mix2 == 24 or mix2 == 6 or mix2 == 8:
-                    return 1
-            if self.game.super3.status == False:
-                if mix2 == 22 or mix2 == 20 or mix2 == 5 or mix2 == 24 or mix2 == 6 or mix2 == 8:
-                    return 1
-            if mix2 == 22 or mix2 == 5 or mix2 == 24 or mix2 == 6 or mix2 == 8:
-                return 1
-            else:
-                return 0
-        if o >= 3:
-            if self.game.super1.status == False:
-                if mix2 == 22 or mix2 == 11 or mix2 == 5 or mix2 == 24 or mix2 == 6 or mix2 == 8 or mix2 == 10:
-                    return 1
-            if self.game.super2.status == False:
-                if mix2 == 22 or mix2 == 13 or mix2 == 5 or mix2 == 24 or mix2 == 6 or mix2 == 8 or mix2 == 10:
-                    return 1
-            if self.game.super3.status == False:
-                if mix2 == 22 or mix2 == 20 or mix2 == 5 or mix2 == 24 or mix2 == 6 or mix2 == 8 or mix2 == 10:
-                    return 1
-            if mix2 == 22 or mix2 == 5 or mix2 == 24 or mix2 == 6 or mix2 == 8 or mix2 == 10:
-                return 1
-            else:
-                return 0
-        if o >= 2:
-            if self.game.super1.status == False:
-                if mix2 == 22 or mix2 == 11 or mix2 == 5 or mix2 == 24 or mix2 == 6 or mix2 == 8 or mix2 == 10 or mix2 == 12:
-                    return 1
-            if self.game.super2.status == False:
-                if mix2 == 22 or mix2 == 13 or mix2 == 5 or mix2 == 24 or mix2 == 6 or mix2 == 8 or mix2 == 10 or mix2 == 12:
-                    return 1
-            if self.game.super3.status == False:
-                if mix2 == 22 or mix2 == 20 or mix2 == 5 or mix2 == 24 or mix2 == 6 or mix2 == 8 or mix2 == 10 or mix2 == 12:
-                    return 1
-            if mix2 == 22 or mix2 == 5 or mix2 == 24 or mix2 == 6 or mix2 == 8 or mix2 == 10 or mix2 == 12:
-                return 1
-            else:
-                return 0
-        if o <= 1:
-            if self.game.super1.status == False:
-                if mix2 == 22 or mix2 == 11 or mix2 == 5 or mix2 == 24 or mix2 == 6 or mix2 == 8 or mix2 == 10 or mix2 == 12 or mix2 == 15:
-                    return 1
-            if self.game.super2.status == False:
-                if mix2 == 22 or mix2 == 13 or mix2 == 5 or mix2 == 24 or mix2 == 6 or mix2 == 8 or mix2 == 10 or mix2 == 12 or mix2 == 15:
-                    return 1
-            if self.game.super3.status == False:
-                if mix2 == 22 or mix2 == 20 or mix2 == 5 or mix2 == 24 or mix2 == 6 or mix2 == 8 or mix2 == 10 or mix2 == 12 or mix2 == 15:
-                    return 1
-            if mix2 == 22 or mix2 == 5 or mix2 == 24 or mix2 == 6 or mix2 == 8 or mix2 == 10 or mix2 == 12 or mix2 == 15:
-                return 1
-            else:
-                return 0
-
-    def eb_mixer3(self):
-        mix3 = self.game.mixer3.connected_rivet()
-        if self.game.select_spots.status == False:
-            if self.game.all_spot.status == False:
-                return 1
-            else:
-                return 0
-        else:
-            if mix3 is not 21:
-                return 1
-            else:
-                return 0
-
     def eb_check(self):
         sd = self.game.spotting.connected_rivet()
         eb = self.game.extra_ball.position
+        m4 = self.game.mixer4.position
 
-        if sd == 29 and self.game.mixer3.connected_rivet() == 21:
+        if sd == 50 and self.game.mixer4.connected_rivet() == 21:
             self.step_eb(9 - eb)
-        if sd == 6:
+        if sd == 1:
             if eb < 3:
                 self.step_eb(3 - eb)
-        if sd == 3:
+        if sd == 6:
             if eb < 6:
                 self.step_eb(6 - eb)
-        if sd == 20:
-            if eb < 9:
-                self.step_eb(9 - eb)
-        if eb < 3:
-            if sd == 8:
-                self.step_eb(1)
-        if eb >= 3 and eb < 6:
-            if sd == 13:
-                self.step_eb(1)
-        if sd == 4 or sd == 5:
-            self.step_eb(1)
+        if m4 == 1 or m4 == 7 or m4 == 10 or m4 == 15 or m4 == 16 or m4 == 19:
+            self.game.extra_ball.step()
 
     def step_eb(self, number):
         if number >= 1:
@@ -1278,6 +1163,22 @@ class SinglecardBingo(procgame.game.Mode):
             number -= 1
             self.delay(name="display", delay=0, handler=graphics.variety.display, param=self)
             self.delay(name="step_eb", delay=0.1, handler=self.step_eb, param=number)
+
+    def step_super(self, number):
+        if number >= 1:
+            self.game.super_card.step()
+            self.check_lifter_status()
+            number -= 1
+            self.delay(name="display", delay=0, handler=graphics.variety.display, param=self)
+            self.delay(name="step_super", delay=0.1, handler=self.step_super, param=number)
+
+    def step_magic_lines(self, number):
+        if number >= 1:
+            self.game.magic_lines_feature.step()
+            self.check_lifter_status()
+            number -= 1
+            self.delay(name="display", delay=0, handler=graphics.variety.display, param=self)
+            self.delay(name="step_magic_lines", delay=0.1, handler=self.step_magic_lines, param=number)
 
     def blink_title(self):
         title1 = random.randint(0,1)
@@ -1319,7 +1220,7 @@ class SinglecardBingo(procgame.game.Mode):
 
 
 class Variety(procgame.game.BasicGame):
-    """ Palm Beach was the first game with Super Cards """
+    """ Variety was the first game with Super Lines """
     def __init__(self, machine_type):
         super(Variety, self).__init__(machine_type)
         pygame.mixer.pre_init(44100,-16,2,512)
@@ -1360,7 +1261,7 @@ class Variety(procgame.game.BasicGame):
         self.card2_replay_counter = units.Stepper("card1_replay_counter", 500)
         self.card3_replay_counter = units.Stepper("card1_replay_counter", 500)
         #Corners Replay Counter
-        self.corners_replay_counter = units.Stepper("corners_replay_counter", 200)
+        self.corners_replay_counter = units.Stepper("corners_replay_counter", 300)
 
         #Initialize stepper units used to keep track of features or timing.
         self.timer = units.Stepper("timer", 40)
@@ -1404,21 +1305,25 @@ class Variety(procgame.game.BasicGame):
         #Relay for corners lighting
         self.corners = units.Relay("corners")
 
-        self.selector = units.Stepper("selector", 3)
+        self.selector = units.Stepper("selector", 1)
 
+        self.super_card = units.Stepper("super_card", 8)
         # Select-a-spot setup
-        self.select_spots = units.Relay("select_spots")
-        self.spotted = units.Stepper("spotted", 3, "variety", "continuous")
+        self.spot_25 = units.Relay("spot_25")
+        self.spot_10 = units.Relay("spot_10")
+
+        self.magic_lines_feature = units.Stepper("magic_lines_feature", 4)
+        self.line1 = units.Stepper("line1", 2, "variety", "continuous")
+        self.line2 = units.Stepper("line2", 2, "variety", "continuous")
+        self.line3 = units.Stepper("line3", 2, "variety", "continuous")
 
         #Some special trip relays for spotted numbers and rollovers
         self.red_star = units.Relay("red_star")
         self.yellow_star = units.Relay("yellow_star")
 
-        self.super1 = units.Relay("super1")
-        self.super2 = units.Relay("super2")
-        self.super3 = units.Relay("super3")
-        self.all_spot = units.Relay("all_spot")
-        
+        self.before_fourth = units.Relay("before_fourth")
+        self.before_fifth = units.Relay("before_fifth")
+
         self.replays = 0
         self.returned = False
 

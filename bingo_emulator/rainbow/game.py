@@ -344,7 +344,6 @@ class MulticardBingo(procgame.game.Mode):
         if self.game.replays < 8999:
             self.game.replays += 1
             graphics.replay_step_up(self.game.replays, graphics.rainbow.reel1, graphics.rainbow.reel10, graphics.rainbow.reel100, graphics.rainbow.reel1000)
-        self.game.reflex.increase()
         self.game.coils.registerUp.pulse()
         graphics.rainbow.display(self)
 

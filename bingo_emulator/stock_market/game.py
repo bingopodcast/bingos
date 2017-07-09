@@ -1156,7 +1156,7 @@ class StockMarket(procgame.game.BasicGame):
         #The probability disc handles the dispersion of corners for each card
         #upon coin or button press.  It also handles the probability for
         #the double or nothing routine.
-        self.probability = units.Spotting("probability", 50)
+        self.probability = units.Motor("probability", 50)
 
         #Tilt is separate from anti-cheat in that the trip will move the shutter
         #when the game is tilted with 1st ball in the lane.  Also prevents you

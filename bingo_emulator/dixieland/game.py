@@ -288,28 +288,28 @@ class MulticardBingo(procgame.game.Mode):
     def pick_magic(self):
         self.game.magic_motor.spin()
         if self.game.cu == 1:
-            if self.game.magic_motor.position == 1:
+            if self.game.magic_motor.position == 0:
                 self.game.magic.append(22)
                 self.game.magic.append(1)
-            elif self.game.magic_motor.position == 2:
+            elif self.game.magic_motor.position == 1:
                 self.game.magic.append(1)
-            elif self.game.magic_motor.position == 3:
+            elif self.game.magic_motor.position == 2:
                 self.game.magic.append(9)
-            elif self.game.magic_motor.position == 4:
+            elif self.game.magic_motor.position == 3:
                 self.game.magic.append(25)
-            elif self.game.magic_motor.position == 5:
+            elif self.game.magic_motor.position == 4:
                 self.game.magic.append(7)
-                self.game.magic.append(8)
-        else:
-            if self.game.magic_motor.position == 1:
-                self.game.magic.append(22)
-            elif self.game.magic_motor.position == 2:
-                self.game.magic.append(1)
-            elif self.game.magic_motor.position == 3:
                 self.game.magic.append(9)
-            elif self.game.magic_motor.position == 4:
+        else:
+            if self.game.magic_motor.position == 0:
+                self.game.magic.append(22)
+            elif self.game.magic_motor.position == 1:
+                self.game.magic.append(1)
+            elif self.game.magic_motor.position == 2:
+                self.game.magic.append(9)
+            elif self.game.magic_motor.position == 3:
                 self.game.magic.append(25)
-            elif self.game.magic_motor.position == 5:
+            elif self.game.magic_motor.position == 4:
                 self.game.magic.append(7)
         self.delay(name="display", delay=0.1, handler=graphics.dixieland.display, param=self)
 
@@ -1587,7 +1587,7 @@ class Dixieland(procgame.game.BasicGame):
         #upon coin or button press.  It also handles the probability for
         #the double or nothing routine. In Ticker Tape, it's called the
         #'Random Disc' and is driven by a motor.
-        self.probability = units.Spotting("probability", 24)
+        self.probability = units.Motor("probability", 24)
 
         #Tilt is separate from anti-cheat in that the trip will move the shutter
         #when the game is tilted with 1st ball in the lane.  Also prevents you
@@ -1603,12 +1603,12 @@ class Dixieland(procgame.game.BasicGame):
 
         #Magic Number stuff
         self.magic = []
-        self.magic_motor = units.Spotting("magic_motor", 5)
+        self.magic_motor = units.Motor("magic_motor", 4)
         self.onetwothree = units.Relay("onetwothree")
         self.fourfivesix = units.Relay("fourfivesix")
 
         #Double-Double feature
-        self.dd_motor = units.Spotting("dd_motor", 3)
+        self.dd_motor = units.Motor("dd_motor", 3)
         self.dd1 = units.Relay("dd1")
         self.dd2 = units.Relay("dd2")
         self.dd3 = units.Relay("dd3")

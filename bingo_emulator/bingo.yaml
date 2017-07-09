@@ -1,9 +1,8 @@
 PRGame:
     machineType: pdb
     numBalls: 8
-#PRBumpers:
-#    - slingl
-#    - slingr   
+PRBumpers:
+    - bumper
 #PRFlippers: 
 #    - flipperLwR
 #    - flipperLwL
@@ -32,16 +31,22 @@ PRCoils:
 #        number: A0-B1-2
 #    gateLamp:
 #        number: A0-B1-3
-#    bump:
-#        number: A1-B0-0
-#    bumper:
-#        number: A1-B0-1
+    bump:
+        number: A1-B0-0
+    bumper:
+        number: A1-B0-1
 #    gate:
 #        number: A1-B0-2
-#    left:
-#        number: A1-B0-3
-#    right:
-#        number: A1-B0-4
+    holdLeft:
+        number: A1-B0-3
+    holdRight:
+        number: A1-B0-4
+    pocketsLeft:
+        number: A1-B0-5
+    pocketsRight:
+        number: A1-B0-6
+    pocketsSeven:
+        number: A1-B0-7
 ##    flipperLwLMain:
 ##        coil_type: 'pdb'
 ##        number: A1-B1-0
@@ -214,3 +219,5 @@ PRSwitches:
         number: 75
     bump:
         number: 76
+    bumper:
+        number: 77

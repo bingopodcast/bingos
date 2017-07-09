@@ -164,7 +164,22 @@ class Spotting:
         self.position = 0
         self.top = top
     def spin(self):
-        movement_amount = random.randint(1,self.top)
+        movement_amount = random.randint(15,30)
+        if self.position + movement_amount > self.top:
+            self.position = (self.position + movement_amount) - self.top
+        else: 
+            self.position += movement_amount
+        return self.position
+    def connected_rivet(self, gamename=None):
+        return self.position
+
+class Motor:
+    def __init__(self, name, top):
+        self.name = name
+        self.position = 0
+        self.top = top
+    def spin(self):
+        movement_amount = random.randint(0, self.top)
         if self.position + movement_amount > self.top:
             self.position = (self.position + movement_amount) - self.top
         else: 
@@ -180,11 +195,30 @@ class Mixer:
         self.top = top
     def spin(self):
         if self.name != "mixer1":
-            movement_amount = random.randint(1,7)
-            if self.position + movement_amount > self.top:
-                self.position = (self.position + movement_amount) - self.top
-            else:
-                self.position += movement_amount
+            if self.name == "mixer2":
+                movement_amount = random.randint(3,10)
+                if self.position + movement_amount > self.top:
+                    self.position = (self.position + movement_amount) - self.top
+                else:
+                    self.position += movement_amount
+            elif self.name == "mixer3":
+                movement_amount = random.randint(2,7)
+                if self.position + movement_amount > self.top:
+                    self.position = (self.position + movement_amount) - self.top
+                else:
+                    self.position += movement_amount
+            elif self.name == "mixer4":
+                movement_amount = random.randint(2,9)
+                if self.position + movement_amount > self.top:
+                    self.position = (self.position + movement_amount) - self.top
+                else:
+                    self.position += movement_amount
+            elif self.name == "mixer5":
+                movement_amount = random.randint(2,10)
+                if self.position + movement_amount > self.top:
+                    self.position = (self.position + movement_amount) - self.top
+                else:
+                    self.position += movement_amount
         else:
             movement_amount = 1
             if self.position + movement_amount > self.top:

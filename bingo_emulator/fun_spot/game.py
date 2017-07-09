@@ -33,9 +33,13 @@ class MulticardBingo(procgame.game.Mode):
         self.game.sound.play('add')
         self.delay(name="display", delay=0.1, handler=graphics.fun_spot.display, param=self)
         if self.game.replays > 0 and self.game.selector.position < 6:
+            self.delay(name="play_replays", delay=0.2, handler=self.play_replays)
+
+    def play_replays(self):
+        if self.game.replays > 0 and self.game.selector.position < 6:
             self.delay(name="play", delay=0, handler=self.regular_play)
-            self.delay(name="display", delay=0.2, handler=graphics.fun_spot.display, param=self)
-            self.delay(name="coin", delay=0.5, handler=self.sw_coin_active, param=sw)
+            self.delay(name="display", delay=0.2, handler=graphics.fun_spot_61.display, param=self)
+            self.delay(name="coin", delay=0.2, handler=self.play_replays)
 
     def sw_startButton_active(self, sw):
         if self.game.replays > 0 or self.game.switches.freeplay.is_active():

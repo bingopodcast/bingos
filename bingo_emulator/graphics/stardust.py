@@ -608,25 +608,25 @@ def display(s, replays=0, menu=False):
         tilt_position = [19,258]
         screen.blit(tilt, tilt_position)
 
-    if s.game.roto_feature.position == 1:
+    if s.game.roto_feature_step.position == 1:
         p = [24,717]
         screen.blit(r_arrow, p)
-    if s.game.roto_feature.position == 2:
+    if s.game.roto_feature_step.position == 2:
         p = [76,719]
         screen.blit(r_arrow, p)
-    if s.game.roto_feature.position == 3:
+    if s.game.roto_feature_step.position == 3:
         p = [128,718]
         screen.blit(r_arrow, p)
-    if s.game.roto_feature.position >= 4 and s.game.roto_feature.position < 6:
+    if s.game.roto_feature_step.position >= 4 and s.game.roto_feature_step.position < 6:
         p = [175,712]
         screen.blit(before_fourth, p)
         if s.game.ball_count.position == 3:
             p = [567,712]
             screen.blit(select_now, p)
-    if s.game.roto_feature.position >= 5:
+    if s.game.roto_feature_step.position >= 5:
         p = [320,712]
         screen.blit(spot_18, p)
-    if s.game.roto_feature.position == 6:
+    if s.game.roto_feature_step.position == 6:
         p = [423,712]
         screen.blit(before_fourth, p)
         if s.game.ball_count.position == 4:
