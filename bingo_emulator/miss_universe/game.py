@@ -33,8 +33,7 @@ class SinglecardBingo(procgame.game.Mode):
             self.game.scramble.spin()
             self.game.program.spin()
             self.regular_play()
-            if self.game.coin.position < 40:
-                self.scan_all()
+            self.scan_all()
         else:
             self.game.sound.stop('add')
             self.game.sound.play('add')
@@ -42,8 +41,7 @@ class SinglecardBingo(procgame.game.Mode):
             self.game.scramble.spin()
             self.game.program.spin()
             self.regular_play()
-            if self.game.coin.position < 40:
-                self.scan_all()
+            self.scan_all()
         self.delay(name="display", delay=0.1, handler=graphics.miss_universe.display, param=self)
 
     def sw_startButton_active(self, sw):
@@ -55,7 +53,7 @@ class SinglecardBingo(procgame.game.Mode):
             self.game.program.spin()
             self.game.tilt.disengage()
             self.regular_play()
-            if self.game.start.status == True and self.game.coin.position < 40:
+            if self.game.start.status == True:
                 self.scan_all()
 
         self.delay(name="display", delay=0.1, handler=graphics.miss_universe.display, param=self)
@@ -155,7 +153,10 @@ class SinglecardBingo(procgame.game.Mode):
 
         self.game.returned = False
         if self.game.start.status == True:
-            self.game.coin.step()
+            if self.game.coin.position < 40:
+                self.game.coin.step()
+            else:
+                self.game.extender.step()
             if self.game.selector.position < 1:
                 self.game.selector.step()
             if self.game.switches.shutter.is_inactive():
@@ -1018,35 +1019,61 @@ class SinglecardBingo(procgame.game.Mode):
 
     def features_spotting(self):
         sd = self.game.program.position
+        ext = self.game.extender.position
         if sd in [5,2,3,8,21,34,39,10,28]:
             if self.game.reflex.connected_rivet() >= 1:
                 if self.game.cu:
                     self.game.spot.step()
         if sd in [4,37,40,41,25,32,37,41,46,9,2,21,45]:
-            if self.game.reflex.connected_rivet() >= 1:
-                if self.game.cu:
-                    self.game.spot.step()
+            if self.game.coin.position < 40:
+                if self.game.reflex.connected_rivet() >= 1:
+                    if self.game.cu:
+                        self.game.spot.step()
+                else:
+                    if ext in [40,45]:
+                        self.game.spot.step()
         if sd in [7,13,14,21,26,33,45]:
-            if self.game.reflex.connected_rivet() >= 1:
-                if self.game.cu:
+            if self.game.coin.position < 40:
+                if self.game.reflex.connected_rivet() >= 1:
+                    if self.game.cu:
+                        self.game.spot.step()
+                elif self.game.reflex.connected_rivet() >= 2:
+                    if self.game.cu:
+                        self.game.line_feature.step()
+            else:
+                if ext == 24:
                     self.game.spot.step()
-            elif self.game.reflex.connected_rivet() >= 2:
-                if self.game.cu:
-                    self.game.line_feature.step()
         if sd in [8,27,29,46]:
-            if self.game.reflex.connected_rivet() >= 1:
-                if self.game.cu:
+            if self.game.coin.position < 40:
+                if self.game.reflex.connected_rivet() >= 1:
+                    if self.game.cu:
+                        self.game.line_feature.step()
+            else:
+                if ext in [13,53]:
                     self.game.line_feature.step()
         if sd in [10,38,39]:
-            if self.game.reflex.connected_rivet() >= 2:
-                if self.game.cu:
+            if self.game.coin.position < 40:
+                if self.game.reflex.connected_rivet() >= 2:
+                    if self.game.cu:
+                        self.game.line_feature.step()
+            else:
+                if ext == 41:
                     self.game.line_feature.step()
         if sd in [0,7,33,24,26,35]:
-            if self.game.reflex.connected_rivet() >= 3:
-                self.game.mystery_yellow.engage(self.game)
-                self.game.coils.bell.pulse()
+            if self.game.coin.position < 40:
+                if self.game.reflex.connected_rivet() >= 3:
+                    self.game.mystery_yellow.engage(self.game)
+                    self.game.coils.bell.pulse()
+                else:
+                    self.game.spot.step()
             else:
-                self.game.spot.step()
+                if ext in [37,56]:
+                    if self.game.cu:
+                        self.game.mystery_red.engage(self.game)
+                        self.game.coils.bell.pulse()
+                    else:
+                        self.game.mystery_yellow.engage(self.game)
+                        self.game.coils.bell.pulse()
         if sd in [14,20,35,12,21,23]:
             if self.game.reflex.connected_rivet() >= 2:
                 self.game.mystery_red.engage(self.game)
@@ -1054,12 +1081,21 @@ class SinglecardBingo(procgame.game.Mode):
             else:
                 self.game.line_feature.step()
         if sd in [15,34,38]:
-            if self.game.reflex.connected_rivet() >= 2:
-                self.game.corners384.engage(self.game)
-                self.game.coils.bell.pulse()
+            if self.game.coin.position < 40:
+                if self.game.reflex.connected_rivet() >= 2:
+                    self.game.corners384.engage(self.game)
+                    self.game.coils.bell.pulse()
+                else:
+                    self.game.corners192.engage(self.game)
+                    self.game.coils.bell.pulse()
             else:
-                self.game.corners192.engage(self.game)
-                self.game.coils.bell.pulse()
+                if ext == 19:
+                    if self.game.reflex.connected_rivet() >= 2:
+                        self.game.corners384.engage(self.game)
+                        self.game.coils.bell.pulse()
+                    else:
+                        self.game.corners192.engage(self.game)
+                        self.game.coils.bell.pulse()
         if sd == 17:
             self.game.corners192.engage(self.game)
             self.game.coils.bell.pulse()
@@ -1071,8 +1107,12 @@ class SinglecardBingo(procgame.game.Mode):
             self.game.green_odds.step()
             self.game.yellow_odds.step()
         if sd in [0,2,4,5,6,8,9,11,15,19,20,21,23,24,26,31,37,41,42,44,47,49]:
-            if self.game.scramble.position in [0,5,11,14,16]:
-                self.game.red_odds.step()
+            if self.game.coin.position < 40:
+                if self.game.scramble.position in [0,5,11,14,16]:
+                    self.game.red_odds.step()
+            else:
+                if ext == 1:
+                    self.game.red_odds.step()
         if sd in [47,21,25,27]:
             if self.game.scramble.position in [0,5,11,14,16]:
                 self.red_extra_step(2)
@@ -1080,17 +1120,26 @@ class SinglecardBingo(procgame.game.Mode):
             if self.game.scramble.position in [0,5,11,14,16]:
                 self.red_extra_step(3)
         if sd in [3,7,10,11,20,22,25,28,36,38,40,46,0]:
-            if self.game.scramble.position in [0,6,11,13]:
-                self.game.yellow_odds.step()
+            if self.game.coin.position < 40:
+                if self.game.scramble.position in [0,6,11,13]:
+                    self.game.yellow_odds.step()
+            else:
+                if ext in [55,58]:
+                    self.game.yellow_odds.step()
         if sd in [4,25,27,28,39,32]:
-            if self.game.scramble.position in [0,6,11,13]:
-                self.yellow_extra_step(2)
+            if self.game.coin.position < 40:
+                if self.game.scramble.position in [0,6,11,13]:
+                    self.yellow_extra_step(2)
         if sd in [1,17,46]:
             if self.game.scramble.position in [0,6,11,13]:
                 self.yellow_extra_step(3)
         if sd in [4,5,12,13,18,24,27,29,30,31,32,45,48]:
-            if self.game.scramble.position in [0,5,11,45,49]:
-                self.game.green_odds.step()
+            if self.game.coin.position < 40:
+                if self.game.scramble.position in [0,5,11,45,49]:
+                    self.game.green_odds.step()
+            else:
+                if ext in [9,33]:
+                    self.game.green_odds.step()
         if sd in [2,14,17,27,29,48]:
             if self.game.scramble.position in [0,5,11,45,49]:
                 self.green_extra_step(2)
@@ -1260,6 +1309,7 @@ class MissUniverse(procgame.game.BasicGame):
         self.corners384 = units.Relay("corners384")
         
         self.coin = units.Stepper("coin", 40, "miss_universe")
+        self.extender = units.Stepper("extender", 60, "miss_universe", "continuous")
 
         self.replays = 0
         self.returned = False
