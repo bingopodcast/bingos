@@ -18,6 +18,9 @@ d = pygame.image.load('bull_market/assets/double.png').convert_alpha()
 n = pygame.image.load('bull_market/assets/nothing.png').convert_alpha()
 tilt = pygame.image.load('bull_market/assets/tilt.png').convert_alpha()
 blink_image = pygame.image.load('bull_market/assets/double_or_nothing.png').convert_alpha()
+bg_menu = pygame.image.load('bull_market/assets/bull_market_menu.png')
+bg_gi = pygame.image.load('bull_market/assets/bull_market_gi.png')
+bg_off = pygame.image.load('bull_market/assets/bull_market_off.png')
 
 
 class scorereel():
@@ -47,14 +50,12 @@ def display(s, replays=0, menu=False):
     backglass = pygame.Surface((720,1280), pygame.SRCALPHA | pygame.FULLSCREEN)
     backglass.fill((0, 0, 0))
     if menu == True:
-        backglass = pygame.image.load('bull_market/assets/bull_market_menu.png')
+        screen.blit(bg_menu, backglass_position)
     else:
         if (s.game.anti_cheat.status == True):
-            backglass = pygame.image.load('bull_market/assets/bull_market_gi.png')
+            screen.blit(bg_gi, backglass_position)
         else:
-            backglass = pygame.image.load('bull_market/assets/bull_market_off.png')
-    #backglass = pygame.transform.scale(backglass, (1280,720))
-    screen.blit(backglass, backglass_position)
+            screen.blit(bg_off, backglass_position)
 
     if s.game.selector.position >= 1:
         position = [121,383]
@@ -85,12 +86,16 @@ def display(s, replays=0, menu=False):
 
     if s.game.before_fourth.status == True:
         if s.game.ball_count.position == 3:
-            p = [17,713]
-            screen.blit(select, p)
+            s.cancel_delayed(name="blink")
+            blink([s,1,1])
+        else:
+            s.cancel_delayed(name="blink")
     elif s.game.before_third.status == True:
         if s.game.ball_count.position == 2:
-            p = [17,713]
-            screen.blit(select, p)
+            s.cancel_delayed(name="blink")
+            blink([s,1,1])
+        else:
+            s.cancel_delayed(name="blink")
 
     if s.game.before_fourth.status == True or s.game.before_third.status == True:
         if s.game.spotting.position == 0:
@@ -543,11 +548,33 @@ def display(s, replays=0, menu=False):
 
     pygame.display.update()
 
+def blink(args):
+    dirty_rects = []
+    s = args[0]
+    b = args[1]
+    sn = args[2]
+
+    if b == 0:
+        if sn == 1:
+            p = [17,713]
+            dirty_rects.append(screen.blit(select, p))
+        pygame.display.update(dirty_rects)
+    else:
+        dirty_rects.append(screen.blit(bg_gi, (17,713), pygame.Rect(17,713,108,27)))
+        pygame.display.update(dirty_rects)
+    b = not b
+
+    args = [s,b,sn]
+
+    s.delay(name="blink", delay=0.1, handler=blink, param=args)
+
 def blink_double(s):
+    dirty_rects = []
     s.game.blink = not s.game.blink
     if s.game.blink == 1:
         blink_pos = [490,637]
-        screen.blit(blink_image, blink_pos)
-        pygame.display.update()
+        dirty_rects.append(screen.blit(blink_image, blink_pos))
+        pygame.display.update(dirty_rects)
     else:
-        display(s)
+        dirty_rects.append(screen.blit(bg_gi, (490,637), pygame.Rect(490,637,163,107)))
+        pygame.display.update(dirty_rects)

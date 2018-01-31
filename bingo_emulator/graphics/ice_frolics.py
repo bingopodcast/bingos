@@ -31,7 +31,9 @@ hold_time = pygame.image.load('ice_frolics/assets/hold_time.png').convert_alpha(
 before_first = pygame.image.load('ice_frolics/assets/before_first.png').convert_alpha()
 before_fourth = pygame.image.load('ice_frolics/assets/before_fourth.png').convert_alpha()
 select_now = pygame.image.load('ice_frolics/assets/select_now.png').convert_alpha()
-
+bg_menu = pygame.image.load('ice_frolics/assets/ice_frolics_menu.png')
+bg_gi = pygame.image.load('ice_frolics/assets/ice_frolics_gi.png')
+bg_off = pygame.image.load('ice_frolics/assets/ice_frolics_off.png')
 
 class scorereel():
     """ Score Reels are used to count replays """
@@ -58,13 +60,12 @@ def display(s, replays=0, menu=False):
     backglass = pygame.Surface((0,0), pygame.SRCALPHA)
     backglass.fill((0, 0, 0))
     if menu == True:
-        backglass = pygame.image.load('ice_frolics/assets/ice_frolics_menu.png')
+        screen.blit(bg_menu, backglass_position)
     else:
         if (s.game.anti_cheat.status == True):
-            backglass = pygame.image.load('ice_frolics/assets/ice_frolics_gi.png')
+            screen.blit(bg_gi, backglass_position)
         else:
-            backglass = pygame.image.load('ice_frolics/assets/ice_frolics_off.png')
-    screen.blit(backglass, backglass_position)
+            screen.blit(bg_off, backglass_position)
 
     if s.game.selector.position >= 1:
         card1_position = [74,442]
@@ -110,14 +111,18 @@ def display(s, replays=0, menu=False):
             screen.blit(super_score, p)
         if s.game.before_first.status == True:
             if s.game.ball_count.position < 1:
-                p = [335,686]
-                screen.blit(select_now, p)
+                s.cancel_delayed(name="blink")
+                blink([s,1,1])
+            else:
+                s.cancel_delayed(name="blink")
             p = [252,619]
             screen.blit(before_first, p)
         else:
             if s.game.ball_count.position == 3:
-                p = [335,686]
-                screen.blit(select_now, p)
+                s.cancel_delayed(name="blink")
+                blink([s,1,1])
+            else:
+                s.cancel_delayed(name="blink")
             p = [336,616]
             screen.blit(before_fourth, p)
 
@@ -455,3 +460,22 @@ def feature_animation(num):
         screen.blit(odds5, p)
         pygame.display.update()
 
+def blink(args):
+    dirty_rects = []
+    s = args[0]
+    b = args[1]
+    sn = args[2]
+
+    if b == 0:
+        if sn == 1:
+            p = [335,686]
+            dirty_rects.append(screen.blit(select_now, p))
+        pygame.display.update(dirty_rects)
+    else:
+        dirty_rects.append(screen.blit(bg_gi, (335,686), pygame.Rect(335,686,140,33)))
+        pygame.display.update(dirty_rects)
+    b = not b
+
+    args = [s,b,sn]
+
+    s.delay(name="blink", delay=0.1, handler=blink, param=args)

@@ -28,6 +28,12 @@ select_now = pygame.image.load('gayety/assets/select_now.png').convert_alpha()
 line1 = pygame.image.load('gayety/assets/line1.png').convert_alpha()
 line2 = pygame.image.load('gayety/assets/line2.png').convert_alpha()
 line3 = pygame.image.load('gayety/assets/line3.png').convert_alpha()
+bg_menu = pygame.image.load('gayety/assets/gayety_menu.png').convert()
+bg_menu.set_colorkey((255,0,252))
+bg_gi = pygame.image.load('gayety/assets/gayety_gi.png').convert()
+bg_gi.set_colorkey((255,0,252))
+bg_off = pygame.image.load('gayety/assets/gayety_off.png').convert()
+bg_off.set_colorkey((255,0,252))
 
 class scorereel():
     """ Score Reels are used to count replays """
@@ -81,18 +87,12 @@ def display(s, replays=0, menu=False):
     backglass = pygame.Surface(screen.get_size(), flags=pygame.SRCALPHA)
     backglass.fill((0, 0, 0))
     if menu == True:
-        backglass = pygame.image.load('gayety/assets/gayety_menu.png').convert()
-        backglass.set_colorkey((255,0,252))
+        screen.blit(bg_menu, backglass_position)
     else:
         if (s.game.anti_cheat.status == True):
-            backglass = pygame.image.load('gayety/assets/gayety_gi.png').convert()
-            backglass.set_colorkey((255,0,252))
+            screen.blit(bg_gi, backglass_position)
         else:
-            backglass = pygame.image.load('gayety/assets/gayety_off.png').convert()
-            backglass.set_colorkey((255,0,252))
-    backglass = pygame.transform.scale(backglass, (720, 1280))
-    
-    screen.blit(backglass, backglass_position)
+            screen.blit(bg_off, backglass_position)
 
     if s.game.extra_ball.position >= 1:
         eb_position = [146,1018]
@@ -363,19 +363,61 @@ def display(s, replays=0, menu=False):
         p = [519,548]
         screen.blit(m, p)
         if s.game.ball_count.position == 3:
-            p = [520,756]
-            screen.blit(select_now, p)
-
+            s.cancel_delayed(name="blink_pockets")
+            blink_pockets([s,1,1])
+        else:
+            s.cancel_delayed("blink_pockets")
 
     if s.game.m_lines.status == True:
         p = [22,550]
         screen.blit(m, p)
         if s.game.ball_count.position == 3:
-            p = [24,758]
-            screen.blit(select_now, p)
-    
+            s.cancel_delayed(name="blink")
+            blink([s,1,1])
+        else:
+            s.cancel_delayed(name="blink")
 
     pygame.display.update()
+
+def blink_pockets(args):
+    dirty_rects = []
+    s = args[0]
+    b = args[1]
+    sn = args[2]
+
+    if b == 1:
+        if sn == 1:
+            p = [520,756]
+            dirty_rects.append(screen.blit(select_now, p))
+        pygame.display.update(dirty_rects)
+    else:
+        dirty_rects.append(screen.blit(bg_gi, (520,756), pygame.Rect(520,756,177,36)))
+        pygame.display.update(dirty_rects)
+    b = not b
+
+    args = [s,b,sn]
+
+    s.delay(name="blink_pockets", delay=0.1, handler=blink_pockets, param=args)
+
+def blink(args):
+    dirty_rects = []
+    s = args[0]
+    b = args[1]
+    sn = args[2]
+
+    if b == 1:
+        if sn == 1:
+            p = [24,758]
+            dirty_rects.append(screen.blit(select_now, p))
+        pygame.display.update(dirty_rects)
+    else:
+        dirty_rects.append(screen.blit(bg_gi, (24,758), pygame.Rect(24,758,177,36)))
+        pygame.display.update(dirty_rects)
+    b = not b
+
+    args = [s,b,sn]
+
+    s.delay(name="blink", delay=0.1, handler=blink, param=args)
 
 def eb_animation(num):
     global screen

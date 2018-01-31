@@ -43,6 +43,9 @@ r6 = pygame.image.load('long_beach/assets/6.png').convert_alpha()
 r7 = pygame.image.load('long_beach/assets/7.png').convert_alpha()
 r8 = pygame.image.load('long_beach/assets/8.png').convert_alpha()
 r9 = pygame.image.load('long_beach/assets/9.png').convert_alpha()
+bg_menu = pygame.image.load('long_beach/assets/long_beach_menu.png')
+bg_gi = pygame.image.load('long_beach/assets/long_beach_gi.png')
+bg_off = pygame.image.load('long_beach/assets/long_beach_off.png')
 
 def display(s, replays=0, menu=False):
 
@@ -50,15 +53,12 @@ def display(s, replays=0, menu=False):
     backglass = pygame.Surface(screen.get_size(), flags=pygame.SRCALPHA)
     backglass.fill((0, 0, 0))
     if menu == True:
-        backglass = pygame.image.load('long_beach/assets/long_beach_menu.png')
+        screen.blit(bg_menu, backglass_position)
     else:
         if (s.game.anti_cheat.status == True):
-            backglass = pygame.image.load('long_beach/assets/long_beach_gi.png')
+            screen.blit(bg_gi, backglass_position)
         else:
-            backglass = pygame.image.load('long_beach/assets/long_beach_off.png')
-    backglass = pygame.transform.scale(backglass, (720, 1280))
-    
-    screen.blit(backglass, backglass_position)
+            screen.blit(bg_off, backglass_position)
 
     if s.game.selector.position >= 1:
         card1_position = [250,475]
@@ -142,11 +142,13 @@ def display(s, replays=0, menu=False):
 
 
 
-    if s.game.double.status == True:
+    if s.game.double1.status == True:
         d_pos = [546,499]
         screen.blit(number, d_pos)
+    if s.game.double2.status == True:
         d_pos = [585,499]
         screen.blit(number, d_pos)
+    if s.game.double3.status == True:
         d_pos = [625,499]
         screen.blit(number, d_pos)
 

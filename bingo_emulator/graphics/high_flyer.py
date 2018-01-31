@@ -18,6 +18,9 @@ d = pygame.image.load('high_flyer/assets/double.png').convert_alpha()
 n = pygame.image.load('high_flyer/assets/nothing.png').convert_alpha()
 tilt = pygame.image.load('high_flyer/assets/tilt.png').convert_alpha()
 blink_image = pygame.image.load('high_flyer/assets/double_or_nothing.png').convert_alpha()
+bg_menu = pygame.image.load('high_flyer/assets/high_flyer_menu.png')
+bg_gi = pygame.image.load('high_flyer/assets/high_flyer_gi.png')
+bg_off = pygame.image.load('high_flyer/assets/high_flyer_off.png')
 
 class scorereel():
     """ Score Reels are used to count replays """
@@ -46,14 +49,12 @@ def display(s, replays=0, menu=False):
     backglass = pygame.Surface((720,1280), pygame.SRCALPHA | pygame.FULLSCREEN)
     backglass.fill((0, 0, 0))
     if menu == True:
-        backglass = pygame.image.load('high_flyer/assets/high_flyer_menu.png')
+        screen.blit(bg_menu, backglass_position)
     else:
         if (s.game.anti_cheat.status == True):
-            backglass = pygame.image.load('high_flyer/assets/high_flyer_gi.png')
+            screen.blit(bg_gi, backglass_position)
         else:
-            backglass = pygame.image.load('high_flyer/assets/high_flyer_off.png')
-    #backglass = pygame.transform.scale(backglass, (1280,720))
-    screen.blit(backglass, backglass_position)
+            screen.blit(bg_off, backglass_position)
 
     if s.game.selector.position >= 1:
         position = [68,286]
@@ -527,10 +528,12 @@ def display(s, replays=0, menu=False):
     pygame.display.update()
 
 def blink_double(s):
+    dirty_rects = []
     s.game.blink = not s.game.blink
     if s.game.blink == 1:
         blink_pos = [497,639]
-        screen.blit(blink_image, blink_pos)
-        pygame.display.update()
+        dirty_rects.append(screen.blit(blink_image, blink_pos))
+        pygame.display.update(dirty_rects)
     else:
-        display(s)
+        dirty_rects.append(screen.blit(bg_gi, (497,639), pygame.Rect(497,639,154,104)))
+        pygame.display.update(dirty_rects)

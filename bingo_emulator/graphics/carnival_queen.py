@@ -24,6 +24,13 @@ select_now = pygame.image.load('carnival_queen/assets/select_now.png').convert_a
 three_blue = pygame.image.load('carnival_queen/assets/three_blue.png').convert_alpha()
 two_blue = pygame.image.load('carnival_queen/assets/two_blue.png').convert_alpha()
 tilt = pygame.image.load('carnival_queen/assets/tilt.png').convert_alpha()
+bg_menu = pygame.image.load('carnival_queen/assets/carnival_queen_menu.png').convert()
+bg_menu.set_colorkey((255,0,252))
+bg_gi = pygame.image.load('carnival_queen/assets/carnival_queen_gi.png').convert()
+bg_gi.set_colorkey((255,0,252))
+bg_off = pygame.image.load('carnival_queen/assets/carnival_queen_off.png').convert()
+bg_off.set_colorkey((255,0,252))
+
 
 class scorereel():
     """ Score Reels are used to count replays """
@@ -78,18 +85,12 @@ def display(s, replays=0, menu=False):
     backglass = pygame.Surface(screen.get_size(), flags=pygame.SRCALPHA)
     backglass.fill((0, 0, 0))
     if menu == True:
-        backglass = pygame.image.load('carnival_queen/assets/carnival_queen_menu.png').convert()
-        backglass.set_colorkey((255,0,252))
+        screen.blit(bg_menu, backglass_position)
     else:
         if (s.game.anti_cheat.status == True):
-            backglass = pygame.image.load('carnival_queen/assets/carnival_queen_gi.png').convert()
-            backglass.set_colorkey((255,0,252))
+            screen.blit(bg_gi, backglass_position)
         else:
-            backglass = pygame.image.load('carnival_queen/assets/carnival_queen_off.png').convert()
-            backglass.set_colorkey((255,0,252))
-    backglass = pygame.transform.scale(backglass, (720, 1280))
-    
-    screen.blit(backglass, backglass_position)
+            screen.blit(bg_off, backglass_position)
 
     if s.game.eb_play.status == True:
         eb_position = [40,1019]
@@ -135,11 +136,21 @@ def display(s, replays=0, menu=False):
         if s.game.before_fourth.status == True:
             bfp = [562,538]
             screen.blit(feature, bfp)
+            if s.game.ball_count.position == 3:
+                s.cancel_delayed(name="blink")
+                blink([s,1,1])
+            else:
+                s.cancel_delayed(name="blink")
         elif s.game.before_fifth.status == True:
             bfp = [560,356]
             screen.blit(feature, bfp)
             ip = [683,380]
             screen.blit(indicator, ip)
+            if s.game.ball_count.position == 4:
+                s.cancel_delayed(name="blink")
+                blink([s,1,1])
+            else:
+                s.cancel_delayed(name="blink")
 
     if s.game.magic_screen_feature.position >= 8:
         if s.game.three_blue.status == True:
@@ -368,6 +379,26 @@ def display(s, replays=0, menu=False):
         screen.blit(tilt, tilt_position)
 
     pygame.display.update()
+
+def blink(args):
+    dirty_rects = []
+    s = args[0]
+    b = args[1]
+    sn = args[2]
+
+    if b == 0:
+        if sn == 1:
+            p = [578,676]
+            dirty_rects.append(screen.blit(select_now, p))
+        pygame.display.update(dirty_rects)
+    else:
+        dirty_rects.append(screen.blit(bg_gi, (578,676), pygame.Rect(578,676,135,42)))
+        pygame.display.update(dirty_rects)
+    b = not b
+
+    args = [s,b,sn]
+
+    s.delay(name="blink", delay=0.1, handler=blink, param=args)
 
 def eb_animation(num):
     global screen

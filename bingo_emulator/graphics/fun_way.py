@@ -28,6 +28,9 @@ r600 = pygame.image.load('fun_way/assets/600.png').convert_alpha()
 r700 = pygame.image.load('fun_way/assets/700.png').convert_alpha()
 r800 = pygame.image.load('fun_way/assets/800.png').convert_alpha()
 r900 = pygame.image.load('fun_way/assets/900.png').convert_alpha()
+bg_menu = pygame.image.load('fun_way/assets/fun_way_menu.png')
+bg_gi = pygame.image.load('fun_way/assets/fun_way_gi.png')
+bg_off = pygame.image.load('fun_way/assets/fun_way_off.png')
 
 def display(s, replays=0, menu=False):
 
@@ -552,5 +555,4 @@ def display(s, replays=0, menu=False):
                     screen.blit(r900, r1_position)
 
     pygame.display.update()
-
 

@@ -18,7 +18,7 @@ class SinglecardBingo(procgame.game.Mode):
         super(SinglecardBingo, self).__init__(game=game, priority=5)
         self.holes = []
         self.startup()
-        self.game.sound.register_music('motor', "audio/six_card_motor.wav")
+        self.game.sound.register_music('motor', "audio/other_motor.wav")
         self.game.sound.register_music('search', "audio/six_card_search_old.wav")
         self.game.sound.register_sound('add', "audio/six_card_add_card.wav")
         self.game.sound.register_sound('tilt', "audio/tilt.wav")
@@ -60,127 +60,268 @@ class SinglecardBingo(procgame.game.Mode):
             self.game.end_run_loop()
             os.system("/home/nbaldridge/proc/bingo_emulator/start_game.sh palm_springs")
 
+    def sw_all_active_for_2s(self, sw):
+        if self.game.switches.drawer.is_active():
+            if self.game.hold_feature.position == 8 and self.game.ball_count.position <= 4:
+                self.check_shutter()
+                self.game.hold_feature.reset()
+                self.game.coils.holdLeft.disable()
+                self.game.coils.holdRight.disable()
+                if 1 in self.holes:
+                    if self.game.switches.hole1.is_inactive():
+                        self.holes.remove(1)
+                    if self.game.spotted_numbers.position >= 7:
+                        if self.game.spotted.position == 0:
+                            self.holes.append(1)
+                if 3 in self.holes:
+                    if self.game.switches.hole3.is_inactive():
+                        self.holes.remove(3)
+                if 5 in self.holes:
+                    if self.game.switches.hole5.is_inactive():
+                        self.holes.remove(5)
+                    if self.game.spotted_numbers.position >= 9:
+                        if self.game.spotted.position == 2:
+                            self.holes.append(5)
+                if 7 in self.holes:
+                    if self.game.switches.hole7.is_inactive():
+                        self.holes.remove(7)
+                if 9 in self.holes:
+                    if self.game.switches.hole9.is_inactive():
+                        self.holes.remove(9)
+                    if self.game.spotted_numbers.position >= 13:
+                        if self.game.spotted.position == 6:
+                            self.holes.append(9)
+                if 11 in self.holes:
+                    if self.game.switches.hole11.is_inactive():
+                        self.holes.remove(11)
+                if 13 in self.holes:
+                    if self.game.switches.hole13.is_inactive():
+                        self.holes.remove(13)
+                if 15 in self.holes:
+                    if self.game.switches.hole15.is_inactive():
+                        self.holes.remove(15)
+                if 17 in self.holes:
+                    if self.game.switches.hole17.is_inactive():
+                        self.holes.remove(17)
+                if 19 in self.holes:
+                    if self.game.switches.hole19.is_inactive():
+                        self.holes.remove(19)
+                if 21 in self.holes:
+                    if self.game.switches.hole21.is_inactive():
+                        self.holes.remove(21)
+                if 23 in self.holes:
+                    if self.game.switches.hole23.is_inactive():
+                        self.holes.remove(23)
+                if 25 in self.holes:
+                    if self.game.switches.hole25.is_inactive():
+                        self.holes.remove(25)
+                if 2 in self.holes:
+                    if self.game.switches.hole2.is_inactive():
+                        self.holes.remove(2)
+                    if self.game.spotted_numbers.position >= 8:
+                        if self.game.spotted.position == 1:
+                            self.holes.append(2)
+                if 4 in self.holes:
+                    if self.game.switches.hole4.is_inactive():
+                        self.holes.remove(4)
+                if 6 in self.holes:
+                    if self.game.switches.hole6.is_inactive():
+                        self.holes.remove(6)
+                if 8 in self.holes:
+                    if self.game.switches.hole8.is_inactive():
+                        self.holes.remove(8)
+                    if self.game.spotted_numbers.position >= 10:
+                        if self.game.spotted.position == 3:
+                            self.holes.append(8)
+                if 10 in self.holes:
+                    if self.game.switches.hole10.is_inactive():
+                        self.holes.remove(10)
+                if 12 in self.holes:
+                    if self.game.switches.hole12.is_inactive():
+                        self.holes.remove(12)
+                if 14 in self.holes:
+                    if self.game.switches.hole14.is_inactive():
+                        self.holes.remove(14)
+                    if self.game.spotted_numbers.position >= 12:
+                        if self.game.spotted.position == 5:
+                            self.holes.append(14)
+                if 16 in self.holes:
+                    if self.game.switches.hole16.is_inactive():
+                        self.holes.remove(16)
+                    if self.game.spotted_numbers.position >= 11:
+                        if self.game.spotted.position == 4:
+                            self.holes.append(16)
+                if 18 in self.holes:
+                    if self.game.switches.hole18.is_inactive():
+                        self.holes.remove(18)
+                if 20 in self.holes:
+                    if self.game.switches.hole20.is_inactive():
+                        self.holes.remove(20)
+                if 22 in self.holes:
+                    if self.game.switches.hole22.is_inactive():
+                        self.holes.remove(22)
+                if 24 in self.holes:
+                    if self.game.switches.hole24.is_inactive():
+                        self.holes.remove(24)
+            graphics.palm_springs.display(self)
+
+
     def sw_enter_active_for_2s(self, sw):
-        if self.game.hold_feature.position == 8 and self.game.ball_count.position <= 4:
-            self.check_shutter()
-            self.game.hold_feature.reset()
-            self.game.coils.holdLeft.disable()
-            self.game.coils.holdRight.disable()
-            if 1 in self.holes:
-                if self.game.switches.hole1.is_inactive():
-                    self.holes.remove(1)
-                if self.game.spotted_numbers.position >= 7:
-                    if self.game.spotted.position == 0:
-                        self.holes.append(1)
-            if 3 in self.holes:
-                if self.game.switches.hole3.is_inactive():
-                    self.holes.remove(3)
-            if 5 in self.holes:
-                if self.game.switches.hole5.is_inactive():
-                    self.holes.remove(5)
-                if self.game.spotted_numbers.position >= 9:
-                    if self.game.spotted.position == 2:
-                        self.holes.append(5)
-            if 7 in self.holes:
-                if self.game.switches.hole7.is_inactive():
-                    self.holes.remove(7)
-            if 9 in self.holes:
-                if self.game.switches.hole9.is_inactive():
-                    self.holes.remove(9)
-                if self.game.spotted_numbers.position >= 13:
-                    if self.game.spotted.position == 6:
-                        self.holes.append(9)
-            if 11 in self.holes:
-                if self.game.switches.hole11.is_inactive():
-                    self.holes.remove(11)
-            if 13 in self.holes:
-                if self.game.switches.hole13.is_inactive():
-                    self.holes.remove(13)
-            if 15 in self.holes:
-                if self.game.switches.hole15.is_inactive():
-                    self.holes.remove(15)
-            if 17 in self.holes:
-                if self.game.switches.hole17.is_inactive():
-                    self.holes.remove(17)
-            if 19 in self.holes:
-                if self.game.switches.hole19.is_inactive():
-                    self.holes.remove(19)
-            if 21 in self.holes:
-                if self.game.switches.hole21.is_inactive():
-                    self.holes.remove(21)
-            if 23 in self.holes:
-                if self.game.switches.hole23.is_inactive():
-                    self.holes.remove(23)
-            if 25 in self.holes:
-                if self.game.switches.hole25.is_inactive():
-                    self.holes.remove(25)
-            if 2 in self.holes:
-                if self.game.switches.hole2.is_inactive():
-                    self.holes.remove(2)
-                if self.game.spotted_numbers.position >= 8:
-                    if self.game.spotted.position == 1:
-                        self.holes.append(2)
-            if 4 in self.holes:
-                if self.game.switches.hole4.is_inactive():
-                    self.holes.remove(4)
-            if 6 in self.holes:
-                if self.game.switches.hole6.is_inactive():
-                    self.holes.remove(6)
-            if 8 in self.holes:
-                if self.game.switches.hole8.is_inactive():
-                    self.holes.remove(8)
-                if self.game.spotted_numbers.position >= 10:
-                    if self.game.spotted.position == 3:
-                        self.holes.append(8)
-            if 10 in self.holes:
-                if self.game.switches.hole10.is_inactive():
-                    self.holes.remove(10)
-            if 12 in self.holes:
-                if self.game.switches.hole12.is_inactive():
-                    self.holes.remove(12)
-            if 14 in self.holes:
-                if self.game.switches.hole14.is_inactive():
-                    self.holes.remove(14)
-                if self.game.spotted_numbers.position >= 12:
-                    if self.game.spotted.position == 5:
-                        self.holes.append(14)
-            if 16 in self.holes:
-                if self.game.switches.hole16.is_inactive():
-                    self.holes.remove(16)
-                if self.game.spotted_numbers.position >= 11:
-                    if self.game.spotted.position == 4:
-                        self.holes.append(16)
-            if 18 in self.holes:
-                if self.game.switches.hole18.is_inactive():
-                    self.holes.remove(18)
-            if 20 in self.holes:
-                if self.game.switches.hole20.is_inactive():
-                    self.holes.remove(20)
-            if 22 in self.holes:
-                if self.game.switches.hole22.is_inactive():
-                    self.holes.remove(22)
-            if 24 in self.holes:
-                if self.game.switches.hole24.is_inactive():
-                    self.holes.remove(24)
-        graphics.palm_springs.display(self)
+        if self.game.switches.drawer.is_inactive():
+            if self.game.hold_feature.position == 8 and self.game.ball_count.position <= 4:
+                self.check_shutter()
+                self.game.hold_feature.reset()
+                self.game.coils.holdLeft.disable()
+                self.game.coils.holdRight.disable()
+                if 1 in self.holes:
+                    if self.game.switches.hole1.is_inactive():
+                        self.holes.remove(1)
+                    if self.game.spotted_numbers.position >= 7:
+                        if self.game.spotted.position == 0:
+                            self.holes.append(1)
+                if 3 in self.holes:
+                    if self.game.switches.hole3.is_inactive():
+                        self.holes.remove(3)
+                if 5 in self.holes:
+                    if self.game.switches.hole5.is_inactive():
+                        self.holes.remove(5)
+                    if self.game.spotted_numbers.position >= 9:
+                        if self.game.spotted.position == 2:
+                            self.holes.append(5)
+                if 7 in self.holes:
+                    if self.game.switches.hole7.is_inactive():
+                        self.holes.remove(7)
+                if 9 in self.holes:
+                    if self.game.switches.hole9.is_inactive():
+                        self.holes.remove(9)
+                    if self.game.spotted_numbers.position >= 13:
+                        if self.game.spotted.position == 6:
+                            self.holes.append(9)
+                if 11 in self.holes:
+                    if self.game.switches.hole11.is_inactive():
+                        self.holes.remove(11)
+                if 13 in self.holes:
+                    if self.game.switches.hole13.is_inactive():
+                        self.holes.remove(13)
+                if 15 in self.holes:
+                    if self.game.switches.hole15.is_inactive():
+                        self.holes.remove(15)
+                if 17 in self.holes:
+                    if self.game.switches.hole17.is_inactive():
+                        self.holes.remove(17)
+                if 19 in self.holes:
+                    if self.game.switches.hole19.is_inactive():
+                        self.holes.remove(19)
+                if 21 in self.holes:
+                    if self.game.switches.hole21.is_inactive():
+                        self.holes.remove(21)
+                if 23 in self.holes:
+                    if self.game.switches.hole23.is_inactive():
+                        self.holes.remove(23)
+                if 25 in self.holes:
+                    if self.game.switches.hole25.is_inactive():
+                        self.holes.remove(25)
+                if 2 in self.holes:
+                    if self.game.switches.hole2.is_inactive():
+                        self.holes.remove(2)
+                    if self.game.spotted_numbers.position >= 8:
+                        if self.game.spotted.position == 1:
+                            self.holes.append(2)
+                if 4 in self.holes:
+                    if self.game.switches.hole4.is_inactive():
+                        self.holes.remove(4)
+                if 6 in self.holes:
+                    if self.game.switches.hole6.is_inactive():
+                        self.holes.remove(6)
+                if 8 in self.holes:
+                    if self.game.switches.hole8.is_inactive():
+                        self.holes.remove(8)
+                    if self.game.spotted_numbers.position >= 10:
+                        if self.game.spotted.position == 3:
+                            self.holes.append(8)
+                if 10 in self.holes:
+                    if self.game.switches.hole10.is_inactive():
+                        self.holes.remove(10)
+                if 12 in self.holes:
+                    if self.game.switches.hole12.is_inactive():
+                        self.holes.remove(12)
+                if 14 in self.holes:
+                    if self.game.switches.hole14.is_inactive():
+                        self.holes.remove(14)
+                    if self.game.spotted_numbers.position >= 12:
+                        if self.game.spotted.position == 5:
+                            self.holes.append(14)
+                if 16 in self.holes:
+                    if self.game.switches.hole16.is_inactive():
+                        self.holes.remove(16)
+                    if self.game.spotted_numbers.position >= 11:
+                        if self.game.spotted.position == 4:
+                            self.holes.append(16)
+                if 18 in self.holes:
+                    if self.game.switches.hole18.is_inactive():
+                        self.holes.remove(18)
+                if 20 in self.holes:
+                    if self.game.switches.hole20.is_inactive():
+                        self.holes.remove(20)
+                if 22 in self.holes:
+                    if self.game.switches.hole22.is_inactive():
+                        self.holes.remove(22)
+                if 24 in self.holes:
+                    if self.game.switches.hole24.is_inactive():
+                        self.holes.remove(24)
+            graphics.palm_springs.display(self)
 
     def sw_trough4_active_for_1s(self, sw):
         if self.game.ball_count.position >= 4:
             self.timeout_actions()
     
     def timeout_actions(self):
-        if (self.game.timer.position < 40):
+        if (self.game.timer.position < 39):
             self.game.timer.step()
-            print self.game.timer.position
-            self.delay(delay=5.0, handler=self.timeout_actions)
+            self.delay(name="timeout", delay=5.0, handler=self.timeout_actions)
         else:
+            self.game.timer.step()
             self.tilt_actions()
 
-    def sw_trough8_inactive_for_1ms(self, sw):
+    def sw_trough8_closed(self, sw):
         if self.game.start.status == False:
+            if self.game.ball_count.position >= 5:
+                self.game.returned = True
             self.game.ball_count.position -= 1
-            self.game.returned = True
             self.check_lifter_status()
+        else:
+            self.check_lifter_status()
+
+    def check_spot(self):
+        if self.game.spotted_numbers.position >= 7:
+            if self.game.spotted.position == 0:
+                if 1 not in self.holes:
+                    self.holes.append(1)
+        if self.game.spotted_numbers.position >= 8:
+            if self.game.spotted.position == 1:
+                if 2 not in self.holes:
+                    self.holes.append(2)
+        if self.game.spotted_numbers.position >= 9:
+            if self.game.spotted.position == 2:
+                if 5 not in self.holes:
+                    self.holes.append(5)
+        if self.game.spotted_numbers.position >= 10:
+            if self.game.spotted.position == 3:
+                if 8 not in self.holes:
+                    self.holes.append(8)
+        if self.game.spotted_numbers.position >= 11:
+            if self.game.spotted.position == 4:
+                if 16 not in self.holes:
+                    self.holes.append(16)
+        if self.game.spotted_numbers.position >= 12:
+            if self.game.spotted.position == 5:
+                if 14 not in self.holes:
+                    self.holes.append(14)
+        if self.game.spotted_numbers.position >= 13:
+            if self.game.spotted.position == 6:
+                if 9 not in self.holes:
+                    self.holes.append(9)
+        graphics.palm_springs.display(self)
 
     def sw_left_active(self, sw):
         max_ball = 4
@@ -901,7 +1042,6 @@ class SinglecardBingo(procgame.game.Mode):
                                 self.holes.remove(2)
 
         self.delay(name="display", delay=0.1, handler=graphics.palm_springs.display, param=self)
-        print self.holes
 
     def sw_right_active(self, sw):
         max_ball = 4
@@ -1622,7 +1762,6 @@ class SinglecardBingo(procgame.game.Mode):
                                 self.holes.remove(2)
 
         self.delay(name="display", delay=0.1, handler=graphics.palm_springs.display, param=self)
-        print self.holes
 
     def check_shutter(self, start=0):
         if start == 1 or self.game.hold_feature.position == 8:
@@ -1637,9 +1776,10 @@ class SinglecardBingo(procgame.game.Mode):
 
     def regular_play(self):
         self.cancel_delayed(name="search")
-        self.cancel_delayed(name="lifter_status")
         self.cancel_delayed(name="card1_replay_step_up")
         self.cancel_delayed(name="corners_replay_step_up")
+        self.cancel_delayed(name="blink")
+        self.cancel_delayed(name="timeout")
         self.game.search_index.disengage()
         self.game.coils.counter.pulse()
         self.game.cu = not self.game.cu
@@ -1685,38 +1825,34 @@ class SinglecardBingo(procgame.game.Mode):
 
     def check_lifter_status(self):
         if self.game.tilt.status == False:
-            if self.game.switches.trough8.is_inactive() and self.game.switches.trough5.is_active() and self.game.switches.trough4.is_active() and self.game.switches.trough3.is_active() and self.game.switches.trough2.is_active():
-                if self.game.switches.shooter.is_inactive():
+            if self.game.switches.trough8.is_closed() and self.game.switches.trough5.is_open() and self.game.switches.trough4.is_open() and self.game.switches.trough3.is_closed() and self.game.switches.trough2.is_closed():
+                if self.game.switches.shooter.is_open():
                     self.game.coils.lifter.enable()
+                    self.game.returned = False
             else:
-                if self.game.switches.trough4.is_active():
-                    if self.game.switches.shooter.is_inactive():
-                        if self.game.switches.gate.is_active():
+                if self.game.start.status == False:
+                    if self.game.switches.trough4.is_open():
+                        if self.game.switches.shooter.is_open():
+                            if self.game.switches.gate.is_closed():
+                                self.game.coils.lifter.enable()
+                    else:
+                        if self.game.switches.trough4.is_closed():
+                            if self.game.extra_ball.position >= 3 and self.game.ball_count.position <= 5:
+                                if self.game.switches.shooter.is_open() and self.game.switches.trough3.is_closed():
+                                    self.game.coils.lifter.enable()
+                        if self.game.switches.trough3.is_open():
+                            if self.game.extra_ball.position >= 6 and self.game.ball_count.position <= 6:
+                                if self.game.switches.shooter.is_open() and self.game.switches.trough2.is_closed():
+                                    self.game.coils.lifter.enable()
+                        if self.game.switches.trough2.is_inactive() and self.game.ball_count.position <= 7:
+                            if self.game.ball_count.position <= 7:
+                                if self.game.extra_ball.position >= 9:
+                                    if self.game.switches.shooter.is_open():
+                                        self.game.coils.lifter.enable()
+                    if self.game.returned == True and self.game.ball_count.position in [4,5,6,7]:
+                        if self.game.switches.shooter.is_open():
                             self.game.coils.lifter.enable()
-                else:
-                    if self.game.switches.trough4.is_inactive():
-                        if self.game.extra_ball.position >= 3 and self.game.ball_count.position <= 5:
-                            if self.game.switches.shooter.is_inactive() and self.game.switches.trough3.is_active():
-                                self.game.coils.lifter.enable()
-                    if self.game.switches.trough3.is_inactive():
-                        if self.game.extra_ball.position >= 6 and self.game.ball_count.position <= 6:
-                            if self.game.switches.shooter.is_inactive() and self.game.switches.trough2.is_active():
-                                self.game.coils.lifter.enable()
-                    if self.game.switches.trough2.is_inactive() and self.game.ball_count.position <= 7:
-                        if self.game.extra_ball.position >= 9:
-                            if self.game.switches.shooter.is_inactive():
-                                self.game.coils.lifter.enable()
-                    if self.game.ball_count.position >= 8:
-                        self.game.coils.lifter.disable()
-                if self.game.returned == True and self.game.ball_count.position == 4:
-                    if self.game.switches.shooter.is_inactive():
-                        self.game.coils.lifter.enable()
-                        self.game.returned = False
-                if self.game.returned == True and self.game.ball_count.position == 8:
-                    if self.game.switches.shooter.is_inactive():
-                        self.game.coils.lifter.enable()
-                        self.game.returned = False
-        self.delay(name="lifter_status", delay=0, handler=self.check_lifter_status)
+                            self.game.returned = False
 
     def sw_smRunout_active_for_1ms(self, sw):
         if self.game.start.status == True:
@@ -1724,8 +1860,8 @@ class SinglecardBingo(procgame.game.Mode):
         else:
             self.check_shutter()
 
-    def sw_trough1_active(self, sw):
-        if self.game.switches.shooter.is_active():
+    def sw_trough1_closed(self, sw):
+        if self.game.switches.shooter.is_closed():
             self.game.coils.lifter.disable()
 
     def sw_shooter_active(self, sw):
@@ -1735,7 +1871,7 @@ class SinglecardBingo(procgame.game.Mode):
 
     def sw_ballLift_active_for_500ms(self, sw):
         if self.game.tilt.status == False:
-            if self.game.switches.shooter.is_inactive():
+            if self.game.switches.shooter.is_open():
                 if self.game.ball_count.position < 5:
                     self.game.coils.lifter.enable()
                 if self.game.ball_count.position == 5 and self.game.extra_ball.position >= 3:
@@ -1756,6 +1892,8 @@ class SinglecardBingo(procgame.game.Mode):
         if self.game.ball_count.position > 5:
             self.game.coils.yellowROLamp.disable()
             self.game.coils.redROLamp.disable()
+        if self.game.ball_count.position <= 7:
+            self.check_lifter_status()
         self.delay(name="display", delay=0.1, handler=graphics.palm_springs.display, param=self)
 
 
@@ -1966,10 +2104,8 @@ class SinglecardBingo(procgame.game.Mode):
     def sw_replayReset_active(self, sw):
         self.game.anti_cheat.disengage()
         self.holes = []
-#        self.cancel_delayed(name="blink_title")
         graphics.palm_springs.display(self)
         self.tilt_actions()
-#        self.delay(name="blink_title", delay=1, handler=self.blink_title)
         self.replay_step_down(self.game.replays)
 
     def tilt_actions(self):
@@ -1977,6 +2113,8 @@ class SinglecardBingo(procgame.game.Mode):
         self.cancel_delayed(name="replay_reset")
         self.cancel_delayed(name="card1_replay_step_up")
         self.cancel_delayed(name="corners_replay_step_up")
+        self.cancel_delayed(name="blink")
+        self.cancel_delayed(name="timeout")
         self.game.coils.redROLamp.disable()
         self.game.coils.yellowROLamp.disable()
         self.game.search_index.disengage()
@@ -2017,7 +2155,7 @@ class SinglecardBingo(procgame.game.Mode):
                 self.game.coils.registerDown.pulse()
                 number -= 1
                 graphics.palm_springs.display(self)
-                self.delay(name="replay_reset", delay=0.0, handler=self.replay_step_down, param=number)
+                self.delay(name="replay_reset", delay=0.13, handler=self.replay_step_down, param=number)
             elif number == 1:
                 self.game.replays -= 1
                 graphics.replay_step_down(self.game.replays, graphics.palm_springs.reel1, graphics.palm_springs.reel10, graphics.palm_springs.reel100)
@@ -2041,302 +2179,610 @@ class SinglecardBingo(procgame.game.Mode):
         self.game.reflex.increase()
         graphics.palm_springs.display(self)
 
-    def sw_blue_active(self, sw):
-        if self.game.hold_feature.position == 8 and self.game.ball_count.position <= 4:
-            if 2 in self.holes:
-                if self.game.switches.hole2.is_inactive():
-                    self.holes.remove(2)
+    def sw_odd_active(self, sw):
+        if self.game.switches.drawer.is_active():
+            if self.game.hold_feature.position == 8 and self.game.ball_count.position <= 4:
+                if 2 in self.holes:
+                    if self.game.switches.hole2.is_inactive():
+                        self.holes.remove(2)
+                    if self.game.spotted_numbers.position >= 8:
+                        if self.game.spotted.position == 1:
+                            self.holes.append(2)
+                if 4 in self.holes:
+                    if self.game.switches.hole4.is_inactive():
+                        self.holes.remove(4)
+                if 6 in self.holes:
+                    if self.game.switches.hole6.is_inactive():
+                        self.holes.remove(6)
+                if 8 in self.holes:
+                    if self.game.switches.hole8.is_inactive():
+                        self.holes.remove(8)
+                    if self.game.spotted_numbers.position >= 10:
+                        if self.game.spotted.position == 3:
+                            self.holes.append(8)
+                if 10 in self.holes:
+                    if self.game.switches.hole10.is_inactive():
+                        self.holes.remove(10)
+                if 12 in self.holes:
+                    if self.game.switches.hole12.is_inactive():
+                        self.holes.remove(12)
+                if 14 in self.holes:
+                    if self.game.switches.hole14.is_inactive():
+                        self.holes.remove(14)
+                    if self.game.spotted_numbers.position >= 12:
+                        if self.game.spotted.position == 5:
+                            self.holes.append(14)
+                if 16 in self.holes:
+                    if self.game.switches.hole16.is_inactive():
+                        self.holes.remove(16)
+                    if self.game.spotted_numbers.position >= 11:
+                        if self.game.spotted.position == 4:
+                            self.holes.append(16)
+                if 18 in self.holes:
+                    if self.game.switches.hole18.is_inactive():
+                        self.holes.remove(18)
+                if 20 in self.holes:
+                    if self.game.switches.hole20.is_inactive():
+                        self.holes.remove(20)
+                if 22 in self.holes:
+                    if self.game.switches.hole22.is_inactive():
+                        self.holes.remove(22)
+                if 24 in self.holes:
+                    if self.game.switches.hole24.is_inactive():
+                        self.holes.remove(24)
+            graphics.palm_springs.display(self)
+
+    def sw_odd_inactive(self, sw):
+        if self.game.switches.drawer.is_active():
+            if self.game.hold_feature.position == 8 and self.game.ball_count.position <= 4:
+                if self.game.switches.hole2.is_active():
+                    self.holes.append(2)
                 if self.game.spotted_numbers.position >= 8:
                     if self.game.spotted.position == 1:
                         self.holes.append(2)
-            if 4 in self.holes:
-                if self.game.switches.hole4.is_inactive():
-                    self.holes.remove(4)
-            if 6 in self.holes:
-                if self.game.switches.hole6.is_inactive():
-                    self.holes.remove(6)
-            if 8 in self.holes:
-                if self.game.switches.hole8.is_inactive():
-                    self.holes.remove(8)
+                if self.game.switches.hole4.is_active():
+                    self.holes.append(4)
+                if self.game.switches.hole6.is_active():
+                    self.holes.append(6)
+                if self.game.switches.hole8.is_active():
+                    self.holes.append(8)
                 if self.game.spotted_numbers.position >= 10:
                     if self.game.spotted.position == 3:
                         self.holes.append(8)
-            if 10 in self.holes:
-                if self.game.switches.hole10.is_inactive():
-                    self.holes.remove(10)
-            if 12 in self.holes:
-                if self.game.switches.hole12.is_inactive():
-                    self.holes.remove(12)
-            if 14 in self.holes:
-                if self.game.switches.hole14.is_inactive():
-                    self.holes.remove(14)
+                if self.game.switches.hole10.is_active():
+                    self.holes.append(10)
+                if self.game.switches.hole12.is_active():
+                    self.holes.append(12)
+                if self.game.switches.hole14.is_active():
+                    self.holes.append(14)
                 if self.game.spotted_numbers.position >= 12:
                     if self.game.spotted.position == 5:
                         self.holes.append(14)
-            if 16 in self.holes:
-                if self.game.switches.hole16.is_inactive():
-                    self.holes.remove(16)
+                if self.game.switches.hole16.is_active():
+                    self.holes.append(16)
                 if self.game.spotted_numbers.position >= 11:
                     if self.game.spotted.position == 4:
                         self.holes.append(16)
-            if 18 in self.holes:
-                if self.game.switches.hole18.is_inactive():
-                    self.holes.remove(18)
-            if 20 in self.holes:
-                if self.game.switches.hole20.is_inactive():
-                    self.holes.remove(20)
-            if 22 in self.holes:
-                if self.game.switches.hole22.is_inactive():
-                    self.holes.remove(22)
-            if 24 in self.holes:
-                if self.game.switches.hole24.is_inactive():
-                    self.holes.remove(24)
-        graphics.palm_springs.display(self)
+                if self.game.switches.hole18.is_active():
+                    self.holes.append(18)
+                if self.game.switches.hole20.is_active():
+                    self.holes.append(20)
+                if self.game.switches.hole22.is_active():
+                    self.holes.append(22)
+                if self.game.switches.hole24.is_active():
+                    self.holes.append(24)
+            graphics.palm_springs.display(self)
+
+    def sw_odd_active_for_2s(self, sw):
+        if self.game.switches.drawer.is_active():
+            if self.game.hold_feature.position == 8 and self.game.ball_count.position <= 4:
+                self.game.coils.holdLeft.enable()
+                self.check_shutter()
+                self.game.hold_feature.reset()
+                self.game.coils.holdLeft.disable()
+                if 2 in self.holes:
+                    if self.game.switches.hole2.is_inactive():
+                        self.holes.remove(2)
+                    if self.game.spotted_numbers.position >= 8:
+                        if self.game.spotted.position == 1:
+                            self.holes.append(2)
+                if 4 in self.holes:
+                    if self.game.switches.hole4.is_inactive():
+                        self.holes.remove(4)
+                if 6 in self.holes:
+                    if self.game.switches.hole6.is_inactive():
+                        self.holes.remove(6)
+                if 8 in self.holes:
+                    if self.game.switches.hole8.is_inactive():
+                        self.holes.remove(8)
+                    if self.game.spotted_numbers.position >= 10:
+                        if self.game.spotted.position == 3:
+                            self.holes.append(8)
+                if 10 in self.holes:
+                    if self.game.switches.hole10.is_inactive():
+                        self.holes.remove(10)
+                if 12 in self.holes:
+                    if self.game.switches.hole12.is_inactive():
+                        self.holes.remove(12)
+                if 14 in self.holes:
+                    if self.game.switches.hole14.is_inactive():
+                        self.holes.remove(14)
+                    if self.game.spotted_numbers.position >= 12:
+                        if self.game.spotted.position == 5:
+                            self.holes.append(14)
+                if 16 in self.holes:
+                    if self.game.switches.hole16.is_inactive():
+                        self.holes.remove(16)
+                    if self.game.spotted_numbers.position >= 11:
+                        if self.game.spotted.position == 4:
+                            self.holes.append(16)
+                if 18 in self.holes:
+                    if self.game.switches.hole18.is_inactive():
+                        self.holes.remove(18)
+                if 20 in self.holes:
+                    if self.game.switches.hole20.is_inactive():
+                        self.holes.remove(20)
+                if 22 in self.holes:
+                    if self.game.switches.hole22.is_inactive():
+                        self.holes.remove(22)
+                if 24 in self.holes:
+                    if self.game.switches.hole24.is_inactive():
+                        self.holes.remove(24)
+            graphics.palm_springs.display(self)
+
+
+    def sw_blue_active(self, sw):
+        if self.game.switches.drawer.is_inactive():
+            if self.game.hold_feature.position == 8 and self.game.ball_count.position <= 4:
+                if 2 in self.holes:
+                    if self.game.switches.hole2.is_inactive():
+                        self.holes.remove(2)
+                    if self.game.spotted_numbers.position >= 8:
+                        if self.game.spotted.position == 1:
+                            self.holes.append(2)
+                if 4 in self.holes:
+                    if self.game.switches.hole4.is_inactive():
+                        self.holes.remove(4)
+                if 6 in self.holes:
+                    if self.game.switches.hole6.is_inactive():
+                        self.holes.remove(6)
+                if 8 in self.holes:
+                    if self.game.switches.hole8.is_inactive():
+                        self.holes.remove(8)
+                    if self.game.spotted_numbers.position >= 10:
+                        if self.game.spotted.position == 3:
+                            self.holes.append(8)
+                if 10 in self.holes:
+                    if self.game.switches.hole10.is_inactive():
+                        self.holes.remove(10)
+                if 12 in self.holes:
+                    if self.game.switches.hole12.is_inactive():
+                        self.holes.remove(12)
+                if 14 in self.holes:
+                    if self.game.switches.hole14.is_inactive():
+                        self.holes.remove(14)
+                    if self.game.spotted_numbers.position >= 12:
+                        if self.game.spotted.position == 5:
+                            self.holes.append(14)
+                if 16 in self.holes:
+                    if self.game.switches.hole16.is_inactive():
+                        self.holes.remove(16)
+                    if self.game.spotted_numbers.position >= 11:
+                        if self.game.spotted.position == 4:
+                            self.holes.append(16)
+                if 18 in self.holes:
+                    if self.game.switches.hole18.is_inactive():
+                        self.holes.remove(18)
+                if 20 in self.holes:
+                    if self.game.switches.hole20.is_inactive():
+                        self.holes.remove(20)
+                if 22 in self.holes:
+                    if self.game.switches.hole22.is_inactive():
+                        self.holes.remove(22)
+                if 24 in self.holes:
+                    if self.game.switches.hole24.is_inactive():
+                        self.holes.remove(24)
+            graphics.palm_springs.display(self)
 
 
     def sw_blue_inactive(self, sw):
-        if self.game.hold_feature.position == 8 and self.game.ball_count.position <= 4:
-            if self.game.switches.hole2.is_active():
-                self.holes.append(2)
-            if self.game.spotted_numbers.position >= 8:
-                if self.game.spotted.position == 1:
+        if self.game.switches.drawer.is_inactive():
+            if self.game.hold_feature.position == 8 and self.game.ball_count.position <= 4:
+                if self.game.switches.hole2.is_active():
                     self.holes.append(2)
-            if self.game.switches.hole4.is_active():
-                self.holes.append(4)
-            if self.game.switches.hole6.is_active():
-                self.holes.append(6)
-            if self.game.switches.hole8.is_active():
-                self.holes.append(8)
-            if self.game.spotted_numbers.position >= 10:
-                if self.game.spotted.position == 3:
-                    self.holes.append(8)
-            if self.game.switches.hole10.is_active():
-                self.holes.append(10)
-            if self.game.switches.hole12.is_active():
-                self.holes.append(12)
-            if self.game.switches.hole14.is_active():
-                self.holes.append(14)
-            if self.game.spotted_numbers.position >= 12:
-                if self.game.spotted.position == 5:
-                    self.holes.append(14)
-            if self.game.switches.hole16.is_active():
-                self.holes.append(16)
-            if self.game.spotted_numbers.position >= 11:
-                if self.game.spotted.position == 4:
-                    self.holes.append(16)
-            if self.game.switches.hole18.is_active():
-                self.holes.append(18)
-            if self.game.switches.hole20.is_active():
-                self.holes.append(20)
-            if self.game.switches.hole22.is_active():
-                self.holes.append(22)
-            if self.game.switches.hole24.is_active():
-                self.holes.append(24)
-        graphics.palm_springs.display(self)
-
-    def sw_blue_active_for_2s(self, sw):
-        if self.game.hold_feature.position == 8 and self.game.ball_count.position <= 4:
-            self.game.coils.holdLeft.engage()
-            self.check_shutter()
-            self.game.hold_feature.reset()
-            self.game.coils.holdLeft.disable()
-            if 2 in self.holes:
-                if self.game.switches.hole2.is_inactive():
-                    self.holes.remove(2)
                 if self.game.spotted_numbers.position >= 8:
                     if self.game.spotted.position == 1:
                         self.holes.append(2)
-            if 4 in self.holes:
-                if self.game.switches.hole4.is_inactive():
-                    self.holes.remove(4)
-            if 6 in self.holes:
-                if self.game.switches.hole6.is_inactive():
-                    self.holes.remove(6)
-            if 8 in self.holes:
-                if self.game.switches.hole8.is_inactive():
-                    self.holes.remove(8)
+                if self.game.switches.hole4.is_active():
+                    self.holes.append(4)
+                if self.game.switches.hole6.is_active():
+                    self.holes.append(6)
+                if self.game.switches.hole8.is_active():
+                    self.holes.append(8)
                 if self.game.spotted_numbers.position >= 10:
                     if self.game.spotted.position == 3:
                         self.holes.append(8)
-            if 10 in self.holes:
-                if self.game.switches.hole10.is_inactive():
-                    self.holes.remove(10)
-            if 12 in self.holes:
-                if self.game.switches.hole12.is_inactive():
-                    self.holes.remove(12)
-            if 14 in self.holes:
-                if self.game.switches.hole14.is_inactive():
-                    self.holes.remove(14)
+                if self.game.switches.hole10.is_active():
+                    self.holes.append(10)
+                if self.game.switches.hole12.is_active():
+                    self.holes.append(12)
+                if self.game.switches.hole14.is_active():
+                    self.holes.append(14)
                 if self.game.spotted_numbers.position >= 12:
                     if self.game.spotted.position == 5:
                         self.holes.append(14)
-            if 16 in self.holes:
-                if self.game.switches.hole16.is_inactive():
-                    self.holes.remove(16)
+                if self.game.switches.hole16.is_active():
+                    self.holes.append(16)
                 if self.game.spotted_numbers.position >= 11:
                     if self.game.spotted.position == 4:
                         self.holes.append(16)
-            if 18 in self.holes:
-                if self.game.switches.hole18.is_inactive():
-                    self.holes.remove(18)
-            if 20 in self.holes:
-                if self.game.switches.hole20.is_inactive():
-                    self.holes.remove(20)
-            if 22 in self.holes:
-                if self.game.switches.hole22.is_inactive():
-                    self.holes.remove(22)
-            if 24 in self.holes:
-                if self.game.switches.hole24.is_inactive():
-                    self.holes.remove(24)
-        graphics.palm_springs.display(self)
+                if self.game.switches.hole18.is_active():
+                    self.holes.append(18)
+                if self.game.switches.hole20.is_active():
+                    self.holes.append(20)
+                if self.game.switches.hole22.is_active():
+                    self.holes.append(22)
+                if self.game.switches.hole24.is_active():
+                    self.holes.append(24)
+            graphics.palm_springs.display(self)
 
-    def sw_green_active(self, sw):
-        if self.game.hold_feature.position == 8 and self.game.ball_count.position <= 4:
-            if 1 in self.holes:
-                if self.game.switches.hole1.is_inactive():
-                    self.holes.remove(1)
+    def sw_blue_active_for_2s(self, sw):
+        if self.game.switches.drawer.is_inactive():
+            if self.game.hold_feature.position == 8 and self.game.ball_count.position <= 4:
+                self.game.coils.holdLeft.enable()
+                self.check_shutter()
+                self.game.hold_feature.reset()
+                self.game.coils.holdLeft.disable()
+                if 2 in self.holes:
+                    if self.game.switches.hole2.is_inactive():
+                        self.holes.remove(2)
+                    if self.game.spotted_numbers.position >= 8:
+                        if self.game.spotted.position == 1:
+                            self.holes.append(2)
+                if 4 in self.holes:
+                    if self.game.switches.hole4.is_inactive():
+                        self.holes.remove(4)
+                if 6 in self.holes:
+                    if self.game.switches.hole6.is_inactive():
+                        self.holes.remove(6)
+                if 8 in self.holes:
+                    if self.game.switches.hole8.is_inactive():
+                        self.holes.remove(8)
+                    if self.game.spotted_numbers.position >= 10:
+                        if self.game.spotted.position == 3:
+                            self.holes.append(8)
+                if 10 in self.holes:
+                    if self.game.switches.hole10.is_inactive():
+                        self.holes.remove(10)
+                if 12 in self.holes:
+                    if self.game.switches.hole12.is_inactive():
+                        self.holes.remove(12)
+                if 14 in self.holes:
+                    if self.game.switches.hole14.is_inactive():
+                        self.holes.remove(14)
+                    if self.game.spotted_numbers.position >= 12:
+                        if self.game.spotted.position == 5:
+                            self.holes.append(14)
+                if 16 in self.holes:
+                    if self.game.switches.hole16.is_inactive():
+                        self.holes.remove(16)
+                    if self.game.spotted_numbers.position >= 11:
+                        if self.game.spotted.position == 4:
+                            self.holes.append(16)
+                if 18 in self.holes:
+                    if self.game.switches.hole18.is_inactive():
+                        self.holes.remove(18)
+                if 20 in self.holes:
+                    if self.game.switches.hole20.is_inactive():
+                        self.holes.remove(20)
+                if 22 in self.holes:
+                    if self.game.switches.hole22.is_inactive():
+                        self.holes.remove(22)
+                if 24 in self.holes:
+                    if self.game.switches.hole24.is_inactive():
+                        self.holes.remove(24)
+            graphics.palm_springs.display(self)
+
+    def sw_even_active(self, sw):
+        if self.game.switches.drawer.is_active():
+            if self.game.hold_feature.position == 8 and self.game.ball_count.position <= 4:
+                if 1 in self.holes:
+                    if self.game.switches.hole1.is_inactive():
+                        self.holes.remove(1)
+                    if self.game.spotted_numbers.position >= 7:
+                        if self.game.spotted.position == 0:
+                            self.holes.append(1)
+                if 3 in self.holes:
+                    if self.game.switches.hole3.is_inactive():
+                        self.holes.remove(3)
+                if 5 in self.holes:
+                    if self.game.switches.hole5.is_inactive():
+                        self.holes.remove(5)
+                    if self.game.spotted_numbers.position >= 9:
+                        if self.game.spotted.position == 2:
+                            self.holes.append(5)
+                if 7 in self.holes:
+                    if self.game.switches.hole7.is_inactive():
+                        self.holes.remove(7)
+                if 9 in self.holes:
+                    if self.game.switches.hole9.is_inactive():
+                        self.holes.remove(9)
+                    if self.game.spotted_numbers.position >= 13:
+                        if self.game.spotted.position == 6:
+                            self.holes.append(9)
+                if 11 in self.holes:
+                    if self.game.switches.hole11.is_inactive():
+                        self.holes.remove(11)
+                if 13 in self.holes:
+                    if self.game.switches.hole13.is_inactive():
+                        self.holes.remove(13)
+                if 15 in self.holes:
+                    if self.game.switches.hole15.is_inactive():
+                        self.holes.remove(15)
+                if 17 in self.holes:
+                    if self.game.switches.hole17.is_inactive():
+                        self.holes.remove(17)
+                if 19 in self.holes:
+                    if self.game.switches.hole19.is_inactive():
+                        self.holes.remove(19)
+                if 21 in self.holes:
+                    if self.game.switches.hole21.is_inactive():
+                        self.holes.remove(21)
+                if 23 in self.holes:
+                    if self.game.switches.hole23.is_inactive():
+                        self.holes.remove(23)
+                if 25 in self.holes:
+                    if self.game.switches.hole25.is_inactive():
+                        self.holes.remove(25)
+            graphics.palm_springs.display(self)
+
+    def sw_even_inactive(self, sw):
+        if self.game.switches.drawer.is_active():
+            if self.game.hold_feature.position == 8 and self.game.ball_count.position <= 4:
+                if self.game.switches.hole1.is_active():
+                    self.holes.append(1)
                 if self.game.spotted_numbers.position >= 7:
                     if self.game.spotted.position == 0:
                         self.holes.append(1)
-            if 3 in self.holes:
-                if self.game.switches.hole3.is_inactive():
-                    self.holes.remove(3)
-            if 5 in self.holes:
-                if self.game.switches.hole5.is_inactive():
-                    self.holes.remove(5)
+                if self.game.switches.hole3.is_active():
+                    self.holes.append(3)
+                if self.game.switches.hole5.is_active():
+                    self.holes.append(5)
                 if self.game.spotted_numbers.position >= 9:
                     if self.game.spotted.position == 2:
                         self.holes.append(5)
-            if 7 in self.holes:
-                if self.game.switches.hole7.is_inactive():
-                    self.holes.remove(7)
-            if 9 in self.holes:
-                if self.game.switches.hole9.is_inactive():
-                    self.holes.remove(9)
+                if self.game.switches.hole7.is_active():
+                    self.holes.append(7)
+                if self.game.switches.hole9.is_active():
+                    self.holes.append(9)
                 if self.game.spotted_numbers.position >= 13:
                     if self.game.spotted.position == 6:
                         self.holes.append(9)
-            if 11 in self.holes:
-                if self.game.switches.hole11.is_inactive():
-                    self.holes.remove(11)
-            if 13 in self.holes:
-                if self.game.switches.hole13.is_inactive():
-                    self.holes.remove(13)
-            if 15 in self.holes:
-                if self.game.switches.hole15.is_inactive():
-                    self.holes.remove(15)
-            if 17 in self.holes:
-                if self.game.switches.hole17.is_inactive():
-                    self.holes.remove(17)
-            if 19 in self.holes:
-                if self.game.switches.hole19.is_inactive():
-                    self.holes.remove(19)
-            if 21 in self.holes:
-                if self.game.switches.hole21.is_inactive():
-                    self.holes.remove(21)
-            if 23 in self.holes:
-                if self.game.switches.hole23.is_inactive():
-                    self.holes.remove(23)
-            if 25 in self.holes:
-                if self.game.switches.hole25.is_inactive():
-                    self.holes.remove(25)
-        graphics.palm_springs.display(self)
+                if self.game.switches.hole11.is_active():
+                    self.holes.append(11)
+                if self.game.switches.hole13.is_active():
+                    self.holes.append(13)
+                if self.game.switches.hole15.is_active():
+                    self.holes.append(15)
+                if self.game.switches.hole17.is_active():
+                    self.holes.append(17)
+                if self.game.switches.hole19.is_active():
+                    self.holes.append(19)
+                if self.game.switches.hole21.is_active():
+                    self.holes.append(21)
+                if self.game.switches.hole23.is_active():
+                    self.holes.append(23)
+                if self.game.switches.hole25.is_active():
+                    self.holes.append(25)
+            graphics.palm_springs.display(self)
+
+    def sw_even_active_for_2s(self, sw):
+        if self.game.switches.drawer.is_active():
+            if self.game.hold_feature.position == 8 and self.game.ball_count.position <= 4:
+                self.game.coils.holdRight.enable()
+                self.check_shutter()
+                self.game.hold_feature.reset()
+                self.game.coils.holdRight.disable()
+                if 1 in self.holes:
+                    if self.game.switches.hole1.is_inactive():
+                        self.holes.remove(1)
+                    if self.game.spotted_numbers.position >= 7:
+                        if self.game.spotted.position == 0:
+                            self.holes.append(1)
+                if 3 in self.holes:
+                    if self.game.switches.hole3.is_inactive():
+                        self.holes.remove(3)
+                if 5 in self.holes:
+                    if self.game.switches.hole5.is_inactive():
+                        self.holes.remove(5)
+                    if self.game.spotted_numbers.position >= 9:
+                        if self.game.spotted.position == 2:
+                            self.holes.append(5)
+                if 7 in self.holes:
+                    if self.game.switches.hole7.is_inactive():
+                        self.holes.remove(7)
+                if 9 in self.holes:
+                    if self.game.switches.hole9.is_inactive():
+                        self.holes.remove(9)
+                    if self.game.spotted_numbers.position >= 13:
+                        if self.game.spotted.position == 6:
+                            self.holes.append(9)
+                if 11 in self.holes:
+                    if self.game.switches.hole11.is_inactive():
+                        self.holes.remove(11)
+                if 13 in self.holes:
+                    if self.game.switches.hole13.is_inactive():
+                        self.holes.remove(13)
+                if 15 in self.holes:
+                    if self.game.switches.hole15.is_inactive():
+                        self.holes.remove(15)
+                if 17 in self.holes:
+                    if self.game.switches.hole17.is_inactive():
+                        self.holes.remove(17)
+                if 19 in self.holes:
+                    if self.game.switches.hole19.is_inactive():
+                        self.holes.remove(19)
+                if 21 in self.holes:
+                    if self.game.switches.hole21.is_inactive():
+                        self.holes.remove(21)
+                if 23 in self.holes:
+                    if self.game.switches.hole23.is_inactive():
+                        self.holes.remove(23)
+                if 25 in self.holes:
+                    if self.game.switches.hole25.is_inactive():
+                        self.holes.remove(25)
+            graphics.palm_springs.display(self)
+
+    def sw_green_active(self, sw):
+        if self.game.switches.drawer.is_inactive():
+            if self.game.hold_feature.position == 8 and self.game.ball_count.position <= 4:
+                if 1 in self.holes:
+                    if self.game.switches.hole1.is_inactive():
+                        self.holes.remove(1)
+                    if self.game.spotted_numbers.position >= 7:
+                        if self.game.spotted.position == 0:
+                            self.holes.append(1)
+                if 3 in self.holes:
+                    if self.game.switches.hole3.is_inactive():
+                        self.holes.remove(3)
+                if 5 in self.holes:
+                    if self.game.switches.hole5.is_inactive():
+                        self.holes.remove(5)
+                    if self.game.spotted_numbers.position >= 9:
+                        if self.game.spotted.position == 2:
+                            self.holes.append(5)
+                if 7 in self.holes:
+                    if self.game.switches.hole7.is_inactive():
+                        self.holes.remove(7)
+                if 9 in self.holes:
+                    if self.game.switches.hole9.is_inactive():
+                        self.holes.remove(9)
+                    if self.game.spotted_numbers.position >= 13:
+                        if self.game.spotted.position == 6:
+                            self.holes.append(9)
+                if 11 in self.holes:
+                    if self.game.switches.hole11.is_inactive():
+                        self.holes.remove(11)
+                if 13 in self.holes:
+                    if self.game.switches.hole13.is_inactive():
+                        self.holes.remove(13)
+                if 15 in self.holes:
+                    if self.game.switches.hole15.is_inactive():
+                        self.holes.remove(15)
+                if 17 in self.holes:
+                    if self.game.switches.hole17.is_inactive():
+                        self.holes.remove(17)
+                if 19 in self.holes:
+                    if self.game.switches.hole19.is_inactive():
+                        self.holes.remove(19)
+                if 21 in self.holes:
+                    if self.game.switches.hole21.is_inactive():
+                        self.holes.remove(21)
+                if 23 in self.holes:
+                    if self.game.switches.hole23.is_inactive():
+                        self.holes.remove(23)
+                if 25 in self.holes:
+                    if self.game.switches.hole25.is_inactive():
+                        self.holes.remove(25)
+            graphics.palm_springs.display(self)
 
     def sw_green_inactive(self, sw):
-        if self.game.hold_feature.position == 8 and self.game.ball_count.position <= 4:
-            if self.game.switches.hole1.is_active():
-                self.holes.append(1)
-            if self.game.spotted_numbers.position >= 7:
-                if self.game.spotted.position == 0:
+        if self.game.switches.drawer.is_inactive():
+            if self.game.hold_feature.position == 8 and self.game.ball_count.position <= 4:
+                if self.game.switches.hole1.is_active():
                     self.holes.append(1)
-            if self.game.switches.hole3.is_active():
-                self.holes.append(3)
-            if self.game.switches.hole5.is_active():
-                self.holes.append(5)
-            if self.game.spotted_numbers.position >= 9:
-                if self.game.spotted.position == 2:
+                if self.game.spotted_numbers.position >= 7:
+                    if self.game.spotted.position == 0:
+                        self.holes.append(1)
+                if self.game.switches.hole3.is_active():
+                    self.holes.append(3)
+                if self.game.switches.hole5.is_active():
                     self.holes.append(5)
-            if self.game.switches.hole7.is_active():
-                self.holes.append(7)
-            if self.game.switches.hole9.is_active():
-                self.holes.append(9)
-            if self.game.spotted_numbers.position >= 13:
-                if self.game.spotted.position == 6:
+                if self.game.spotted_numbers.position >= 9:
+                    if self.game.spotted.position == 2:
+                        self.holes.append(5)
+                if self.game.switches.hole7.is_active():
+                    self.holes.append(7)
+                if self.game.switches.hole9.is_active():
                     self.holes.append(9)
-            if self.game.switches.hole11.is_active():
-                self.holes.append(11)
-            if self.game.switches.hole13.is_active():
-                self.holes.append(13)
-            if self.game.switches.hole15.is_active():
-                self.holes.append(15)
-            if self.game.switches.hole17.is_active():
-                self.holes.append(17)
-            if self.game.switches.hole19.is_active():
-                self.holes.append(19)
-            if self.game.switches.hole21.is_active():
-                self.holes.append(21)
-            if self.game.switches.hole23.is_active():
-                self.holes.append(23)
-            if self.game.switches.hole25.is_active():
-                self.holes.append(25)
-        graphics.palm_springs.display(self)
+                if self.game.spotted_numbers.position >= 13:
+                    if self.game.spotted.position == 6:
+                        self.holes.append(9)
+                if self.game.switches.hole11.is_active():
+                    self.holes.append(11)
+                if self.game.switches.hole13.is_active():
+                    self.holes.append(13)
+                if self.game.switches.hole15.is_active():
+                    self.holes.append(15)
+                if self.game.switches.hole17.is_active():
+                    self.holes.append(17)
+                if self.game.switches.hole19.is_active():
+                    self.holes.append(19)
+                if self.game.switches.hole21.is_active():
+                    self.holes.append(21)
+                if self.game.switches.hole23.is_active():
+                    self.holes.append(23)
+                if self.game.switches.hole25.is_active():
+                    self.holes.append(25)
+            graphics.palm_springs.display(self)
 
 
     def sw_green_active_for_2s(self, sw):
-        if self.game.hold_feature.position == 8 and self.game.ball_count.position <= 4:
-            self.game.coils.holdRight.engage()
-            self.check_shutter()
-            self.game.hold_feature.reset()
-            self.game.coils.holdRight.disable()
-            if 1 in self.holes:
-                if self.game.switches.hole1.is_inactive():
-                    self.holes.remove(1)
-                if self.game.spotted_numbers.position >= 7:
-                    if self.game.spotted.position == 0:
-                        self.holes.append(1)
-            if 3 in self.holes:
-                if self.game.switches.hole3.is_inactive():
-                    self.holes.remove(3)
-            if 5 in self.holes:
-                if self.game.switches.hole5.is_inactive():
-                    self.holes.remove(5)
-                if self.game.spotted_numbers.position >= 9:
-                    if self.game.spotted.position == 2:
-                        self.holes.append(5)
-            if 7 in self.holes:
-                if self.game.switches.hole7.is_inactive():
-                    self.holes.remove(7)
-            if 9 in self.holes:
-                if self.game.switches.hole9.is_inactive():
-                    self.holes.remove(9)
-                if self.game.spotted_numbers.position >= 13:
-                    if self.game.spotted.position == 6:
-                        self.holes.append(9)
-            if 11 in self.holes:
-                if self.game.switches.hole11.is_inactive():
-                    self.holes.remove(11)
-            if 13 in self.holes:
-                if self.game.switches.hole13.is_inactive():
-                    self.holes.remove(13)
-            if 15 in self.holes:
-                if self.game.switches.hole15.is_inactive():
-                    self.holes.remove(15)
-            if 17 in self.holes:
-                if self.game.switches.hole17.is_inactive():
-                    self.holes.remove(17)
-            if 19 in self.holes:
-                if self.game.switches.hole19.is_inactive():
-                    self.holes.remove(19)
-            if 21 in self.holes:
-                if self.game.switches.hole21.is_inactive():
-                    self.holes.remove(21)
-            if 23 in self.holes:
-                if self.game.switches.hole23.is_inactive():
-                    self.holes.remove(23)
-            if 25 in self.holes:
-                if self.game.switches.hole25.is_inactive():
-                    self.holes.remove(25)
-        graphics.palm_springs.display(self)
+        if self.game.switches.drawer.is_inactive():
+            if self.game.hold_feature.position == 8 and self.game.ball_count.position <= 4:
+                self.game.coils.holdRight.enable()
+                self.check_shutter()
+                self.game.hold_feature.reset()
+                self.game.coils.holdRight.disable()
+                if 1 in self.holes:
+                    if self.game.switches.hole1.is_inactive():
+                        self.holes.remove(1)
+                    if self.game.spotted_numbers.position >= 7:
+                        if self.game.spotted.position == 0:
+                            self.holes.append(1)
+                if 3 in self.holes:
+                    if self.game.switches.hole3.is_inactive():
+                        self.holes.remove(3)
+                if 5 in self.holes:
+                    if self.game.switches.hole5.is_inactive():
+                        self.holes.remove(5)
+                    if self.game.spotted_numbers.position >= 9:
+                        if self.game.spotted.position == 2:
+                            self.holes.append(5)
+                if 7 in self.holes:
+                    if self.game.switches.hole7.is_inactive():
+                        self.holes.remove(7)
+                if 9 in self.holes:
+                    if self.game.switches.hole9.is_inactive():
+                        self.holes.remove(9)
+                    if self.game.spotted_numbers.position >= 13:
+                        if self.game.spotted.position == 6:
+                            self.holes.append(9)
+                if 11 in self.holes:
+                    if self.game.switches.hole11.is_inactive():
+                        self.holes.remove(11)
+                if 13 in self.holes:
+                    if self.game.switches.hole13.is_inactive():
+                        self.holes.remove(13)
+                if 15 in self.holes:
+                    if self.game.switches.hole15.is_inactive():
+                        self.holes.remove(15)
+                if 17 in self.holes:
+                    if self.game.switches.hole17.is_inactive():
+                        self.holes.remove(17)
+                if 19 in self.holes:
+                    if self.game.switches.hole19.is_inactive():
+                        self.holes.remove(19)
+                if 21 in self.holes:
+                    if self.game.switches.hole21.is_inactive():
+                        self.holes.remove(21)
+                if 23 in self.holes:
+                    if self.game.switches.hole23.is_inactive():
+                        self.holes.remove(23)
+                if 25 in self.holes:
+                    if self.game.switches.hole25.is_inactive():
+                        self.holes.remove(25)
+            graphics.palm_springs.display(self)
 
     def sw_yellow_active(self, sw):
         if self.game.ball_count.position >= 5:
@@ -2374,7 +2820,6 @@ class SinglecardBingo(procgame.game.Mode):
         # search activity.  For each revolution of the search disc (which happens about every 5-7 seconds), the
         # game will activate() each search relay for each 'hot' rivet on the search disc.  This can be on a different
         # wiper finger for each set of rivets on the search disc.
-#        self.cancel_delayed(name="blink_title")
         self.game.sound.stop_music()
         self.game.sound.play_music('search', -1)
         
@@ -2402,7 +2847,6 @@ class SinglecardBingo(procgame.game.Mode):
                             if s >= 3:
                                 self.find_winner(s, self.card, self.corners, self.supercard)
                                 break
-#        self.delay(name="blink_title", delay=3, handler=self.blink_title)
 
     def find_winner(self, relays, card, corners, supercard):
         if self.game.search_index.status == False and self.game.replays < 899:
@@ -2607,16 +3051,16 @@ class SinglecardBingo(procgame.game.Mode):
 
     def all_probability(self):
         mix1 = self.game.mixer1.connected_rivet()
-        if self.game.reflex.connected_rivet() == 0 and (mix1 == 1 or mix1 == 6 or mix1 == 8 or mix1 == 11 or mix1 == 13 or mix1 == 16 or mix1 == 18 or mix1 == 22 or mix1 == 24):
+        if self.game.reflex.connected_rivet() == 0 and (mix1 in [1,6,8,11,13,16,18,22,24]):
             self.scan_odds()
             self.scan_features()
-        elif self.game.reflex.connected_rivet() == 1 and (mix1 != 2 or mix1 != 5 or mix1 != 7 or mix1 != 9 or mix1 != 12 or mix1 != 14 or mix1 != 15 or mix1 != 19 or mix1 != 23):
+        elif self.game.reflex.connected_rivet() == 1 and (mix1 not in [2,5,7,9,12,14,15,19,23]):
             self.scan_odds()
             self.scan_features()
-        elif self.game.reflex.connected_rivet() == 2 and (mix1 != 5 or mix1 != 9 or mix1 != 12 or mix1 != 15 or mix1 != 19 or mix1 != 23):
+        elif self.game.reflex.connected_rivet() == 2 and (mix1 not in [5,9,12,15,19,23]):
             self.scan_odds()
             self.scan_features()
-        elif self.game.reflex.connected_rivet() == 3 and (mix1 != 5 or mix1 != 9 or mix1 != 15 or mix1 != 23):
+        elif self.game.reflex.connected_rivet() == 3 and (mix1 not in [5,9,15,23]):
             self.scan_odds()
             self.scan_features()
         elif self.game.reflex.connected_rivet() == 4:
@@ -2635,7 +3079,7 @@ class SinglecardBingo(procgame.game.Mode):
         if p == 1:
             es = self.check_extra_step()
             if es == 1:
-                i = random.randint(1,6)
+                i = random.randint(1,3)
                 self.extra_step(i)
             else:
                 self.game.odds.step()
@@ -2690,7 +3134,7 @@ class SinglecardBingo(procgame.game.Mode):
     def check_mixer3(self):
         mix3 = self.game.mixer3.connected_rivet()
         if self.game.super_card1.status == False and self.game.super_card2.status == False:
-            if mix3 == 10 or mix3 == 21 or mix3 == 24 or mix3 == 23:
+            if mix3 in [10,21,24,23]:
                 return 1
         if self.game.super_card1.status == False or self.game.super_card2.status == False:
             if mix3 in [6,12,13]:
@@ -2701,7 +3145,7 @@ class SinglecardBingo(procgame.game.Mode):
             if mix3 in [5,10,11]:
                 return 1
         if mix3 == 6:
-            if self.game.spotted.position != 5 and self.game.spotted.position != 6:
+            if self.game.spotted.position not in [5,6]:
                 return 1
         return 0
 
@@ -2742,20 +3186,25 @@ class SinglecardBingo(procgame.game.Mode):
         if sd == 6:
             if self.game.spotted_numbers.position < 10:
                 self.step_spotted_numbers(10 - self.game.spotted_numbers.position)
+                self.check_spot()
         if self.game.reflex.connected_rivet() <= 4:
             if sd == 11:
                 self.step_spotted_numbers(13)
+                self.check_spot()
         if sd == 25:
             if self.game.spotted_numbers.position < 13:
                 self.step_spotted_numbers(13 - self.game.spotted_numbers.position)
+                self.check_spot()
         if self.game.spotted_numbers.position < 10:
             if self.game.cu:
                 self.step_spotted_numbers(1)
+                self.check_spot()
             else:
                 self.step_hold_feature(1)
         if sd == 7:
             if self.game.spotted_numbers.position == 10:
                 self.step_spotted_numbers(13)
+                self.check_spot()
         if sd == 5:
             self.step_hold_feature(8)
         if sd == 33:
@@ -2765,10 +3214,12 @@ class SinglecardBingo(procgame.game.Mode):
         if self.game.spotting.position == 10:
             if self.game.spotted_numbers.position > 10:
                 self.game.spotted_numbers.step()
+                self.check_spot()
         
     def step_spotted_numbers(self, number):
             if number >= 1:
                 self.game.spotted_numbers.step()
+                self.check_spot()
                 number -= 1
                 if self.game.spotted_numbers.position == 6:
                     number = 2
@@ -2796,6 +3247,7 @@ class SinglecardBingo(procgame.game.Mode):
                 self.step_eb(i)
             else:
                 self.game.extra_ball.step()
+                self.check_lifter_status()
 
         # Timer resets to 0 position on ball count increasing.  We are fudging this since we will have
         # no good way to measure balls as they return back to the trough.  The ball count unit cannot be
@@ -2846,10 +3298,11 @@ class SinglecardBingo(procgame.game.Mode):
         else:
             if self.game.mixer4.position in [2,8]:
                 self.game.extra_ball.step()
+                self.check_lifter_status()
 
     def eb_probability(self):
         mix1 = self.game.mixer1.connected_rivet()
-        if self.game.reflex.connected_rivet() == 0 and (mix1 == 1 or mix1 == 6 or mix1 == 8 or mix1 == 11 or mix1 == 13 or mix1 == 16 or mix1 == 18 or mix1 == 22 or mix1 == 24):
+        if self.game.reflex.connected_rivet() == 0 and (mix1 in [1,6,8,11,13,16,18,22,24]):
             m3 = self.check_mixer3()
             if m3 == 1:
                 i = self.check_eb_spotting()
@@ -2857,7 +3310,7 @@ class SinglecardBingo(procgame.game.Mode):
                     return 1
                 else:
                     return 0
-        elif self.game.reflex.connected_rivet() == 1 and (mix1 != 2 or mix1 != 5 or mix1 != 7 or mix1 != 9 or mix1 != 12 or mix1 != 14 or mix1 != 15 or mix1 != 19 or mix1 != 23):
+        elif self.game.reflex.connected_rivet() == 1 and (mix1 not in [2,5,7,9,12,14,15,19,23]):
             m3 = self.check_mixer3()
             if m3 == 1:
                 i = self.check_eb_spotting()
@@ -2865,7 +3318,7 @@ class SinglecardBingo(procgame.game.Mode):
                     return 1
                 else:
                     return 0
-        elif self.game.reflex.connected_rivet() == 2 and (mix1 != 5 or mix1 != 9 or mix1 != 12 or mix1 != 15 or mix1 != 19 or mix1 != 23):
+        elif self.game.reflex.connected_rivet() == 2 and (mix1 not in [5,9,12,15,19,23]):
             m3 = self.check_mixer3()
             if m3 == 1:
                 i = self.check_eb_spotting()
@@ -2873,7 +3326,7 @@ class SinglecardBingo(procgame.game.Mode):
                     return 1
                 else:
                     return 0
-        elif self.game.reflex.connected_rivet() == 3 and (mix1 != 5 or mix1 != 9 or mix1 != 15 or mix1 != 23):
+        elif self.game.reflex.connected_rivet() == 3 and (mix1 not in [5,9,15,23]):
             m3 = self.check_mixer3()
             if m3 == 1:
                 i = self.check_eb_spotting()
@@ -2900,32 +3353,6 @@ class SinglecardBingo(procgame.game.Mode):
             self.delay(name="display", delay=0.1, handler=graphics.palm_springs.display, param=self)
             self.delay(name="step_eb", delay=0.1, handler=self.step_eb, param=number)
 
-    def blink_title(self):
-        title1 = random.randint(0,1)
-        title2 = random.randint(0,1)
-        title3 = random.randint(0,1)
-        title4 = random.randint(0,1)
-        if title1 == 1:
-            pos = [167,257]
-            image = pygame.image.load('palm_springs/assets/title1_on.png').convert_alpha()
-            screen.blit(image, pos)
-        if title2 == 1:
-            pos = [241,290]
-            image = pygame.image.load('palm_springs/assets/title2_on.png').convert_alpha()
-            screen.blit(image, pos)
-        if title3 == 1:
-            pos = [346,298]
-            image = pygame.image.load('palm_springs/assets/title3_on.png').convert_alpha()
-            screen.blit(image, pos)
-        if title4 == 1:
-            pos = [431,264]
-            image = pygame.image.load('palm_springs/assets/title4_on.png').convert_alpha()
-            screen.blit(image, pos)
-            
-        pygame.display.update()
-        self.delay(name="display", delay=0.1, handler=graphics.palm_springs.display, param=self)
-#        self.delay(name="blink_title", delay=3, handler=self.blink_title)
-
     # Define reset as the knock-off, anti-cheat relay disabled, and replay reset enabled.  Motors turn while credits are knocked off.
     # When meter reaches zero and the zero limit switch is hit, turn off motor sound and leave backglass gi on, but with tilt displayed.
 
@@ -2936,11 +3363,9 @@ class SinglecardBingo(procgame.game.Mode):
         self.eb = False
         self.game.anti_cheat.engage(self.game)
         self.tilt_actions()
-#        self.delay(name="blink_title", delay=1, handler=self.blink_title)
-
 
 class PalmSprings(procgame.game.BasicGame):
-    """ Palm Beach was the first game with Super Cards """
+    """ Palm Springs was the first game with the ball return feature """
     def __init__(self, machine_type):
         super(PalmSprings, self).__init__(machine_type)
         pygame.mixer.pre_init(44100,-16,2,512)
@@ -2987,10 +3412,6 @@ class PalmSprings(procgame.game.BasicGame):
         self.ball_count = units.Stepper("ball_count", 8)
 
         # Initialize reflex(es) and mixers unique to this game
-        # NOTE: reflex unit drawing was not available for this game, so until I convince
-        #       another Palm Beach owner to take their game apart, I'll note that there
-        #       are five lugs, four of which provide another path to the mixer, and one which is always connected
-        #       and bypasses the mixer entirely.  There are no games from 1951 or 52 that have the reflex documented.
         self.reflex = units.Reflex("primary", 200)
 
         #This is a disc which has 50 positions

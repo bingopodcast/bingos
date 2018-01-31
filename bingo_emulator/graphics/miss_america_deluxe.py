@@ -44,6 +44,9 @@ red_stars = pygame.image.load('miss_america_deluxe/assets/red_stars.png').conver
 red_letter_game = pygame.image.load('miss_america_deluxe/assets/red_letter_game.png').convert_alpha()
 four_green = pygame.image.load('miss_america_deluxe/assets/four_green.png').convert_alpha()
 striped_diagonals = pygame.image.load('miss_america_deluxe/assets/striped_diagonals.png').convert_alpha()
+bg_menu = pygame.image.load('miss_america_deluxe/assets/miss_america_deluxe_menu.png')
+bg_gi = pygame.image.load('miss_america_deluxe/assets/miss_america_deluxe_gi.png')
+bg_off = pygame.image.load('miss_america_deluxe/assets/miss_america_deluxe_off.png')
 
 class scorereel():
     """ Score Reels are used to count replays """
@@ -123,15 +126,12 @@ def display(s, replays=0, menu=False):
     backglass.set_colorkey((255,0,252))
     backglass.fill((0, 0, 0))
     if menu == True:
-        backglass = pygame.image.load('miss_america_deluxe/assets/miss_america_deluxe_menu.png')
+        screen.blit(bg_menu, backglass_position)
     else:
         if (s.game.anti_cheat.status == True):
-            backglass = pygame.image.load('miss_america_deluxe/assets/miss_america_deluxe_gi.png')
+            screen.blit(bg_gi, backglass_position)
         else:
-            backglass = pygame.image.load('miss_america_deluxe/assets/miss_america_deluxe_off.png')
-    backglass = pygame.transform.scale(backglass, (720, 1280))
-    
-    screen.blit(backglass, backglass_position)
+            screen.blit(bg_off, backglass_position)
 
     if s.game.rollovers.status == True and s.game.selection_feature.position >= 5:
         if s.game.cu:
@@ -814,12 +814,16 @@ def display(s, replays=0, menu=False):
     if s.game.selection_feature.position >= 5:
         if s.game.before_fourth.status == True:
             if s.game.ball_count.position == 3:
-                p = [272,725]
-                screen.blit(select_now, p)
+                s.cancel_delayed(name="blink")
+                blink([s,1,1])
+            else:
+                s.cancel_delayed(name="blink")
         elif s.game.before_fifth.status == True:
             if s.game.ball_count.position == 4:
-                p = [272,725]
-                screen.blit(select_now, p)
+                s.cancel_delayed(name="blink")
+                blink([s,1,1])
+            else:
+                s.cancel_delayed(name="blink")
     if s.game.selector.position >= 2:
         if s.game.red_letter_two.status == True:
             p = [499,653]
@@ -841,6 +845,26 @@ def display(s, replays=0, menu=False):
             screen.blit(striped_diagonals, p)
 
     pygame.display.update()
+
+def blink(args):
+    dirty_rects = []
+    s = args[0]
+    b = args[1]
+    sn = args[2]
+
+    if b == 0:
+        if sn == 1:
+            p = [272,725]
+            dirty_rects.append(screen.blit(select_now, p))
+        pygame.display.update(dirty_rects)
+    else:
+        dirty_rects.append(screen.blit(bg_gi, (272,725), pygame.Rect(272,725,171,32)))
+        pygame.display.update(dirty_rects)
+    b = not b
+
+    args = [s,b,sn]
+
+    s.delay(name="blink", delay=0.1, handler=blink, param=args)
 
 def eb_animation(num):
     global screen

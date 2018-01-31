@@ -47,6 +47,9 @@ lite_a_name = pygame.image.load('tropicana/assets/lite_a_name.png').convert_alph
 return_arrow = pygame.image.load('tropicana/assets/return_arrow.png').convert_alpha()
 ball_return = pygame.image.load('tropicana/assets/return.png').convert_alpha()
 special_held = pygame.image.load('tropicana/assets/special_held.png').convert_alpha()
+bg_menu = pygame.image.load('tropicana/assets/tropicana_menu.png')
+bg_gi = pygame.image.load('tropicana/assets/tropicana_gi.png')
+bg_off = pygame.image.load('tropicana/assets/tropicana_off.png')
 
 class scorereel():
     """ Score Reels are used to count replays """
@@ -73,15 +76,12 @@ def display(s, replays=0, menu=False):
     backglass = pygame.Surface(screen.get_size(), flags=pygame.SRCALPHA)
     backglass.fill((0, 0, 0))
     if menu == True:
-        backglass = pygame.image.load('tropicana/assets/tropicana_menu.png')
+        screen.blit(bg_menu, backglass_position)
     else:
         if (s.game.anti_cheat.status == True):
-            backglass = pygame.image.load('tropicana/assets/tropicana_gi.png')
+            screen.blit(bg_gi, backglass_position)
         else:
-            backglass = pygame.image.load('tropicana/assets/tropicana_off.png')
-    backglass = pygame.transform.scale(backglass, (720, 1280))
-    
-    screen.blit(backglass, backglass_position)
+            screen.blit(bg_off, backglass_position)
 
     if s.game.tilt.status == True:
         p = [196,250]
@@ -390,13 +390,21 @@ def display(s, replays=0, menu=False):
         p = [451,645]
         screen.blit(s_number, p)
 
-    if (s.game.select_spots.status == True or s.game.selection_feature_relay.status == True) and s.game.before_fourth.status == True and s.game.ball_count.position == 3:
-        p = [495,645]
-        screen.blit(select_now, p)
+    if (s.game.select_spots.status == True or s.game.selection_feature_relay.status == True):
+        if s.game.before_fourth.status == True:
+            if s.game.ball_count.position == 3:
+                s.cancel_delayed(name="blink")
+                blink([s,1,1])
+            else:
+                s.cancel_delayed(name="blink")
 
-    if (s.game.select_spots.status == True or s.game.selection_feature_relay.status == True) and s.game.before_fifth.status == True and s.game.ball_count.position == 4:
-        p = [495,645]
-        screen.blit(select_now, p)
+    if (s.game.select_spots.status == True or s.game.selection_feature_relay.status == True):
+        if s.game.before_fifth.status == True:
+            if s.game.ball_count.position == 4:
+                s.cancel_delayed(name="blink")
+                blink([s,1,1])
+            else:
+                s.cancel_delayed(name="blink")
 
     if s.game.before_fourth.status == True and (s.game.selection_feature.position > 3 or s.game.selection_feature_relay.status == True):
         p = [3,622]
@@ -572,6 +580,26 @@ def display(s, replays=0, menu=False):
         screen.blit(ball_return, p)
 
     pygame.display.update()
+
+def blink(args):
+    dirty_rects = []
+    s = args[0]
+    b = args[1]
+    sn = args[2]
+
+    if b == 0:
+        if sn == 1:
+            p = [495,645]
+            dirty_rects.append(screen.blit(select_now, p))
+        pygame.display.update(dirty_rects)
+    else:
+        dirty_rects.append(screen.blit(bg_gi, (495,645), pygame.Rect(495,645,134,40)))
+        pygame.display.update(dirty_rects)
+    b = not b
+
+    args = [s,b,sn]
+
+    s.delay(name="blink", delay=0.1, handler=blink, param=args)
 
 def eb_animation(num):
     global screen

@@ -53,6 +53,9 @@ score_arrow = pygame.image.load('starlet/assets/score_arrow.png').convert_alpha(
 feature = pygame.image.load('starlet/assets/feature.png').convert_alpha()
 special_pocket = pygame.image.load('starlet/assets/special_pocket.png').convert_alpha()
 eight_balls = pygame.image.load('starlet/assets/eight_balls.png').convert_alpha()
+bg_menu = pygame.image.load('starlet/assets/starlet_menu.png')
+bg_gi = pygame.image.load('starlet/assets/starlet_gi.png')
+bg_off = pygame.image.load('starlet/assets/starlet_off.png')
 
 class scorereel():
     """ Score Reels are used to count replays """
@@ -104,15 +107,12 @@ def display(s, replays=0, menu=False):
     backglass = pygame.Surface(screen.get_size(), flags=pygame.SRCALPHA)
     backglass.fill((0, 0, 0))
     if menu == True:
-        backglass = pygame.image.load('starlet/assets/starlet_menu.png')
+        screen.blit(bg_menu, backglass_position)
     else:
         if (s.game.anti_cheat.status == True):
-            backglass = pygame.image.load('starlet/assets/starlet_gi.png')
+            screen.blit(bg_gi, backglass_position)
         else:
-            backglass = pygame.image.load('starlet/assets/starlet_off.png')
-    backglass = pygame.transform.scale(backglass, (720, 1280))
-    
-    screen.blit(backglass, backglass_position)
+            screen.blit(bg_off, backglass_position)
 
     if s.game.tilt.status == True:
         p = [226,250]
@@ -479,13 +479,21 @@ def display(s, replays=0, menu=False):
         p = [531,727]
         screen.blit(s_number, p)
 
-    if (s.game.select_spots.status == True or s.game.selection_feature_relay.status == True) and s.game.before_fourth.status == True and s.game.ball_count.position == 3:
-        p = [153,692]
-        screen.blit(select_now, p)
+    if (s.game.select_spots.status == True or s.game.selection_feature_relay.status == True):
+        if s.game.before_fourth.status == True:
+            if s.game.ball_count.position == 3:
+                s.cancel_delayed(name="blink")
+                blink([s,1,1])
+            else:
+                s.cancel_delayed(name="blink")
 
-    if (s.game.select_spots.status == True or s.game.selection_feature_relay.status == True) and s.game.before_fifth.status == True and s.game.ball_count.position == 4:
-        p = [153,692]
-        screen.blit(select_now, p)
+    if (s.game.select_spots.status == True or s.game.selection_feature_relay.status == True):
+        if s.game.before_fifth.status == True:
+            if s.game.ball_count.position == 4:
+                s.cancel_delayed(name="blink")
+                blink([s,1,1])
+            else:
+                s.cancel_delayed(name="blink")
 
     if s.game.before_fourth.status == True and (s.game.selection_feature.position > 3):
         p = [5,712]
@@ -612,16 +620,60 @@ def display(s, replays=0, menu=False):
             p = [549,526]
             screen.blit(roto_time, p)
             if s.game.ball_count.position == 3:
-                p = [548,576]
-                screen.blit(roto_time, p)
+                s.cancel_delayed(name="blink_roto")
+                blink_roto([s,1,1])
+            else:
+                s.cancel_delayed("blink_roto")
         elif s.game.before_fifth.status == True:
             p = [548,627]
             screen.blit(roto_time, p)
             if s.game.ball_count.position == 4:
-                p = [550,576]
-                screen.blit(roto_time, p)
+                s.cancel_delayed(name="blink_roto")
+                blink_roto([s,1,1])
+            else:
+                s.cancel_delayed("blink_roto")
 
     pygame.display.update()
+
+def blink_roto(args):
+    dirty_rects = []
+    s = args[0]
+    b = args[1]
+    sn = args[2]
+
+    if b == 0:
+        if sn == 1:
+            p = [548,576]
+            dirty_rects.append(screen.blit(roto_time, p))
+        pygame.display.update(dirty_rects)
+    else:
+        dirty_rects.append(screen.blit(bg_gi, (548,576), pygame.Rect(548,576,165,51)))
+        pygame.display.update(dirty_rects)
+    b = not b
+
+    args = [s,b,sn]
+
+    s.delay(name="blink_roto", delay=0.1, handler=blink_roto, param=args)
+
+def blink(args):
+    dirty_rects = []
+    s = args[0]
+    b = args[1]
+    sn = args[2]
+
+    if b == 0:
+        if sn == 1:
+            p = [153,692]
+            dirty_rects.append(screen.blit(select_now, p))
+        pygame.display.update(dirty_rects)
+    else:
+        dirty_rects.append(screen.blit(bg_gi, (153,692), pygame.Rect(153,692,124,35)))
+        pygame.display.update(dirty_rects)
+    b = not b
+
+    args = [s,b,sn]
+
+    s.delay(name="blink", delay=0.1, handler=blink, param=args)
 
 def eb_animation(num):
     global screen

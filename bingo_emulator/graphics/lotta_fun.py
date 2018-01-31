@@ -28,6 +28,9 @@ r600 = pygame.image.load('lotta_fun/assets/600.png').convert_alpha()
 r700 = pygame.image.load('lotta_fun/assets/700.png').convert_alpha()
 r800 = pygame.image.load('lotta_fun/assets/800.png').convert_alpha()
 r900 = pygame.image.load('lotta_fun/assets/900.png').convert_alpha()
+bg_menu = pygame.image.load('lotta_fun/assets/lotta_fun_menu.png')
+bg_gi = pygame.image.load('lotta_fun/assets/lotta_fun_gi.png')
+bg_off = pygame.image.load('lotta_fun/assets/lotta_fun_off.png')
 
 def display(s, replays=0, menu=False):
 
@@ -35,15 +38,12 @@ def display(s, replays=0, menu=False):
     backglass = pygame.Surface(screen.get_size(), flags=pygame.SRCALPHA)
     backglass.fill((0, 0, 0))
     if menu == True:
-        backglass = pygame.image.load('lotta_fun/assets/lotta_fun_menu.png')
+        screen.blit(bg_menu, backglass_position)
     else:
         if (s.game.anti_cheat.status == True):
-            backglass = pygame.image.load('lotta_fun/assets/lotta_fun_gi.png')
+            screen.blit(bg_gi, backglass_position)
         else:
-            backglass = pygame.image.load('lotta_fun/assets/lotta_fun_off.png')
-    backglass = pygame.transform.scale(backglass, (720, 1280))
-    
-    screen.blit(backglass, backglass_position)
+            screen.blit(bg_off, backglass_position)
 
     if s.game.selector.position >= 1:
         card1_position = [88,765]

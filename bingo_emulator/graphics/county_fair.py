@@ -35,6 +35,12 @@ t = pygame.image.load('county_fair/assets/t.png').convert_alpha()
 red_t = pygame.image.load('county_fair/assets/red_t.png').convert_alpha()
 y = pygame.image.load('county_fair/assets/y.png').convert_alpha()
 red_y = pygame.image.load('county_fair/assets/red_y.png').convert_alpha()
+bg_menu = pygame.image.load('county_fair/assets/county_fair_menu.png').convert()
+bg_menu.set_colorkey((255,0,252))
+bg_gi = pygame.image.load('county_fair/assets/county_fair_gi.png').convert()
+bg_gi.set_colorkey((255,0,252))
+bg_off = pygame.image.load('county_fair/assets/county_fair_off.png').convert()
+bg_off.set_colorkey((255,0,252))
 
 class scorereel():
     """ Score Reels are used to count replays """
@@ -92,18 +98,12 @@ def display(s, replays=0, menu=False):
     backglass = pygame.Surface(screen.get_size(), flags=pygame.SRCALPHA)
     backglass.fill((0, 0, 0))
     if menu == True:
-        backglass = pygame.image.load('county_fair/assets/county_fair_menu.png').convert()
-        backglass.set_colorkey((255,0,252))
+        screen.blit(bg_menu, backglass_position)
     else:
         if (s.game.anti_cheat.status == True):
-            backglass = pygame.image.load('county_fair/assets/county_fair_gi.png').convert()
-            backglass.set_colorkey((255,0,252))
+            screen.blit(bg_gi, backglass_position)
         else:
-            backglass = pygame.image.load('county_fair/assets/county_fair_off.png').convert()
-            backglass.set_colorkey((255,0,252))
-    backglass = pygame.transform.scale(backglass, (720, 1280))
-    
-    screen.blit(backglass, backglass_position)
+            screen.blit(bg_off, backglass_position)
 
     if s.game.green_odds.position < 4:
         rc = [108,255]
@@ -208,12 +208,27 @@ def display(s, replays=0, menu=False):
         if s.game.selection_feature.position < 7:
             bfp = [550,572]
             screen.blit(feature, bfp)
+            if s.game.ball_count.position == 3:
+                s.cancel_delayed(name="blink")
+                blink([s,1,1])
+            else:
+                s.cancel_delayed(name="blink")
         elif s.game.selection_feature.position == 7:
             bfp = [550,407]
             screen.blit(feature, bfp)
+            if s.game.ball_count.position == 4:
+                s.cancel_delayed(name="blink")
+                blink([s,1,1])
+            else:
+                s.cancel_delayed(name="blink")
         elif s.game.selection_feature.position == 8:
             bfp = [550,349]
             screen.blit(feature, bfp)
+            if s.game.ball_count.position == 5:
+                s.cancel_delayed(name="blink")
+                blink([s,1,1])
+            else:
+                s.cancel_delayed(name="blink")
 
     if s.game.magic_screen_feature.position >= 9:
         if s.game.three_blue.status == True:
@@ -446,6 +461,26 @@ def display(s, replays=0, menu=False):
         screen.blit(tilt, tilt_position)
 
     pygame.display.update()
+
+def blink(args):
+    dirty_rects = []
+    s = args[0]
+    b = args[1]
+    sn = args[2]
+
+    if b == 0:
+        if sn == 1:
+            p = [571,680]
+            dirty_rects.append(screen.blit(select_now, p))
+        pygame.display.update(dirty_rects)
+    else:
+        dirty_rects.append(screen.blit(bg_gi, (571,680), pygame.Rect(571,680,124,35)))
+        pygame.display.update(dirty_rects)
+    b = not b
+
+    args = [s,b,sn]
+
+    s.delay(name="blink", delay=0.1, handler=blink, param=args)
 
 def eb_animation(num):
     global screen

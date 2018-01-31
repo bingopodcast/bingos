@@ -46,6 +46,9 @@ collected = pygame.image.load('magic_ring/assets/collected.png').convert_alpha()
 double_up = pygame.image.load('magic_ring/assets/double_up.png').convert_alpha()
 stars = pygame.image.load('magic_ring/assets/stars.png').convert_alpha()
 double_rectangle = pygame.image.load('magic_ring/assets/double_rectangle.png').convert_alpha()
+bg_menu = pygame.image.load('magic_ring/assets/magic_ring_menu.png').convert_alpha()
+bg_gi = pygame.image.load('magic_ring/assets/magic_ring_gi.png').convert_alpha()
+bg_off = pygame.image.load('magic_ring/assets/magic_ring_off.png').convert_alpha()
 
 class scorereel():
     """ Score Reels are used to count replays """
@@ -117,15 +120,12 @@ def display(s, replays=0, menu=False):
     backglass = pygame.Surface(screen.get_size(), flags=pygame.SRCALPHA)
     backglass.fill((0, 0, 0))
     if menu == True:
-        backglass = pygame.image.load('magic_ring/assets/magic_ring_menu.png').convert_alpha()
+        screen.blit(bg_menu, backglass_position)
     else:
         if (s.game.anti_cheat.status == True):
-            backglass = pygame.image.load('magic_ring/assets/magic_ring_gi.png').convert_alpha()
+            screen.blit(bg_gi, backglass_position)
         else:
-            backglass = pygame.image.load('magic_ring/assets/magic_ring_off.png').convert_alpha()
-    backglass = pygame.transform.scale(backglass, (720, 1280))
-    
-    screen.blit(backglass, backglass_position)
+            screen.blit(bg_off, backglass_position)
 
     wheel_letter_pos = [305,450]
     screen.blit(wheel_letters, wheel_letter_pos)
@@ -354,12 +354,14 @@ def display(s, replays=0, menu=False):
 
     if s.game.ball_count.position == 5 and s.game.double.status == False:
         if (s.game.red_winner.status == True and s.game.red_replay_counter.position == 0) or (s.game.yellow_winner.status == True and s.game.yellow_replay_counter.position == 0) or (s.game.green_winner.status == True and s.game.green_replay_counter.position == 0):
-            p = [140,732]
-            screen.blit(dn, p)
-    if s.game.ball_count.position == 3 and s.game.double_double.status == False and s.game.double.status == True:
+            s.cancel_delayed(name="blink_double")
+            blink_double([s,1,1])
+    elif s.game.ball_count.position == 3 and s.game.double_double.status == False and s.game.double.status == True:
         if (s.game.red_winner.status == True and s.game.red_replay_counter.position == 0) or (s.game.yellow_winner.status == True and s.game.yellow_replay_counter.position == 0) or (s.game.green_winner.status == True and s.game.green_replay_counter.position == 0):
-            p = [140,732]
-            screen.blit(dn, p)
+            s.cancel_delayed(name="blink_double")
+            blink_double([s,1,1])
+    else:
+        s.cancel_delayed("blink_double")
 
     if s.game.double_colors.position >= 1:
         p = [140,675]
@@ -429,8 +431,10 @@ def display(s, replays=0, menu=False):
         elif s.game.selection_feature.position == 9:
             t = 5
         if s.game.ball_count.position == t:
-            p = [90,495]
-            screen.blit(select_now, p)
+            s.cancel_delayed(name="blink")
+            blink([s,1,1])
+        else:
+            s.cancel_delayed(name="blink")
     if s.game.wheel.position >= 1:
         p = [24,546]
         screen.blit(w_letter, p)
@@ -485,6 +489,46 @@ def display(s, replays=0, menu=False):
         screen.blit(stars, p)
 
     pygame.display.update()
+
+def blink_double(args):
+    dirty_rects = []
+    s = args[0]
+    b = args[1]
+    sn = args[2]
+
+    if b == 0:
+        if sn == 1:
+            p = [140,732]
+            dirty_rects.append(screen.blit(dn, p))
+        pygame.display.update(dirty_rects)
+    else:
+        dirty_rects.append(screen.blit(bg_gi, (140,732), pygame.Rect(140,732,433,74)))
+        pygame.display.update(dirty_rects)
+    b = not b
+
+    args = [s,b,sn]
+
+    s.delay(name="blink_double", delay=0.1, handler=blink_double, param=args)
+
+def blink(args):
+    dirty_rects = []
+    s = args[0]
+    b = args[1]
+    sn = args[2]
+
+    if b == 0:
+        if sn == 1:
+            p = [90,495]
+            dirty_rects.append(screen.blit(select_now, p))
+        pygame.display.update(dirty_rects)
+    else:
+        dirty_rects.append(screen.blit(bg_gi, (90,495), pygame.Rect(90,495,63,78)))
+        pygame.display.update(dirty_rects)
+    b = not b
+
+    args = [s,b,sn]
+
+    s.delay(name="blink", delay=0.1, handler=blink, param=args)
 
 def feature_animation(num):
     global screen

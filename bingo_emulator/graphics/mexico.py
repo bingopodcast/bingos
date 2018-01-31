@@ -42,6 +42,9 @@ letter_co = pygame.image.load('mexico/assets/letter_co.png').convert_alpha()
 lite_a_name = pygame.image.load('mexico/assets/lite_a_name.png').convert_alpha()
 return_arrow = pygame.image.load('mexico/assets/return_arrow.png').convert_alpha()
 ball_return = pygame.image.load('mexico/assets/return.png').convert_alpha()
+bg_menu = pygame.image.load('mexico/assets/mexico_menu.png')
+bg_gi = pygame.image.load('mexico/assets/mexico_gi.png')
+bg_off = pygame.image.load('mexico/assets/mexico_off.png')
 
 class scorereel():
     """ Score Reels are used to count replays """
@@ -68,15 +71,12 @@ def display(s, replays=0, menu=False):
     backglass = pygame.Surface(screen.get_size(), flags=pygame.SRCALPHA)
     backglass.fill((0, 0, 0))
     if menu == True:
-        backglass = pygame.image.load('mexico/assets/mexico_menu.png')
+        screen.blit(bg_menu, backglass_position)
     else:
         if (s.game.anti_cheat.status == True):
-            backglass = pygame.image.load('mexico/assets/mexico_gi.png')
+            screen.blit(bg_gi, backglass_position)
         else:
-            backglass = pygame.image.load('mexico/assets/mexico_off.png')
-    backglass = pygame.transform.scale(backglass, (720, 1280))
-    
-    screen.blit(backglass, backglass_position)
+            screen.blit(bg_off, backglass_position)
 
     if s.game.tilt.status == True:
         p = [229,259]
@@ -377,13 +377,21 @@ def display(s, replays=0, menu=False):
         p = [451,694]
         screen.blit(s_number, p)
 
-    if (s.game.select_spots.status == True or s.game.selection_feature_relay.status == True) and s.game.before_fourth.status == True and s.game.ball_count.position == 3:
-        p = [491,694]
-        screen.blit(select_now, p)
+    if (s.game.select_spots.status == True or s.game.selection_feature_relay.status == True):
+        if s.game.before_fourth.status == True:
+            if s.game.ball_count.position == 3:
+                s.cancel_delayed(name="blink")
+                blink([s,1,1])
+            else:
+                s.cancel_delayed(name="blink")
 
-    if (s.game.select_spots.status == True or s.game.selection_feature_relay.status == True) and s.game.before_fifth.status == True and s.game.ball_count.position == 4:
-        p = [491,694]
-        screen.blit(select_now, p)
+    if (s.game.select_spots.status == True or s.game.selection_feature_relay.status == True):
+        if s.game.before_fifth.status == True:
+            if s.game.ball_count.position == 4:
+                s.cancel_delayed(name="blink")
+                blink([s,1,1])
+            else:
+                s.cancel_delayed(name="blink")
 
     if s.game.before_fourth.status == True and (s.game.selection_feature.position > 3 or s.game.selection_feature_relay.status == True):
         p = [7,695]
@@ -517,16 +525,6 @@ def display(s, replays=0, menu=False):
         screen.blit(select_feature, p)
 
 
-    if s.game.selection_feature_relay.status == True:
-        if s.game.before_fourth.status == True:
-            max_ball = 4
-        else:
-            max_ball = 5
-        if s.game.ball_count.position == max_ball:
-            if s.game.spotted.position == 8:
-                p = [254,642]
-                screen.blit(three_four, p)
-
     if s.game.three_as_four.status == True:
         p = [254,642]
         screen.blit(three_four, p)
@@ -575,6 +573,26 @@ def display(s, replays=0, menu=False):
         screen.blit(ball_return, p)
 
     pygame.display.update()
+
+def blink(args):
+    dirty_rects = []
+    s = args[0]
+    b = args[1]
+    sn = args[2]
+
+    if b == 0:
+        if sn == 1:
+            p = [491,694]
+            dirty_rects.append(screen.blit(select_now, p))
+        pygame.display.update(dirty_rects)
+    else:
+        dirty_rects.append(screen.blit(bg_gi, (491,694), pygame.Rect(491,694,132,39)))
+        pygame.display.update(dirty_rects)
+    b = not b
+
+    args = [s,b,sn]
+
+    s.delay(name="blink", delay=0.1, handler=blink, param=args)
 
 def eb_animation(num):
     global screen

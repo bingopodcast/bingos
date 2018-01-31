@@ -60,6 +60,9 @@ special_odds = pygame.image.load('london/assets/special_odds.png').convert_alpha
 golden = pygame.image.load('london/assets/golden.png').convert_alpha()
 color = pygame.image.load('london/assets/color.png').convert_alpha()
 twin_number = pygame.image.load('london/assets/twin_number.png').convert_alpha()
+bg_menu = pygame.image.load('london/assets/london_menu.png').convert_alpha()
+bg_gi = pygame.image.load('london/assets/london_gi.png').convert_alpha()
+bg_off = pygame.image.load('london/assets/london_off.png').convert_alpha()
 
 class scorereel():
     """ Score Reels are used to count replays """
@@ -124,16 +127,12 @@ def display(s, replays=0, menu=False):
     backglass = pygame.Surface(screen.get_size(), flags=pygame.SRCALPHA)
     backglass.fill((0, 0, 0))
     if menu == True:
-        backglass = pygame.image.load('london/assets/london_menu.png').convert_alpha()
+        screen.blit(bg_menu, backglass_position)
     else:
         if (s.game.anti_cheat.status == True):
-            backglass = pygame.image.load('london/assets/london_gi.png').convert_alpha()
+            screen.blit(bg_gi, backglass_position)
         else:
-            backglass = pygame.image.load('london/assets/london_off.png').convert_alpha()
-    backglass = pygame.transform.scale(backglass, (720, 1280))
-    
-    screen.blit(backglass, backglass_position)
-
+            screen.blit(bg_off, backglass_position)
 
     if s.game.eb_play.status == True:
         eb_position = [38,1044]
@@ -238,14 +237,16 @@ def display(s, replays=0, menu=False):
         screen.blit(ml_letter, p)
 
     if s.game.mystic_lines.position >= 4:
-        t = 4
+        t = 3
         if s.game.selection_feature.position in [7,8]:
-            t = 5
+            t = 4
         if s.game.selection_feature.position == 9:
-            t = 6
+            t = 5
         if s.game.ball_count.position == t:
-            p = [286,643]
-            screen.blit(select_now, p)
+            s.cancel_delayed(name="blink")
+            blink([s,1,1])
+        else:
+            s.cancel_delayed(name="blink")
 
     if s.game.tilt.status == False:
         if s.holes:
@@ -540,22 +541,22 @@ def display(s, replays=0, menu=False):
     p = [634,212]
     screen.blit(letter6, p)
 
-    if s.game.red_odds.position < 4:
+    if s.game.red_odds.position < 5:
         p = [387,212]
         screen.blit(red_letter1, p)
-    if s.game.red_odds.position == 4:
+    if s.game.red_odds.position in [5,6]:
         p = [424,212]
         screen.blit(red_letter2, p)
-    if s.game.red_odds.position == 5:
+    if s.game.red_odds.position == 7:
         p = [474,212]
         screen.blit(red_letter3, p)
-    if s.game.red_odds.position == 6:
+    if s.game.red_odds.position == 8:
         p = [529,212]
         screen.blit(red_letter4, p)
-    if s.game.red_odds.position == 7:
+    if s.game.red_odds.position == 9:
         p = [580,212]
         screen.blit(red_letter5, p)
-    if s.game.red_odds.position == 8:
+    if s.game.red_odds.position == 10:
         p = [634,212]
         screen.blit(red_letter6, p)
 
@@ -609,18 +610,46 @@ def display(s, replays=0, menu=False):
     # Special Game
     if s.game.missed.status == False:
         if s.game.special_odds.position > 0:
+            s.cancel_delayed("blink_circle")
+            s.cancel_delayed("blink_triangle")
+            s.cancel_delayed("blink_square")
         #Blink all three symbols until they are made, then light solid.
-            if s.game.special_game.position >= 0:
-                if s.game.circle.status == True:
+            if s.game.special_game.position == 0:
+                if s.game.circle.status == False:
+                    blink_circle([s,1,1,(606,650)])
+                else:
                     p = [606,650]
                     screen.blit(color, p)
-                if s.game.triangle.status == True:
+                if s.game.triangle.status == False:
+                    blink_triangle([s,1,1,(605,686)])
+                else:
                     p = [605,686]
                     screen.blit(color, p)
-                if s.game.square.status == True:
+                if s.game.square.status == False:
+                    blink_square([s,1,1,(606,614)])
+                else:
                     p = [606,614]
                     screen.blit(color, p)
-            if s.game.special_game.position >= 1:
+            if s.game.special_game.position == 1:
+                p = [606,650]
+                screen.blit(color, p)
+                p = [605,686]
+                screen.blit(color, p)
+                p = [606,614]
+                screen.blit(color, p)
+                if s.game.orange1.status == True:
+                    blink_circle([s,1,1,(640,650)])
+                if s.game.white1.status == True:
+                    blink_square([s,1,1,(640,614)])
+                if s.game.pink1.status == True:
+                    blink_triangle([s,1,1,(640,686)])
+            if s.game.special_game.position == 2:
+                p = [606,650]
+                screen.blit(color, p)
+                p = [605,686]
+                screen.blit(color, p)
+                p = [606,614]
+                screen.blit(color, p)
                 if s.game.orange1.status == True:
                     p = [640,650]
                     screen.blit(color, p)
@@ -630,16 +659,12 @@ def display(s, replays=0, menu=False):
                 if s.game.pink1.status == True:
                     p = [640,686]
                     screen.blit(color, p)
-            if s.game.special_game.position == 2:
                 if s.game.orange2.status == True:
-                    p = [674,650]
-                    screen.blit(color, p)
+                    blink_circle([s,1,1,(674,650)])
                 if s.game.white2.status == True:
-                    p = [674,614]
-                    screen.blit(color, p)
+                    blink_square([s,1,1,(674,614)])
                 if s.game.pink2.status == True:
-                    p = [674,686]
-                    screen.blit(color, p)
+                    blink_triangle([s,1,1,(674,686)])
 
             if s.game.special_game.position == 3:
                 p = [542,384]
@@ -717,6 +742,86 @@ def display(s, replays=0, menu=False):
 
 
     pygame.display.update()
+
+def blink_circle(args):
+    dirty_rects = []
+    s = args[0]
+    b = args[1]
+    sn = args[2]
+    p = args[3]
+
+    if b == 0:
+        if sn == 1:
+            dirty_rects.append(screen.blit(color, p))
+        pygame.display.update(dirty_rects)
+    else:
+        dirty_rects.append(screen.blit(bg_gi, (p[0],p[1]), pygame.Rect(p[0],p[1],35,37)))
+        pygame.display.update(dirty_rects)
+    b = not b
+
+    args = [s,b,sn,p]
+
+    s.delay(name="blink_circle", delay=0.3, handler=blink_circle, param=args)
+
+def blink_square(args):
+    dirty_rects = []
+    s = args[0]
+    b = args[1]
+    sn = args[2]
+    p = args[3]
+
+    if b == 0:
+        if sn == 1:
+            dirty_rects.append(screen.blit(color, p))
+        pygame.display.update(dirty_rects)
+    else:
+        dirty_rects.append(screen.blit(bg_gi, (p[0],p[1]), pygame.Rect(p[0],p[1],35,37)))
+        pygame.display.update(dirty_rects)
+    b = not b
+
+    args = [s,b,sn,p]
+
+    s.delay(name="blink_square", delay=0.3, handler=blink_square, param=args)
+
+def blink_triangle(args):
+    dirty_rects = []
+    s = args[0]
+    b = args[1]
+    sn = args[2]
+    p = args[3]
+
+    if b == 0:
+        if sn == 1:
+            dirty_rects.append(screen.blit(color, p))
+        pygame.display.update(dirty_rects)
+    else:
+        dirty_rects.append(screen.blit(bg_gi, (p[0],p[1]), pygame.Rect(p[0],p[1],35,37)))
+        pygame.display.update(dirty_rects)
+    b = not b
+
+    args = [s,b,sn,p]
+
+    s.delay(name="blink_triangle", delay=0.3, handler=blink_triangle, param=args)
+
+def blink(args):
+    dirty_rects = []
+    s = args[0]
+    b = args[1]
+    sn = args[2]
+
+    if b == 0:
+        if sn == 1:
+            p = [286,643]
+            dirty_rects.append(screen.blit(select_now, p))
+        pygame.display.update(dirty_rects)
+    else:
+        dirty_rects.append(screen.blit(bg_gi, (286,643), pygame.Rect(286,643,146,30)))
+        pygame.display.update(dirty_rects)
+    b = not b
+
+    args = [s,b,sn]
+
+    s.delay(name="blink", delay=0.1, handler=blink, param=args)
 
 def eb_animation(num):
     global screen

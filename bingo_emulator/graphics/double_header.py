@@ -52,6 +52,9 @@ d0 = pygame.image.load('double_header/assets/d0.png').convert_alpha()
 d1 = pygame.image.load('double_header/assets/d1.png').convert_alpha()
 d2 = pygame.image.load('double_header/assets/d2.png').convert_alpha()
 d3 = pygame.image.load('double_header/assets/d3.png').convert_alpha()
+bg_menu = pygame.image.load('double_header/assets/double_header_menu.png')
+bg_gi = pygame.image.load('double_header/assets/double_header_gi.png')
+bg_off = pygame.image.load('double_header/assets/double_header_off.png')
 
 class scorereel():
     """ Score Reels are used to count replays """
@@ -128,16 +131,12 @@ def display(s, replays=0, menu=False):
     backglass = pygame.Surface(screen.get_size(), flags=pygame.SRCALPHA)
     backglass.fill((0, 0, 0))
     if menu == True:
-        backglass = pygame.image.load('double_header/assets/double_header_menu.png')
+        screen.blit(bg_menu, backglass_position)
     else:
         if (s.game.anti_cheat.status == True):
-            backglass = pygame.image.load('double_header/assets/double_header_gi.png')
+            screen.blit(bg_gi, backglass_position)
         else:
-            backglass = pygame.image.load('double_header/assets/double_header_off.png')
-    backglass = pygame.transform.scale(backglass, (720, 1280))
-    
-    screen.blit(backglass, backglass_position)
-
+            screen.blit(bg_off, backglass_position)
 
     if s.game.tilt.status == False:
         if s.holes:
@@ -522,12 +521,16 @@ def display(s, replays=0, menu=False):
 
     if s.game.magic_squares_feature.position >= 1:
         if s.game.ball_count.position == 3:
-            p = [440,731]
-            screen.blit(select_now, p)
+            s.cancel_delayed(name="blink")
+            blink([s,1,1])
+        else:
+            s.cancel_delayed(name="blink")
     if s.game.selection_feature.position >= 5:
         if s.game.ball_count.position == 3:
-            p = [215,733]
-            screen.blit(turn_now, p)
+            s.cancel_delayed(name="blink_turn")
+            blink_turn([s,1,1])
+        else:
+            s.cancel_delayed(name="blink_turn")
         
     if s.game.corners.status == True:
         p = [157,253]
@@ -614,8 +617,47 @@ def display(s, replays=0, menu=False):
         tilt_position = [30,239]
         screen.blit(tilt, tilt_position)
 
-    pygame.display.flip()
     pygame.display.update()
+
+def blink(args):
+    dirty_rects = []
+    s = args[0]
+    b = args[1]
+    sl = args[2]
+
+    if b == 0:
+        if sl == 1:
+            p = [440,731]
+            dirty_rects.append(screen.blit(select_now, p))
+        pygame.display.update(dirty_rects)
+    else:
+        dirty_rects.append(screen.blit(bg_gi, (440,731), pygame.Rect(440,731,186,35)))
+        pygame.display.update(dirty_rects)
+    b = not b
+
+    args = [s,b,sl]
+
+    s.delay(name="blink", delay=0.1, handler=blink, param=args)
+
+def blink_turn(args):
+    dirty_rects = []
+    s = args[0]
+    b = args[1]
+    sl = args[2]
+
+    if b == 0:
+        if sl == 1:
+            p = [215,733]
+            dirty_rects.append(screen.blit(turn_now, p))
+        pygame.display.update(dirty_rects)
+    else:
+        dirty_rects.append(screen.blit(bg_gi, (215,733), pygame.Rect(215,733,118,32)))
+        pygame.display.update(dirty_rects)
+    b = not b
+
+    args = [s,b,sl]
+
+    s.delay(name="blink_turn", delay=0.1, handler=blink_turn, param=args)
 
 def eb_animation(num):
 

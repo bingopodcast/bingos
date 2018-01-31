@@ -34,6 +34,9 @@ sl1 = pygame.image.load('dude_ranch/assets/super_line1.png').convert_alpha()
 sl2 = pygame.image.load('dude_ranch/assets/super_line2.png').convert_alpha()
 tilt = pygame.image.load('dude_ranch/assets/tilt.png').convert_alpha()
 red_number = pygame.image.load('dude_ranch/assets/red_number.png').convert_alpha()
+bg_menu = pygame.image.load('dude_ranch/assets/dude_ranch_menu.png')
+bg_gi = pygame.image.load('dude_ranch/assets/dude_ranch_gi.png')
+bg_off = pygame.image.load('dude_ranch/assets/dude_ranch_off.png')
 
 class scorereel():
     """ Score Reels are used to count replays """
@@ -60,15 +63,12 @@ def display(s, replays=0, menu=False):
     backglass = pygame.Surface(screen.get_size(), flags=pygame.SRCALPHA)
     backglass.fill((0, 0, 0))
     if menu == True:
-        backglass = pygame.image.load('dude_ranch/assets/dude_ranch_menu.png')
+        screen.blit(bg_menu, backglass_position)
     else:
         if (s.game.anti_cheat.status == True):
-            backglass = pygame.image.load('dude_ranch/assets/dude_ranch_gi.png')
+            screen.blit(bg_gi, backglass_position)
         else:
-            backglass = pygame.image.load('dude_ranch/assets/dude_ranch_off.png')
-    backglass = pygame.transform.scale(backglass, (720, 1280))
-    
-    screen.blit(backglass, backglass_position)
+            screen.blit(bg_off, backglass_position)
 
     if s.game.selector.position >= 1:
         c_pos = [72,439]
@@ -338,12 +338,18 @@ def display(s, replays=0, menu=False):
         p = [650,718]
         screen.blit(number, p)
 
-    if s.game.spotted_numbers.position > 6 and s.game.ball_count.position == 3:
-        p = [237,759]
-        screen.blit(select_spots, p)
-    if s.game.feature.position > 5 and s.game.ball_count.position == 3:
-        p = [275,659]
-        screen.blit(select_now, p)
+    if s.game.spotted_numbers.position > 6:
+        if s.game.ball_count.position == 3:
+            s.cancel_delayed(name="blink")
+            blink([s,1,1])
+        else:
+            s.cancel_delayed(name="blink")
+    if s.game.feature.position > 5:
+        if s.game.ball_count.position == 2:
+            s.cancel_delayed(name="blink_select")
+            blink_select([s,1,1])
+        else:
+            s.cancel_delayed(name="blink_select")
 
     if s.game.feature.position == 1:
         p = [278,537]
@@ -430,6 +436,46 @@ def display(s, replays=0, menu=False):
                     screen.blit(red_number, number_position)
                     
     pygame.display.update()
+
+def blink_select(args):
+    dirty_rects = []
+    s = args[0]
+    b = args[1]
+    sl = args[2]
+
+    if b == 0:
+        if sl == 1:
+            p = [278,661]
+            dirty_rects.append(screen.blit(select_now, p))
+        pygame.display.update(dirty_rects)
+    else:
+        dirty_rects.append(screen.blit(bg_gi, (278,661), pygame.Rect(278,661,176,37)))
+        pygame.display.update(dirty_rects)
+    b = not b
+
+    args = [s,b,sl]
+
+    s.delay(name="blink_select", delay=0.1, handler=blink_select, param=args)
+
+def blink(args):
+    dirty_rects = []
+    s = args[0]
+    b = args[1]
+    sl = args[2]
+
+    if b == 0:
+        if sl == 1:
+            p = [238,760]
+            dirty_rects.append(screen.blit(select_spots, p))
+        pygame.display.update(dirty_rects)
+    else:
+        dirty_rects.append(screen.blit(bg_gi, (238,760), pygame.Rect(238,760,152,32)))
+        pygame.display.update(dirty_rects)
+    b = not b
+
+    args = [s,b,sl]
+
+    s.delay(name="blink", delay=0.1, handler=blink, param=args)
 
 def eb_animation(num):
 

@@ -1,7 +1,6 @@
 import random
 import procgame
 
-
 class Stepper:
     def __init__(self, name, top, gamename=None, t=None):
         self.name = name
@@ -163,12 +162,13 @@ class Spotting:
         self.name = name
         self.position = 0
         self.top = top
+        self.movement_amount = 0
     def spin(self):
-        movement_amount = random.randint(15,30)
-        if self.position + movement_amount > self.top:
-            self.position = (self.position + movement_amount) - self.top
+        self.movement_amount = random.randint(15,30)
+        if self.position + self.movement_amount > self.top:
+            self.position = (self.position + self.movement_amount) - self.top
         else: 
-            self.position += movement_amount
+            self.position += self.movement_amount
         return self.position
     def connected_rivet(self, gamename=None):
         return self.position
@@ -178,12 +178,13 @@ class Motor:
         self.name = name
         self.position = 0
         self.top = top
+        self.movement_amount = 0
     def spin(self):
-        movement_amount = random.randint(0, self.top)
-        if self.position + movement_amount > self.top:
-            self.position = (self.position + movement_amount) - self.top
+        self.movement_amount = random.randint(0, self.top)
+        if self.position + self.movement_amount > self.top:
+            self.position = (self.position + self.movement_amount) - self.top
         else: 
-            self.position += movement_amount
+            self.position += self.movement_amount
         return self.position
     def connected_rivet(self, gamename=None):
         return self.position

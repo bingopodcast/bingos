@@ -28,6 +28,9 @@ ml_arrow = pygame.image.load('galaxy/assets/line_arrow.png').convert_alpha()
 button = pygame.image.load('galaxy/assets/pap.png').convert_alpha()
 return_select_now = pygame.image.load('galaxy/assets/return_select_now.png').convert_alpha()
 sf_arrow = pygame.image.load('galaxy/assets/sf_arrow.png').convert_alpha()
+bg_menu = pygame.image.load('galaxy/assets/galaxy_menu.png').convert_alpha()
+bg_gi = pygame.image.load('galaxy/assets/galaxy_gi.png').convert_alpha()
+bg_off = pygame.image.load('galaxy/assets/galaxy_off.png').convert_alpha()
 
 class scorereel():
     """ Score Reels are used to count replays """
@@ -100,7 +103,7 @@ def display(s, replays=0, menu=False):
     
     screen.blit(backglass, backglass_position)
 
-    if s.game.mystic_lines.position >= 1:
+    if s.game.mystic_lines.position >= 2:
         if s.game.selection_feature.position in [1,2]:
             bfp = [584,581]
             screen.blit(time, bfp)
@@ -134,24 +137,28 @@ def display(s, replays=0, menu=False):
         screen.blit(ml_letter, p)
 
     if s.game.mystic_lines.position >= 2:
-        t = 4
-        if s.game.selection_feature.position in [4,5]:
-            t = 5
+        t = 3
+        if s.game.selection_feature.position in [3,4,5]:
+            t = 4
         if s.game.selection_feature.position == 6:
-            t = 6
+            t = 5
         if s.game.ball_count.position == t:
-            p = [299,702]
-            screen.blit(select_now, p)
+            s.cancel_delayed(name="blink")
+            blink([s,1,1])
+        else:
+            s.cancel_delayed(name="blink")
 
     if s.game.b_return.status == True:
-        t = 4
-        if s.game.selection_feature.position in [4,5]:
-            t = 5
+        t = 3
+        if s.game.selection_feature.position in [3,4,5]:
+            t = 4
         if s.game.selection_feature.position == 6:
-            t = 6
+            t = 5
         if s.game.ball_count.position == t:
-            p = [17,493]
-            screen.blit(return_select_now, p)
+            s.cancel_delayed(name="blink_return")
+            blink_return([s,1,1])
+        else:
+            s.cancel_delayed(name="blink_return")
 
 
     if s.game.tilt.status == False:
@@ -595,6 +602,46 @@ def display(s, replays=0, menu=False):
         screen.blit(tilt, tilt_position)
 
     pygame.display.update()
+
+def blink(args):
+    dirty_rects = []
+    s = args[0]
+    b = args[1]
+    sn = args[2]
+
+    if b == 0:
+        if sn == 1:
+            p = [299,702]
+            dirty_rects.append(screen.blit(select_now, p))
+        pygame.display.update(dirty_rects)
+    else:
+        dirty_rects.append(screen.blit(bg_gi, (299,702), pygame.Rect(299,702,125,33)))
+        pygame.display.update(dirty_rects)
+    b = not b
+
+    args = [s,b,sn]
+
+    s.delay(name="blink", delay=0.1, handler=blink, param=args)
+
+def blink_return(args):
+    dirty_rects = []
+    s = args[0]
+    b = args[1]
+    sn = args[2]
+
+    if b == 0:
+        if sn == 1:
+            p = [17,493]
+            dirty_rects.append(screen.blit(return_select_now, p))
+        pygame.display.update(dirty_rects)
+    else:
+        dirty_rects.append(screen.blit(bg_gi, (17,493), pygame.Rect(17,493,133,36)))
+        pygame.display.update(dirty_rects)
+    b = not b
+
+    args = [s,b,sn]
+
+    s.delay(name="blink_return", delay=0.1, handler=blink_return, param=args)
 
 def eb_animation(num):
     pass

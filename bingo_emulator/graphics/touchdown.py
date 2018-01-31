@@ -51,6 +51,9 @@ numberd3 = pygame.image.load('touchdown/assets/numberd3.png').convert()
 numberd4 = pygame.image.load('touchdown/assets/numberd4.png').convert()
 numberd5 = pygame.image.load('touchdown/assets/numberd5.png').convert()
 number16 = pygame.image.load('touchdown/assets/number16.png').convert()
+bg_menu = pygame.image.load('touchdown/assets/touchdown_menu.png')
+bg_gi = pygame.image.load('touchdown/assets/touchdown_gi.png')
+bg_off = pygame.image.load('touchdown/assets/touchdown_off.png')
 
 class scorereel():
     """ Score Reels are used to count replays """
@@ -156,16 +159,12 @@ def display(s, replays=0, menu=False):
     backglass = pygame.Surface(screen.get_size(), flags=pygame.SRCALPHA)
     backglass.fill((0, 0, 0))
     if menu == True:
-        backglass = pygame.image.load('touchdown/assets/touchdown_menu.png')
+        screen.blit(bg_menu, backglass_position)
     else:
         if (s.game.anti_cheat.status == True):
-            backglass = pygame.image.load('touchdown/assets/touchdown_gi.png')
+            screen.blit(bg_gi, backglass_position)
         else:
-            backglass = pygame.image.load('touchdown/assets/touchdown_off.png')
-    backglass = pygame.transform.scale(backglass, (720, 1280))
-    
-    screen.blit(backglass, backglass_position)
-
+            screen.blit(bg_off, backglass_position)
 
     if s.game.extra_ball.position >= 1:
         eb_position = [143,1024]
@@ -613,29 +612,56 @@ def display(s, replays=0, menu=False):
             p = [574,522]
             screen.blit(time, p)
             if s.game.ball_count.position == 3:
-                p = [576,600]
-                screen.blit(time, p)
+                s.cancel_delayed(name="blink")
+                blink([s,1,1])
+            else:
+                s.cancel_delayed(name="blink")
         elif s.game.before_fifth.status == True:
             p = [574,444]
             screen.blit(time, p)
             if s.game.ball_count.position == 4:
-                p = [576,600]
-                screen.blit(time, p)
+                s.cancel_delayed(name="blink")
+                blink([s,1,1])
+            else:
+                s.cancel_delayed(name="blink")
         elif s.game.after_fifth.status == True:
             p = [574,366]
             screen.blit(time, p)
             if s.game.ball_count.position == 5:
-                p = [576,600]
-                screen.blit(time, p)
-            if s.game.tilt.status == True:
-                tilt_position = [34,750]
-                screen.blit(tilt, tilt_position)
+                s.cancel_delayed(name="blink")
+                blink([s,1,1])
+            else:
+                s.cancel_delayed(name="blink")
+
+    if s.game.tilt.status == True:
+        tilt_position = [34,750]
+        screen.blit(tilt, tilt_position)
                
     if s.game.eb_play.status == True:
         p = [34,1022]
         screen.blit(extra_balls, p)
 
     pygame.display.update()
+
+def blink(args):
+    dirty_rects = []
+    s = args[0]
+    b = args[1]
+    sn = args[2]
+
+    if b == 0:
+        if sn == 1:
+            p = [576,600]
+            dirty_rects.append(screen.blit(time, p))
+        pygame.display.update(dirty_rects)
+    else:
+        dirty_rects.append(screen.blit(bg_gi, (576,600), pygame.Rect(576,600,120,57)))
+        pygame.display.update(dirty_rects)
+    b = not b
+
+    args = [s,b,sn]
+
+    s.delay(name="blink", delay=0.1, handler=blink, param=args)
 
 def eb_animation(num):
     global screen

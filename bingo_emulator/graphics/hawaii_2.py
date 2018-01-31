@@ -47,6 +47,9 @@ scores = pygame.image.load('hawaii_2/assets/scores.png').convert_alpha()
 score_arrow = pygame.image.load('hawaii_2/assets/scores_arrow.png').convert_alpha()
 stop_shop = pygame.image.load('hawaii_2/assets/stop_shop.png').convert_alpha()
 play_ss = pygame.image.load('hawaii_2/assets/play_ss.png').convert_alpha()
+bg_menu = pygame.image.load('hawaii_2/assets/hawaii_2_menu.png').convert_alpha()
+bg_gi = pygame.image.load('hawaii_2/assets/hawaii_2_gi.png').convert_alpha()
+bg_off = pygame.image.load('hawaii_2/assets/hawaii_2_off.png').convert_alpha()
 
 class scorereel():
     """ Score Reels are used to count replays """
@@ -111,16 +114,12 @@ def display(s, replays=0, menu=False):
     backglass = pygame.Surface(screen.get_size(), flags=pygame.SRCALPHA)
     backglass.fill((0, 0, 0))
     if menu == True:
-        backglass = pygame.image.load('hawaii_2/assets/hawaii_2_menu.png').convert_alpha()
+        screen.blit(bg_menu, backglass_position)
     else:
         if (s.game.anti_cheat.status == True):
-            backglass = pygame.image.load('hawaii_2/assets/hawaii_2_gi.png').convert_alpha()
+            screen.blit(bg_gi, backglass_position)
         else:
-            backglass = pygame.image.load('hawaii_2/assets/hawaii_2_off.png').convert_alpha()
-    backglass = pygame.transform.scale(backglass, (720, 1280))
-    
-    screen.blit(backglass, backglass_position)
-
+            screen.blit(bg_off, backglass_position)
 
     if s.game.eb_play.status == True:
         eb_position = [36,1051]
@@ -222,14 +221,16 @@ def display(s, replays=0, menu=False):
         screen.blit(ml_letter, p)
 
     if s.game.mystic_lines.position >= 4:
-        t = 4
+        t = 3
         if s.game.selection_feature.position in [7,8]:
-            t = 5
+            t = 4
         if s.game.selection_feature.position == 9:
-            t = 6
+            t = 5
         if s.game.ball_count.position == t:
-            p = [284,627]
-            screen.blit(select_now, p)
+            s.cancel_delayed(name="blink")
+            blink([s,1,1])
+        else:
+            s.cancel_delayed(name="blink")
 
     if s.game.tilt.status == False:
         if s.holes:
@@ -523,22 +524,22 @@ def display(s, replays=0, menu=False):
     p = [509,210]
     screen.blit(letter6, p)
 
-    if s.game.red_odds.position < 4:
+    if s.game.red_odds.position < 5:
         p = [198,210]
         screen.blit(red_letter1, p)
-    if s.game.red_odds.position == 4:
+    if s.game.red_odds.position in [5,6]:
         p = [262,210]
         screen.blit(red_letter2, p)
-    if s.game.red_odds.position == 5:
+    if s.game.red_odds.position == 7:
         p = [321,210]
         screen.blit(red_letter3, p)
-    if s.game.red_odds.position == 6:
+    if s.game.red_odds.position == 8:
         p = [412,210]
         screen.blit(red_letter4, p)
-    if s.game.red_odds.position == 7:
+    if s.game.red_odds.position == 9:
         p = [472,210]
         screen.blit(red_letter5, p)
-    if s.game.red_odds.position == 8:
+    if s.game.red_odds.position == 10:
         p = [509,210]
         screen.blit(red_letter6, p)
 
@@ -565,6 +566,15 @@ def display(s, replays=0, menu=False):
         screen.blit(six_stars, p)
 
     if s.game.color_selector.position != 0:
+        p = [534,746]
+        screen.blit(double, p)
+        p = [578,746]
+        screen.blit(double, p)
+        p = [624,746]
+        screen.blit(double, p)
+        p = [669,746]
+        screen.blit(double, p)
+
         # Red DD
         if s.game.color_selector.position == 1:
             if s.game.double_red.status == True:
@@ -696,15 +706,6 @@ def display(s, replays=0, menu=False):
             p = [668,671]
             screen.blit(double, p)
 
-    p = [534,746]
-    screen.blit(double, p)
-    p = [578,746]
-    screen.blit(double, p)
-    p = [624,746]
-    screen.blit(double, p)
-    p = [669,746]
-    screen.blit(double, p)
-
     if s.game.score_select.position == 1:
         p = [91,671]
         screen.blit(score_arrow, p)
@@ -718,8 +719,10 @@ def display(s, replays=0, menu=False):
         p = [206,649]
         screen.blit(scores, p)
         if s.game.ball_count.position == 1:
-            p = [7,649]
-            screen.blit(scores, p)
+            s.cancel_delayed(name="blink_score")
+            blink_score([s,1,1])
+        else:
+            s.cancel_delayed(name="blink_score")
     if s.game.score_select.position == 5:
         p = [297,670]
         screen.blit(score_arrow, p)
@@ -733,9 +736,10 @@ def display(s, replays=0, menu=False):
         p = [405,648]
         screen.blit(scores, p)
         if s.game.ball_count.position == 2:
-            p = [7,649]
-            screen.blit(scores, p)
-
+            s.cancel_delayed(name="blink_score")
+            blink_score([s,1,1])
+        else:
+            s.cancel_delayed(name="blink_score")
     if s.game.x_feature.position == 1:
         p = [120,736]
         screen.blit(score_arrow, p)
@@ -763,6 +767,46 @@ def display(s, replays=0, menu=False):
         screen.blit(tilt, tilt_position)
 
     pygame.display.update()
+
+def blink_score(args):
+    dirty_rects = []
+    s = args[0]
+    b = args[1]
+    sn = args[2]
+
+    if b == 0:
+        if sn == 1:
+            p = [7,649]
+            dirty_rects.append(screen.blit(scores, p))
+        pygame.display.update(dirty_rects)
+    else:
+        dirty_rects.append(screen.blit(bg_gi, (7,649), pygame.Rect(7,649,85,68)))
+        pygame.display.update(dirty_rects)
+    b = not b
+
+    args = [s,b,sn]
+
+    s.delay(name="blink_score", delay=0.1, handler=blink_score, param=args)
+
+def blink(args):
+    dirty_rects = []
+    s = args[0]
+    b = args[1]
+    sn = args[2]
+
+    if b == 0:
+        if sn == 1:
+            p = [284,627]
+            dirty_rects.append(screen.blit(select_now, p))
+        pygame.display.update(dirty_rects)
+    else:
+        dirty_rects.append(screen.blit(bg_gi, (284,627), pygame.Rect(284,627,161,23)))
+        pygame.display.update(dirty_rects)
+    b = not b
+
+    args = [s,b,sn]
+
+    s.delay(name="blink", delay=0.1, handler=blink, param=args)
 
 def eb_animation(num):
     global screen

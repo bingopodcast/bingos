@@ -22,6 +22,9 @@ reel1 = scorereel([589,340], "graphics/assets/white_reel.png")
 reel10 = scorereel([570,340], "graphics/assets/white_reel.png")
 reel100 = scorereel([550,340], "graphics/assets/white_reel.png")
 reel1000 = scorereel([532,340], "graphics/assets/white_reel.png")
+bg_menu = pygame.image.load('lite_a_line/assets/lite_a_line_menu.png')
+bg_gi = pygame.image.load('lite_a_line/assets/lite_a_line_gi.png')
+bg_off = pygame.image.load('lite_a_line/assets/lite_a_line_off.png')
 
 def display(s, replays=0, menu=False):
     
@@ -38,13 +41,12 @@ def display(s, replays=0, menu=False):
     backglass = pygame.Surface((0,0), pygame.SRCALPHA)
     backglass.fill((0, 0, 0))
     if menu == True:
-        backglass = pygame.image.load('lite_a_line/assets/lite_a_line_menu.png')
+        screen.blit(bg_menu, backglass_position)
     else:
         if (s.game.anti_cheat.status == True):
-            backglass = pygame.image.load('lite_a_line/assets/lite_a_line_gi.png')
+            screen.blit(bg_gi, backglass_position)
         else:
-            backglass = pygame.image.load('lite_a_line/assets/lite_a_line_off.png')
-    screen.blit(backglass, backglass_position)
+            screen.blit(bg_off, backglass_position)
 
     if s.game.selector.position >= 1:
         position = [96,761]

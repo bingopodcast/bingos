@@ -53,6 +53,9 @@ horizontal_scores = pygame.image.load('stardust/assets/horizontal_scores.png').c
 h_arrow = pygame.image.load('stardust/assets/h_arrow.png').convert_alpha()
 h_left = pygame.image.load('stardust/assets/h_left.png').convert_alpha()
 h_right = pygame.image.load('stardust/assets/h_right.png').convert_alpha()
+bg_menu = pygame.image.load('stardust/assets/stardust_menu.png')
+bg_gi = pygame.image.load('stardust/assets/stardust_gi.png')
+bg_off = pygame.image.load('stardust/assets/stardust_off.png')
 
 class scorereel():
     """ Score Reels are used to count replays """
@@ -97,7 +100,7 @@ def display(s, replays=0, menu=False):
         p = [86,488]
         screen.blit(roto6, p)
     elif s.game.roto.position == 7:
-        p = [75,488]
+        p = [86,488]
         screen.blit(roto7, p)
 
     if s.game.roto2.position == 0:
@@ -129,15 +132,12 @@ def display(s, replays=0, menu=False):
     backglass = pygame.Surface(screen.get_size(), flags=pygame.SRCALPHA)
     backglass.fill((0, 0, 0))
     if menu == True:
-        backglass = pygame.image.load('stardust/assets/stardust_menu.png')
+        screen.blit(bg_menu, backglass_position)
     else:
         if (s.game.anti_cheat.status == True):
-            backglass = pygame.image.load('stardust/assets/stardust_gi.png')
+            screen.blit(bg_gi, backglass_position)
         else:
-            backglass = pygame.image.load('stardust/assets/stardust_off.png')
-    backglass = pygame.transform.scale(backglass, (720, 1280))
-    
-    screen.blit(backglass, backglass_position)
+            screen.blit(bg_off, backglass_position)
 
     if s.game.selector.position >= 1:
         p = [132,367]
@@ -621,8 +621,10 @@ def display(s, replays=0, menu=False):
         p = [175,712]
         screen.blit(before_fourth, p)
         if s.game.ball_count.position == 3:
-            p = [567,712]
-            screen.blit(select_now, p)
+            s.cancel_delayed(name="blink")
+            blink([s,1,1])
+        else:
+            s.cancel_delayed(name="blink")
     if s.game.roto_feature_step.position >= 5:
         p = [320,712]
         screen.blit(spot_18, p)
@@ -630,14 +632,36 @@ def display(s, replays=0, menu=False):
         p = [423,712]
         screen.blit(before_fourth, p)
         if s.game.ball_count.position == 4:
-            p = [567,712]
-            screen.blit(select_now, p)
+            s.cancel_delayed(name="blink")
+            blink([s,1,1])
+        else:
+            s.cancel_delayed(name="blink")
                
     if s.game.eb_play.status == True:
         p = [21,984]
         screen.blit(extra_balls, p)
 
     pygame.display.update()
+
+def blink(args):
+    dirty_rects = []
+    s = args[0]
+    b = args[1]
+    sn = args[2]
+
+    if b == 0:
+        if sn == 1:
+            p = [567,712]
+            dirty_rects.append(screen.blit(select_now, p))
+        pygame.display.update(dirty_rects)
+    else:
+        dirty_rects.append(screen.blit(bg_gi, (567,712), pygame.Rect(567,712,140,47)))
+        pygame.display.update(dirty_rects)
+    b = not b
+
+    args = [s,b,sn]
+
+    s.delay(name="blink", delay=0.1, handler=blink, param=args)
 
 def eb_animation(num):
     global screen

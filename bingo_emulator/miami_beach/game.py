@@ -18,7 +18,7 @@ class SinglecardBingo(procgame.game.Mode):
         super(SinglecardBingo, self).__init__(game=game, priority=5)
         self.holes = []
         self.startup()
-        self.game.sound.register_music('motor', "audio/six_card_motor.wav")
+        self.game.sound.register_music('motor', "audio/other_motor.wav")
         self.game.sound.register_music('search', "audio/six_card_search_old.wav")
         self.game.sound.register_sound('add', "audio/six_card_add_card.wav")
         self.game.sound.register_sound('tilt', "audio/tilt.wav")
@@ -65,18 +65,38 @@ class SinglecardBingo(procgame.game.Mode):
             self.timeout_actions()
     
     def timeout_actions(self):
-        if (self.game.timer.position < 40):
+        if (self.game.timer.position < 39):
             self.game.timer.step()
-            print self.game.timer.position
-            self.delay(delay=5.0, handler=self.timeout_actions)
+            self.delay(name="timeout", delay=5.0, handler=self.timeout_actions)
         else:
+            self.game.timer.step()
             self.tilt_actions()
 
-    def sw_trough8_inactive_for_1ms(self, sw):
+    def sw_trough8_closed(self, sw):
         if self.game.start.status == False:
+            if self.game.ball_count.position >= 5:
+                self.game.returned = True
             self.game.ball_count.position -= 1
-            self.game.returned = True
             self.check_lifter_status()
+        else:
+            self.check_lifter_status()
+
+    def check_spot(self):
+        if self.game.spotted_numbers.position >= 6:
+            if self.game.spotted.position == 0:
+                if 19 not in self.holes:
+                    self.holes.append(19)
+            if self.game.spotted.position == 1:
+                if 20 not in self.holes:
+                    self.holes.append(20)
+            if self.game.spotted.position == 2:
+                if 21 not in self.holes:
+                    self.holes.append(21)
+            if self.game.spotted.position == 3:
+                if 22 not in self.holes:
+                    self.holes.append(22)
+        self.delay(name="display", delay=0.1, handler=graphics.miami_beach.display, param=self)
+
 
     def sw_left_active(self, sw):
         max_ball = 4
@@ -239,9 +259,10 @@ class SinglecardBingo(procgame.game.Mode):
 
     def regular_play(self):
         self.cancel_delayed(name="search")
-        self.cancel_delayed(name="lifter_status")
         self.cancel_delayed(name="card1_replay_step_up")
         self.cancel_delayed(name="corners_replay_step_up")
+        self.cancel_delayed(name="blink")
+        self.cancel_delayed(name="timeout")
         self.game.search_index.disengage()
         self.game.coils.counter.pulse()
         self.game.cu = not self.game.cu
@@ -251,6 +272,7 @@ class SinglecardBingo(procgame.game.Mode):
         self.game.mixer3.spin()
         self.game.mixer4.spin()
         self.game.reflex.decrease()
+        self.game.sound.play_music('motor', -1)
 
         self.game.returned = False
         if self.game.start.status == True:
@@ -300,38 +322,34 @@ class SinglecardBingo(procgame.game.Mode):
 
     def check_lifter_status(self):
         if self.game.tilt.status == False:
-            if self.game.switches.trough8.is_inactive() and self.game.switches.trough5.is_active() and self.game.switches.trough4.is_active() and self.game.switches.trough3.is_active() and self.game.switches.trough2.is_active():
-                if self.game.switches.shooter.is_inactive():
+            if self.game.switches.trough8.is_closed() and self.game.switches.trough5.is_open() and self.game.switches.trough4.is_open() and self.game.switches.trough3.is_closed() and self.game.switches.trough2.is_closed():
+                if self.game.switches.shooter.is_open():
                     self.game.coils.lifter.enable()
+                    self.game.returned = False
             else:
-                if self.game.switches.trough4.is_active():
-                    if self.game.switches.shooter.is_inactive():
-                        if self.game.switches.gate.is_active():
+                if self.game.start.status == False:
+                    if self.game.switches.trough4.is_open():
+                        if self.game.switches.shooter.is_open():
+                            if self.game.switches.gate.is_closed():
+                                self.game.coils.lifter.enable()
+                    else:
+                        if self.game.switches.trough4.is_closed():
+                            if self.game.extra_ball.position >= 3 and self.game.ball_count.position <= 5:
+                                if self.game.switches.shooter.is_open() and self.game.switches.trough3.is_closed():
+                                    self.game.coils.lifter.enable()
+                        if self.game.switches.trough3.is_open():
+                            if self.game.extra_ball.position >= 6 and self.game.ball_count.position <= 6:
+                                if self.game.switches.shooter.is_open() and self.game.switches.trough2.is_closed():
+                                    self.game.coils.lifter.enable()
+                        if self.game.switches.trough2.is_inactive() and self.game.ball_count.position <= 7:
+                            if self.game.ball_count.position <= 7:
+                                if self.game.extra_ball.position >= 9:
+                                    if self.game.switches.shooter.is_open():
+                                        self.game.coils.lifter.enable()
+                    if self.game.returned == True and self.game.ball_count.position in [4,5,6,7]:
+                        if self.game.switches.shooter.is_open():
                             self.game.coils.lifter.enable()
-                else:
-                    if self.game.switches.trough4.is_inactive():
-                        if self.game.extra_ball.position >= 3 and self.game.ball_count.position <= 5:
-                            if self.game.switches.shooter.is_inactive() and self.game.switches.trough3.is_active():
-                                self.game.coils.lifter.enable()
-                    if self.game.switches.trough3.is_inactive():
-                        if self.game.extra_ball.position >= 6 and self.game.ball_count.position <= 6:
-                            if self.game.switches.shooter.is_inactive() and self.game.switches.trough2.is_active():
-                                self.game.coils.lifter.enable()
-                    if self.game.switches.trough2.is_inactive() and self.game.ball_count.position <= 7:
-                        if self.game.extra_ball.position >= 9:
-                            if self.game.switches.shooter.is_inactive():
-                                self.game.coils.lifter.enable()
-                    if self.game.ball_count.position >= 8:
-                        self.game.coils.lifter.disable()
-                if self.game.returned == True and self.game.ball_count.position == 4:
-                    if self.game.switches.shooter.is_inactive():
-                        self.game.coils.lifter.enable()
-                        self.game.returned = False
-                if self.game.returned == True and self.game.ball_count.position == 8:
-                    if self.game.switches.shooter.is_inactive():
-                        self.game.coils.lifter.enable()
-                        self.game.returned = False
-        self.delay(name="lifter_status", delay=0, handler=self.check_lifter_status)
+                            self.game.returned = False
 
     def sw_smRunout_active_for_1ms(self, sw):
         if self.game.start.status == True:
@@ -339,8 +357,8 @@ class SinglecardBingo(procgame.game.Mode):
         else:
             self.check_shutter()
 
-    def sw_trough1_active(self, sw):
-        if self.game.switches.shooter.is_active():
+    def sw_trough1_closed(self, sw):
+        if self.game.switches.shooter.is_closed():
             self.game.coils.lifter.disable()
 
     def sw_shooter_active(self, sw):
@@ -350,7 +368,7 @@ class SinglecardBingo(procgame.game.Mode):
 
     def sw_ballLift_active_for_500ms(self, sw):
         if self.game.tilt.status == False:
-            if self.game.switches.shooter.is_inactive():
+            if self.game.switches.shooter.is_open():
                 if self.game.ball_count.position < 5:
                     self.game.coils.lifter.enable()
                 if self.game.ball_count.position == 5 and self.game.extra_ball.position >= 3:
@@ -368,6 +386,8 @@ class SinglecardBingo(procgame.game.Mode):
         if self.game.ball_count.position >= 4:
             if self.game.search_index.status == False:
                 self.search()
+        if self.game.ball_count.position <= 7:
+            self.check_lifter_status()
         self.delay(name="display", delay=0.1, handler=graphics.miami_beach.display, param=self)
 
 
@@ -578,10 +598,8 @@ class SinglecardBingo(procgame.game.Mode):
     def sw_replayReset_active(self, sw):
         self.game.anti_cheat.disengage()
         self.holes = []
-#        self.cancel_delayed(name="blink_title")
         graphics.miami_beach.display(self)
         self.tilt_actions()
-#        self.delay(name="blink_title", delay=1, handler=self.blink_title)
         self.replay_step_down(self.game.replays)
 
     def tilt_actions(self):
@@ -589,6 +607,8 @@ class SinglecardBingo(procgame.game.Mode):
         self.cancel_delayed(name="replay_reset")
         self.cancel_delayed(name="card1_replay_step_up")
         self.cancel_delayed(name="corners_replay_step_up")
+        self.cancel_delayed(name="blink")
+        self.cancel_delayed(name="timeout")
         self.game.card1_replay_counter.reset()
         self.game.super_corners.disengage()
         self.game.spotted_numbers.reset()
@@ -629,7 +649,7 @@ class SinglecardBingo(procgame.game.Mode):
                 self.game.coils.registerDown.pulse()
                 number -= 1
                 graphics.miami_beach.display(self)
-                self.delay(name="replay_reset", delay=0.0, handler=self.replay_step_down, param=number)
+                self.delay(name="replay_reset", delay=0.13, handler=self.replay_step_down, param=number)
             elif number == 1:
                 self.game.replays -= 1
                 graphics.replay_step_down(self.game.replays, graphics.miami_beach.reel1, graphics.miami_beach.reel10, graphics.miami_beach.reel100)
@@ -689,7 +709,6 @@ class SinglecardBingo(procgame.game.Mode):
         # search activity.  For each revolution of the search disc (which happens about every 5-7 seconds), the
         # game will activate() each search relay for each 'hot' rivet on the search disc.  This can be on a different
         # wiper finger for each set of rivets on the search disc.
-#        self.cancel_delayed(name="blink_title")
         self.game.sound.stop_music()
         self.game.sound.play_music('search', -1)
         
@@ -717,7 +736,6 @@ class SinglecardBingo(procgame.game.Mode):
                             if s >= 3:
                                 self.find_winner(s, self.card, self.corners, self.color)
                                 break
-#        self.delay(name="blink_title", delay=3, handler=self.blink_title)
 
     def find_winner(self, relays, card, corners, color):
         if self.game.search_index.status == False and self.game.replays < 899:
@@ -912,11 +930,11 @@ class SinglecardBingo(procgame.game.Mode):
             card = 5
         if rivets == 32:
             corners = True
-        if rivets == 1 or rivets == 4 or rivets == 14 or rivets == 17 or rivets == 23 or rivets == 26 or rivets == 34 or rivets == 37 or rivets == 41 or rivets == 44 or rivets == 19:
+        if rivets in [1,4,14,17,23,26,34,37,41,44,19]:
             color = 'red'
-        if rivets == 11 or rivets == 12 or rivets == 29 or rivets == 30:
+        if rivets in [11,12,29,30]:
             color = 'green'
-        if rivets == 2 or rivets == 5 or rivets == 15 or rivets == 19 or rivets == 24 or rivets == 27 or rivets == 35 or rivets == 38 or rivets == 42 or rivets == 45 or rivets == 7 or rivets == 9 or rivets == 39:
+        if rivets in [2,5,15,19,24,27,35,38,42,45,7,9,39]:
             color = 'yellow'
 
         return (self.pos[rivets], card, corners, color)
@@ -928,18 +946,16 @@ class SinglecardBingo(procgame.game.Mode):
     def all_probability(self):
         if self.game.curtains.position == 0:
             self.game.curtains.step()
-            print self.game.curtains.position
         if self.game.odds.position < 3:
             self.game.odds.step()
-        #Used Surf Club's mixers - wrong, but lacking documentation.
         mix1 = self.game.mixer1.connected_rivet()
-        if self.game.reflex.connected_rivet() == 0 and (mix1 == 1 or mix1 == 9 or mix1 == 15):
+        if self.game.reflex.connected_rivet() == 0 and (mix1 in [1,9,15]):
             self.scan_odds()
             self.scan_features()
-        elif self.game.reflex.connected_rivet() == 1 and (mix1 == 2 or mix1 == 14 or mix1 == 24 or mix1 == 1 or mix1 == 9 or mix1 == 15):
+        elif self.game.reflex.connected_rivet() == 1 and (mix1 in [0,2,14]):
             self.scan_odds()
             self.scan_features()
-        elif self.game.reflex.connected_rivet() == 2 and (mix1 == 6 or mix1 == 13 or mix1 == 22 or mix1 == 2 or mix1 == 14 or mix1 == 24 or mix1 == 1 or mix1 == 9 or mix1 == 15):
+        elif self.game.reflex.connected_rivet() == 2 and (mix1 in [6,13,22]):
             self.scan_odds()
             self.scan_features()
         elif self.game.reflex.connected_rivet() == 3:
@@ -949,10 +965,14 @@ class SinglecardBingo(procgame.game.Mode):
             self.scan_odds()
             self.scan_features()
         else:
-            s = random.randint(1,5)
-            self.animate_odds_scan(s)
-            s = random.randint(1,6)
-            self.animate_feature_scan(s)
+            if mix1 in [3,4,7,8,10,11,16,17,18,19,21,23]:
+                self.scan_odds()
+                self.scan_features()
+            else:
+                s = random.randint(1,5)
+                self.animate_odds_scan(s)
+                s = random.randint(1,6)
+                self.animate_feature_scan(s)
 
     def scan_odds(self):
         if self.game.odds.position < 3:
@@ -963,7 +983,7 @@ class SinglecardBingo(procgame.game.Mode):
         if p == 1:
             es = self.check_extra_step()
             if es == 1:
-                i = random.randint(1,5)
+                i = random.randint(1,3)
                 self.extra_step(i)
             else:
                 self.game.odds.step()
@@ -1030,11 +1050,11 @@ class SinglecardBingo(procgame.game.Mode):
 
         if self.game.lines.position < self.game.lines.top or self.game.odds.position > 2:
             if self.game.cu == True:
-                if mix2 == 6:
+                if mix2 in [13,8,10]:
                     self.game.red_three_as_four.engage(self.game)
-                if mix2 == 8:
+                if mix2 in [17,20,5]:
                     self.game.yellow_three_as_four.engage(self.game)
-                if mix2 == 10:
+                if mix2 in [1,23]:
                     self.game.green_three_as_five.engage(self.game)
         m3 = self.check_mixer3()
         if m3 == True:
@@ -1052,31 +1072,31 @@ class SinglecardBingo(procgame.game.Mode):
         l = self.game.lines.top
 
         if r == 1 and g == 1 and y == 1:
-            if mix4 == 12 or mix4 == 22:
+            if mix4 in [0,1,6,7,9,12,18,21,22]:
                 return 1
             else:
                 return 0
         if r == 1 and g == 0 and y == 0:
             if self.game.lines.position < l:
-                if mix4 != 3 and mix4 != 7 and mix4 != 13:
+                if mix4 in [8,10,11,14,17,19,20]:
                     return 1
             else:
-                if mix4 == 12 or mix4 == 22 or mix4 == 20 or mix4 == 10 or mix4 == 4:
+                if mix4 in [1,5,17,20,23]:
                     return 1
                 else:
                     return 0
         if r == 1 and g == 1 and y == 0:
-            if mix4 == 12 or mix4 == 22 or mix4 == 20 or mix4 == 10 or mix4 == 4:
+            if mix4 not in [3,8,10,13,17,20,22]:
                 return 1
             else:
                 return 0
         if r == 0 and g == 1 and y == 1:
-            if mix4 == 2 or mix4 == 6 or mix4 == 8 or mix4 == 20 or mix4 == 10:
+            if mix4 not in [0,1,6,7,9,12,18,21,22]:
                 return 1
             else:
                 return 0
         if r == 1 and g == 0 and y == 1:
-            if mix4 == 2 or mix4 == 6 or mix4 == 8 or mix4 == 12 or mix4 == 22:
+            if mix4 not in [2,3,4,5,13,15,16,23]:
                 return 1
             else:
                 return 0
@@ -1084,28 +1104,30 @@ class SinglecardBingo(procgame.game.Mode):
     def check_mixer2(self):
         mix2 = self.game.mixer2.position
         odds = self.game.odds.position
-        if odds < 4:
-            if mix2 != 15 or mix2 != 19 or mix2 != 23 or mix2 != 7 or mix2 != 9:
+        if odds == 1:
+            if mix2 not in [8,23]:
                 return 1
             else:
                 return 0
+        if odds in [2,3]:
+            return 1
         elif odds == 4:
-            if mix2 != 19 or mix2 != 23 or mix2 != 7 or mix2 != 9:
+            if mix2 not in [0,2,5,7,9,11,16,18,20,22,12,14,17,19,21,23]:
                 return 1
             else:
                 return 0
         elif odds == 5:
-            if mix2 != 23 or mix2 != 7 or mix2 != 9 or mix2 != 15:
+            if mix2 not in [4,10,12,14,17,21,16,22]:
                 return 1
             else:
                 return 0
         elif odds == 6:
-            if mix2 != 7 or mix2 != 9 or mix2 != 19 or mix2 != 15:
+            if mix2 not in [1,9,12,21,2,5,14,18]:
                 return 1
             else:
                 return 0
-        elif odds == 7 or odds == 8:
-            if mix2 != 9 or mix2 != 19 or mix2 != 15 or mix2 != 23:
+        elif odds in [7,8]:
+            if mix2 not in [3,11,17,4,10,20]:
                 return 1
             else:
                 return 0
@@ -1114,59 +1136,59 @@ class SinglecardBingo(procgame.game.Mode):
         mix3 = self.game.mixer3.position
         lines = self.game.lines.position
         if lines < 4:
-            if mix3 != 22 or mix3 != 20 or mix3 != 17:
+            if mix3 in [1,3,5,8,10,13,14,17,20,22,23]:
                 return 1
             else:
                 return 0
-        if lines >= 4:
-            if mix3 == 3 or mix3 == 5 or mix3 == 7 or mix3 == 10 or mix3 == 12:
+        if lines in range(5,10):
+            if mix3 in [0,2,4,6,7,9,12,15,16,18,19,21]:
+                return 1
+            else:
+                return 0
+        if lines >= 10:
+            if mix3 == 23:
                 return 1
             else:
                 return 0
 
     def features_spotting(self):
         sd = self.game.spotting.position
+        if self.game.super_corners.status == False:
+            self.game.corners.engage(self.game)
         if self.game.cu == 1:
-            self.game.lines.step()
-            if self.game.lines.position >= 5:
-                self.game.corners.engage(self.game)
+            if self.game.lines.position < 3:
+                self.game.lines.step()
         else:
             self.game.spotted_numbers.step()
-        if sd == 6 and self.game.lines.position >= 5:
+            self.check_spot()
+        if sd in [5,10,15,19,30,32,42,46] and self.game.lines.position >= 5:
             self.step_lines(10 - self.game.lines.position)
-            if self.game.lines.position >= 5:
-                self.game.corners.engage(self.game)
-        if sd == 8 and self.game.lines.position >= 10:
+        if sd in [8,18,25,28,33,40,43] and self.game.lines.position >= 10:
             self.step_lines(15 - self.game.lines.position)
-            if self.game.lines.position >= 5:
-                self.game.corners.engage(self.game)
-        if sd == 4:
+        if sd in [0,4,11,20,36,44]:
             self.step_lines(5 - self.game.lines.position)
-            if self.game.lines.position >= 5:
-                self.game.corners.engage(self.game)
-        if sd == 7:
+        if sd in [7,27]:
             self.step_lines(10 - self.game.lines.position)
-            if self.game.lines.position >= 5:
-                self.game.corners.engage(self.game)
-        if sd == 16:
+        if sd in [16,22,41]:
             self.step_lines(15 - self.game.lines.position)
-            if self.game.lines.position >= 5:
-                self.game.corners.engage(self.game)
-        if sd == 2:
+        if sd in [2,6,14,21,26,31,34,38,48]:
             self.step_spotted_numbers(6 - self.game.spotted_numbers.position)
-        if sd == 1:
+            self.check_spot()
+        if sd in [1,9,17,23,35,45]:
             self.step_spotted_numbers(4 - self.game.spotted_numbers.position)
-        if sd == 3:
+            self.check_spot()
+        if sd in [3,12,29,37,47]:
             self.step_spotted_numbers(5 - self.game.spotted_numbers.position)
-        if sd == 24 or sd == 39 or sd == 13:
+            self.check_spot()
+        if sd == 13:
             self.game.super_corners.engage(self.game)
+            self.game.corners.disengage()
         if self.game.lines.position >= 5 and self.game.curtains.position < 3:
             self.step_curtains(3 - self.game.curtains.position)
         if self.game.lines.position >= 10 and self.game.curtains.position < 4:
             self.step_curtains(4 - self.game.curtains.position)
         if self.game.lines.position >= 15 and self.game.curtains.position < 5:
             self.step_curtains(5 - self.game.curtains.position)
-        print self.game.curtains.position
 
     def step_curtains(self, number):
         if number >= 1:
@@ -1193,6 +1215,7 @@ class SinglecardBingo(procgame.game.Mode):
     def step_spotted_numbers(self, number):
         if number >= 1:
             self.game.spotted_numbers.step()
+            self.check_spot()
             number -= 1
             self.delay(name="display", delay=0.1, handler=graphics.miami_beach.display, param=self)
             self.delay(name="step_spotted_numbers", delay=0.1, handler=self.step_spotted_numbers, param=number)
@@ -1243,39 +1266,37 @@ class SinglecardBingo(procgame.game.Mode):
 
     def check_eb_spotting(self):
         sd = self.game.spotting.position
-        if sd == 50:
-            if self.game.mixer3.position == 24:
+        if sd == 0:
+            if self.game.mixer3.position == 23:
                 self.step_eb(9 - self.game.extra_ball.position)
-        elif sd == 6:
+        elif sd in [1,2,3,4,8,9,13,14,18,19,20,23,25,28,29,35,39,42,46,47]:
             self.step_eb(3 - self.game.extra_ball.position)
-        elif sd == 1:
+        elif sd in [6,7,11,15,16,21,24,26,27,37,40,41,44]:
             if self.game.extra_ball.position < 6:
                 self.step_eb(6 - self.game.extra_ball.position)
-            else:
-                self.step_eb(9 - self.game.extra_ball.position)
         else:
             self.game.extra_ball.step()
+            self.check_lifter_status()
 
     def eb_probability(self):
-        #Used Surf Club's mixers - wrong, but lacking documentation.
         mix1 = self.game.mixer1.connected_rivet()
-
-        if self.game.reflex.connected_rivet() == 0 and (mix1 == 1 or mix1 == 9 or mix1 == 15):
+        if self.game.reflex.connected_rivet() == 0 and (mix1 in [1,9,15]):
             m3 = self.check_mixer3()
             if m3 == 1:
                 self.check_eb_spotting()
-        elif self.game.reflex.connected_rivet() == 1 and (mix1 == 2 or mix1 == 14 or mix1 == 24 or mix1 == 1 or mix1 == 9 or mix1 == 15):
+        elif self.game.reflex.connected_rivet() == 1 and (mix1 in [0,2,14]):
             m3 = self.check_mixer3()
             if m3 == 1:
                 self.check_eb_spotting()
-        elif self.game.reflex.connected_rivet() == 2 and (mix1 == 6 or mix1 == 13 or mix1 == 22 or mix1 == 2 or mix1 == 14 or mix1 == 24 or mix1 == 1 or mix1 == 9 or mix1 == 15):
+        elif self.game.reflex.connected_rivet() == 2 and (mix1 in [6,13,22]):
             m3 = self.check_mixer3()
             if m3 == 1:
                 self.check_eb_spotting()
         else:
-            m3 = self.check_mixer3()
-            if m3 == 1:
-                self.check_eb_spotting()
+            if mix1 in [3,4,7,8,10,11,16,17,18,19,21,23]:
+                m3 = self.check_mixer3()
+                if m3 == 1:
+                    self.check_eb_spotting()
 
     def step_eb(self, number):
         if number >= 1:
@@ -1284,32 +1305,6 @@ class SinglecardBingo(procgame.game.Mode):
             number -= 1
             self.delay(name="display", delay=0.1, handler=graphics.miami_beach.display, param=self)
             self.delay(name="step_eb", delay=0.1, handler=self.step_eb, param=number)
-
-    def blink_title(self):
-        title1 = random.randint(0,1)
-        title2 = random.randint(0,1)
-        title3 = random.randint(0,1)
-        title4 = random.randint(0,1)
-        if title1 == 1:
-            pos = [167,257]
-            image = pygame.image.load('miami_beach/assets/title1_on.png').convert_alpha()
-            screen.blit(image, pos)
-        if title2 == 1:
-            pos = [241,290]
-            image = pygame.image.load('miami_beach/assets/title2_on.png').convert_alpha()
-            screen.blit(image, pos)
-        if title3 == 1:
-            pos = [346,298]
-            image = pygame.image.load('miami_beach/assets/title3_on.png').convert_alpha()
-            screen.blit(image, pos)
-        if title4 == 1:
-            pos = [431,264]
-            image = pygame.image.load('miami_beach/assets/title4_on.png').convert_alpha()
-            screen.blit(image, pos)
-            
-        pygame.display.update()
-        self.delay(name="display", delay=0.1, handler=graphics.miami_beach.display, param=self)
-#        self.delay(name="blink_title", delay=3, handler=self.blink_title)
 
     # Define reset as the knock-off, anti-cheat relay disabled, and replay reset enabled.  Motors turn while credits are knocked off.
     # When meter reaches zero and the zero limit switch is hit, turn off motor sound and leave backglass gi on, but with tilt displayed.
@@ -1321,11 +1316,9 @@ class SinglecardBingo(procgame.game.Mode):
         self.eb = False
         self.game.anti_cheat.engage(self.game)
         self.tilt_actions()
-#        self.delay(name="blink_title", delay=1, handler=self.blink_title)
-
 
 class MiamiBeach(procgame.game.BasicGame):
-    """ Palm Beach was the first game with Super Cards """
+    """ Miami Beach is the only game with Magic Curtains """
     def __init__(self, machine_type):
         super(MiamiBeach, self).__init__(machine_type)
         pygame.mixer.pre_init(44100,-16,2,512)
@@ -1371,10 +1364,6 @@ class MiamiBeach(procgame.game.BasicGame):
         self.ball_count = units.Stepper("ball_count", 8)
 
         # Initialize reflex(es) and mixers unique to this game
-        # NOTE: reflex unit drawing was not available for this game, so until I convince
-        #       another Palm Beach owner to take their game apart, I'll note that there
-        #       are five lugs, four of which provide another path to the mixer, and one which is always connected
-        #       and bypasses the mixer entirely.  There are no games from 1951 or 52 that have the reflex documented.
         self.reflex = units.Reflex("primary", 200)
 
         #This is a disc which has 50 positions

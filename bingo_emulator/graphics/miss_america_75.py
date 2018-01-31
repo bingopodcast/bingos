@@ -31,6 +31,9 @@ d = pygame.image.load('miss_america_75/assets/double.png').convert_alpha()
 n = pygame.image.load('miss_america_75/assets/nothing.png').convert_alpha()
 r = pygame.image.load('miss_america_75/assets/regular.png').convert_alpha()
 blink_image = pygame.image.load('miss_america_75/assets/double_or_nothing.png').convert_alpha()
+bg_menu = pygame.image.load('miss_america_75/assets/miss_america_75_menu.png')
+bg_gi = pygame.image.load('miss_america_75/assets/miss_america_75_gi.png')
+bg_off = pygame.image.load('miss_america_75/assets/miss_america_75_off.png')
 
 class scorereel():
     """ Score Reels are used to count replays """
@@ -110,15 +113,12 @@ def display(s, replays=0, menu=False):
     backglass.set_colorkey((255,0,252))
     backglass.fill((0, 0, 0))
     if menu == True:
-        backglass = pygame.image.load('miss_america_75/assets/miss_america_75_menu.png')
+        screen.blit(bg_menu, backglass_position)
     else:
         if (s.game.anti_cheat.status == True):
-            backglass = pygame.image.load('miss_america_75/assets/miss_america_75_gi.png')
+            screen.blit(bg_gi, backglass_position)
         else:
-            backglass = pygame.image.load('miss_america_75/assets/miss_america_75_off.png')
-    backglass = pygame.transform.scale(backglass, (720, 1280))
-    
-    screen.blit(backglass, backglass_position)
+            screen.blit(bg_off, backglass_position)
 
     if s.game.rollovers.status == True and s.game.selection_feature.position >= 5:
         if s.game.cu:
@@ -801,14 +801,38 @@ def display(s, replays=0, menu=False):
     if s.game.selection_feature.position >= 5:
         if s.game.before_fourth.status == True:
             if s.game.ball_count.position == 3:
-                p = [475,749]
-                screen.blit(select_now, p)
+                s.cancel_delayed(name="blink")
+                blink([s,1,1])
+            else:
+                s.cancel_delayed(name="blink")
         elif s.game.before_fifth.status == True:
             if s.game.ball_count.position == 4:
-                p = [483,641]
-                screen.blit(select_now, p)
+                s.cancel_delayed(name="blink")
+                blink([s,1,1])
+            else:
+                s.cancel_delayed(name="blink")
 
     pygame.display.update()
+
+def blink(args):
+    dirty_rects = []
+    s = args[0]
+    b = args[1]
+    sn = args[2]
+
+    if b == 0:
+        if sn == 1:
+            p = [475,749]
+            dirty_rects.append(screen.blit(select_now, p))
+        pygame.display.update(dirty_rects)
+    else:
+        dirty_rects.append(screen.blit(bg_gi, (475,749), pygame.Rect(475,749,188,32)))
+        pygame.display.update(dirty_rects)
+    b = not b
+
+    args = [s,b,sn]
+
+    s.delay(name="blink", delay=0.1, handler=blink, param=args)
 
 def eb_animation(num):
     global screen
@@ -905,12 +929,13 @@ def odds_animation(num):
     #    screen.blit(o5, odds_position)
     #    pygame.display.update()
 
-
 def blink_double(s):
+    dirty_rects = []
     s.game.blink = not s.game.blink
     if s.game.blink == 1:
         blink_pos = [283,578]
-        screen.blit(blink_image, blink_pos)
-        pygame.display.update()
+        dirty_rects.append(screen.blit(blink_image, blink_pos))
+        pygame.display.update(dirty_rects)
     else:
-        display(s)
+        dirty_rects.append(screen.blit(bg_gi, (283,578), pygame.Rect(283,578,164,102)))
+        pygame.display.update(dirty_rects)

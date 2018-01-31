@@ -65,6 +65,9 @@ e1 = pygame.image.load('playtime/assets/e1.png').convert_alpha()
 e2 = pygame.image.load('playtime/assets/e2.png').convert_alpha()
 e3 = pygame.image.load('playtime/assets/e3.png').convert_alpha()
 rollover = pygame.image.load('playtime/assets/rollover.png').convert_alpha()
+bg_menu = pygame.image.load('playtime/assets/playtime_menu.png')
+bg_gi = pygame.image.load('playtime/assets/playtime_gi.png')
+bg_off = pygame.image.load('playtime/assets/playtime_off.png')
 
 class scorereel():
     """ Score Reels are used to count replays """
@@ -153,16 +156,12 @@ def display(s, replays=0, menu=False):
     backglass = pygame.Surface(screen.get_size(), flags=pygame.SRCALPHA)
     backglass.fill((0, 0, 0))
     if menu == True:
-        backglass = pygame.image.load('playtime/assets/playtime_menu.png')
+        screen.blit(bg_menu, backglass_position)
     else:
         if (s.game.anti_cheat.status == True):
-            backglass = pygame.image.load('playtime/assets/playtime_gi.png')
+            screen.blit(bg_gi, backglass_position)
         else:
-            backglass = pygame.image.load('playtime/assets/playtime_off.png')
-    backglass = pygame.transform.scale(backglass, (720, 1280))
-    
-    screen.blit(backglass, backglass_position)
-
+            screen.blit(bg_off, backglass_position)
 
     if s.game.tilt.status == False:
         if s.holes:
@@ -495,8 +494,10 @@ def display(s, replays=0, menu=False):
                 p = [539,409]
                 screen.blit(s_arrow, p)
             if s.game.ball_count.position == 3:
-                p = [556,649]
-                screen.blit(select_now, p)
+                s.cancel_delayed(name="blink")
+                blink([s,1,1])
+            else:
+                s.cancel_delayed(name="blink")
         if sf == 3 or sf == 4:
             p = [33,932]
             screen.blit(rollover, p)
@@ -517,16 +518,20 @@ def display(s, replays=0, menu=False):
             p = [563,344]
             screen.blit(time, p)
             if s.game.ball_count.position == 4:
-                p = [556,649]
-                screen.blit(select_now, p)
+                s.cancel_delayed(name="blink")
+                blink([s,1,1])
+            else:
+                s.cancel_delayed(name="blink")
         if sf == 9:
             p = [539,297]
             screen.blit(s_arrow, p)
             p = [565,272]
             screen.blit(time, p)
             if s.game.ball_count.position == 5:
-                p = [556,649]
-                screen.blit(select_now, p)
+                s.cancel_delayed(name="blink")
+                blink([s,1,1])
+            else:
+                s.cancel_delayed(name="blink")
 
     if s.game.corners.status == True:
         p = [37,493]
@@ -648,8 +653,27 @@ def display(s, replays=0, menu=False):
         tilt_position = [59,235]
         screen.blit(tilt, tilt_position)
 
-    pygame.display.flip()
     pygame.display.update()
+
+def blink(args):
+    dirty_rects = []
+    s = args[0]
+    b = args[1]
+    sn = args[2]
+
+    if b == 0:
+        if sn == 1:
+            p = [556,649]
+            dirty_rects.append(screen.blit(select_now, p))
+        pygame.display.update(dirty_rects)
+    else:
+        dirty_rects.append(screen.blit(bg_gi, (556,649), pygame.Rect(556,649,156,43)))
+        pygame.display.update(dirty_rects)
+    b = not b
+
+    args = [s,b,sn]
+
+    s.delay(name="blink", delay=0.1, handler=blink, param=args)
 
 def eb_animation(num):
     global screen

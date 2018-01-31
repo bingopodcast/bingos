@@ -17,6 +17,9 @@ d = pygame.image.load('bali/assets/double.png').convert_alpha()
 n = pygame.image.load('bali/assets/nothing.png').convert_alpha()
 tilt = pygame.image.load('bali/assets/tilt.png').convert_alpha()
 blink_image = pygame.image.load('bali/assets/double_or_nothing.png').convert_alpha()
+bg_menu = pygame.image.load('bali/assets/bali_menu.png')
+bg_gi = pygame.image.load('bali/assets/bali_gi.png')
+bg_off = pygame.image.load('bali/assets/bali_off.png')
 
 
 class scorereel():
@@ -46,13 +49,12 @@ def display(s, replays=0, menu=False):
     backglass = pygame.Surface((0,0), pygame.SRCALPHA)
     backglass.fill((0, 0, 0))
     if menu == True:
-        backglass = pygame.image.load('bali/assets/bali_menu.png')
+        screen.blit(bg_menu, backglass_position)
     else:
         if (s.game.anti_cheat.status == True):
-            backglass = pygame.image.load('bali/assets/bali_gi.png')
+            screen.blit(bg_gi, backglass_position)
         else:
-            backglass = pygame.image.load('bali/assets/bali_off.png')
-    screen.blit(backglass, backglass_position)
+            screen.blit(bg_off, backglass_position)
 
     if s.game.selector.position >= 1:
         position = [350,365]
@@ -311,10 +313,12 @@ def display(s, replays=0, menu=False):
     pygame.display.update()
 
 def blink_double(s):
+    dirty_rects = []
     s.game.blink = not s.game.blink
     if s.game.blink == 1:
         blink_pos = [518,394]
-        screen.blit(blink_image, blink_pos)
-        pygame.display.update()
+        dirty_rects.append(screen.blit(blink_image, blink_pos))
+        pygame.display.update(dirty_rects)
     else:
-        display(s)
+        dirty_rects.append(screen.blit(bg_gi, (518,394), pygame.Rect(518,394,156,93)))
+        pygame.display.update(dirty_rects)

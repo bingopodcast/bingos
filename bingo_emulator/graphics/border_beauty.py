@@ -50,6 +50,9 @@ columnb2 = pygame.image.load('border_beauty/assets/columnb2.png').convert_alpha(
 columna = pygame.image.load('border_beauty/assets/columna.png').convert_alpha()
 columnc1 = pygame.image.load('border_beauty/assets/columnc1.png').convert_alpha()
 columnc2 = pygame.image.load('border_beauty/assets/columnc2.png').convert_alpha()
+bg_menu = pygame.image.load('border_beauty/assets/border_beauty_menu.png').convert_alpha()
+bg_gi = pygame.image.load('border_beauty/assets/border_beauty_gi.png').convert_alpha()
+bg_off = pygame.image.load('border_beauty/assets/border_beauty_off.png').convert_alpha()
 
 class scorereel():
     """ Score Reels are used to count replays """
@@ -114,16 +117,12 @@ def display(s, replays=0, menu=False):
     backglass = pygame.Surface(screen.get_size(), flags=pygame.SRCALPHA)
     backglass.fill((0, 0, 0))
     if menu == True:
-        backglass = pygame.image.load('border_beauty/assets/border_beauty_menu.png').convert_alpha()
+        screen.blit(bg_menu, backglass_position)
     else:
         if (s.game.anti_cheat.status == True):
-            backglass = pygame.image.load('border_beauty/assets/border_beauty_gi.png').convert_alpha()
+            screen.blit(bg_gi, backglass_position)
         else:
-            backglass = pygame.image.load('border_beauty/assets/border_beauty_off.png').convert_alpha()
-    backglass = pygame.transform.scale(backglass, (720, 1280))
-    
-    screen.blit(backglass, backglass_position)
-
+            screen.blit(bg_off, backglass_position)
 
     if s.game.eb_play.status == True:
         eb_position = [37,1030]
@@ -225,14 +224,16 @@ def display(s, replays=0, menu=False):
         screen.blit(ml_letter, p)
 
     if s.game.mystic_lines.position >= 4:
-        t = 4
+        t = 3
         if s.game.selection_feature.position in [7,8]:
-            t = 5
+            t = 4
         if s.game.selection_feature.position == 9:
-            t = 6
+            t = 5
         if s.game.ball_count.position == t:
-            p = [523,716]
-            screen.blit(select_now, p)
+            s.cancel_delayed(name="blink")
+            blink([s,1,1])
+        else:
+            s.cancel_delayed(name="blink")
 
     if s.game.tilt.status == False:
         if s.holes:
@@ -621,4 +622,22 @@ def odds_animation(num):
         screen.blit(odds, o)
     pygame.display.update()
 
+def blink(args):
+    dirty_rects = []
+    s = args[0]
+    b = args[1]
+    sn = args[2]
 
+    if b == 0:
+        if sn == 1:
+            p = [523,716]
+            dirty_rects.append(screen.blit(select_now, p))
+        pygame.display.update(dirty_rects)
+    else:
+        dirty_rects.append(screen.blit(bg_gi, (523,716), pygame.Rect(523,716,149,40)))
+        pygame.display.update(dirty_rects)
+    b = not b
+
+    args = [s,b,sn]
+
+    s.delay(name="blink", delay=0.1, handler=blink, param=args)

@@ -58,6 +58,9 @@ collected = pygame.image.load('orient/assets/collected.png').convert_alpha()
 missed = pygame.image.load('orient/assets/missed.png').convert_alpha()
 special_odds = pygame.image.load('orient/assets/special_odds.png').convert_alpha()
 golden = pygame.image.load('orient/assets/golden.png').convert_alpha()
+bg_menu = pygame.image.load('orient/assets/orient_menu.png').convert_alpha()
+bg_gi = pygame.image.load('orient/assets/orient_gi.png').convert_alpha()
+bg_off = pygame.image.load('orient/assets/orient_off.png').convert_alpha()
 
 class scorereel():
     """ Score Reels are used to count replays """
@@ -122,16 +125,12 @@ def display(s, replays=0, menu=False):
     backglass = pygame.Surface(screen.get_size(), flags=pygame.SRCALPHA)
     backglass.fill((0, 0, 0))
     if menu == True:
-        backglass = pygame.image.load('orient/assets/orient_menu.png').convert_alpha()
+        screen.blit(bg_menu, backglass_position)
     else:
         if (s.game.anti_cheat.status == True):
-            backglass = pygame.image.load('orient/assets/orient_gi.png').convert_alpha()
+            screen.blit(bg_gi, backglass_position)
         else:
-            backglass = pygame.image.load('orient/assets/orient_off.png').convert_alpha()
-    backglass = pygame.transform.scale(backglass, (720, 1280))
-    
-    screen.blit(backglass, backglass_position)
-
+            screen.blit(bg_off, backglass_position)
 
     if s.game.eb_play.status == True:
         eb_position = [38,1041]
@@ -236,14 +235,16 @@ def display(s, replays=0, menu=False):
         screen.blit(ml_letter, p)
 
     if s.game.mystic_lines.position >= 4:
-        t = 4
+        t = 3
         if s.game.selection_feature.position in [7,8]:
-            t = 5
+            t = 4
         if s.game.selection_feature.position == 9:
-            t = 6
+            t = 5
         if s.game.ball_count.position == t:
-            p = [390,724]
-            screen.blit(select_now, p)
+            s.cancel_delayed(name="blink")
+            blink([s,1,1])
+        else:
+            s.cancel_delayed(name="blink")
 
     if s.game.tilt.status == False:
         if s.holes:
@@ -537,22 +538,22 @@ def display(s, replays=0, menu=False):
     p = [637,203]
     screen.blit(letter6, p)
 
-    if s.game.red_odds.position < 4:
+    if s.game.red_odds.position < 5:
         p = [381,207]
         screen.blit(red_letter1, p)
-    if s.game.red_odds.position == 4:
+    if s.game.red_odds.position in [5,6]:
         p = [425,197]
         screen.blit(red_letter2, p)
-    if s.game.red_odds.position == 5:
+    if s.game.red_odds.position == 7:
         p = [489,206]
         screen.blit(red_letter3, p)
-    if s.game.red_odds.position == 6:
+    if s.game.red_odds.position == 8:
         p = [520,209]
         screen.blit(red_letter4, p)
-    if s.game.red_odds.position == 7:
+    if s.game.red_odds.position == 9:
         p = [568,211]
         screen.blit(red_letter5, p)
-    if s.game.red_odds.position == 8:
+    if s.game.red_odds.position == 10:
         p = [637,203]
         screen.blit(red_letter6, p)
 
@@ -669,8 +670,27 @@ def display(s, replays=0, menu=False):
         p = [600,344]
         screen.blit(special_odds, p)
 
-
     pygame.display.update()
+
+def blink(args):
+    dirty_rects = []
+    s = args[0]
+    b = args[1]
+    sn = args[2]
+
+    if b == 0:
+        if sn == 1:
+            p = [390,724]
+            dirty_rects.append(screen.blit(select_now, p))
+        pygame.display.update(dirty_rects)
+    else:
+        dirty_rects.append(screen.blit(bg_gi, (390,724), pygame.Rect(390,724,128,36)))
+        pygame.display.update(dirty_rects)
+    b = not b
+
+    args = [s,b,sn]
+
+    s.delay(name="blink", delay=0.1, handler=blink, param=args)
 
 def eb_animation(num):
     global screen

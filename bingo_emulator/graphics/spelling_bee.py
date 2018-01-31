@@ -12,6 +12,9 @@ letter = pygame.image.load('spelling_bee/assets/letter.png').convert_alpha()
 average = pygame.image.load('spelling_bee/assets/average.png').convert_alpha()
 star_hole = pygame.image.load('spelling_bee/assets/star_hole.png').convert_alpha()
 tilt = pygame.image.load('spelling_bee/assets/tilt.png').convert_alpha()
+bg_menu = pygame.image.load('spelling_bee/assets/spelling_bee_menu.png')
+bg_gi = pygame.image.load('spelling_bee/assets/spelling_bee_gi.png')
+bg_off = pygame.image.load('spelling_bee/assets/spelling_bee_off.png')
 
 class scorereel():
     """ Score Reels are used to count replays """
@@ -37,13 +40,12 @@ def display(s, replays=0, menu=False):
     backglass = pygame.Surface((0,0), pygame.SRCALPHA)
     backglass.fill((0, 0, 0))
     if menu == True:
-        backglass = pygame.image.load('spelling_bee/assets/spelling_bee_menu.png')
+        screen.blit(bg_menu, backglass_position)
     else:
         if (s.game.anti_cheat.status == True):
-            backglass = pygame.image.load('spelling_bee/assets/spelling_bee_gi.png')
+            screen.blit(bg_gi, backglass_position)
         else:
-            backglass = pygame.image.load('spelling_bee/assets/spelling_bee_off.png')
-    screen.blit(backglass, backglass_position)
+            screen.blit(bg_off, backglass_position)
 
     if s.game.selector.position >= 1:
         card1_position = [203,647]
@@ -346,7 +348,4 @@ def display(s, replays=0, menu=False):
         tilt_position = [55,400]
         screen.blit(tilt, tilt_position)
 
-    pygame.display.flip()
     pygame.display.update()
-
-

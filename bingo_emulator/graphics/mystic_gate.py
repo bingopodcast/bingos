@@ -27,6 +27,9 @@ gate = pygame.image.load('mystic_gate/assets/gate.png').convert_alpha()
 circle = pygame.image.load('mystic_gate/assets/circle.png').convert_alpha()
 coin_limit = pygame.image.load('mystic_gate/assets/coin_limit.png').convert_alpha()
 open_gate = pygame.image.load('mystic_gate/assets/open_gate.png').convert_alpha()
+bg_menu = pygame.image.load('mystic_gate/assets/mystic_gate_menu.png').convert_alpha()
+bg_gi = pygame.image.load('mystic_gate/assets/mystic_gate_gi.png').convert_alpha()
+bg_off = pygame.image.load('mystic_gate/assets/mystic_gate_off.png').convert_alpha()
 
 class scorereel():
     """ Score Reels are used to count replays """
@@ -91,15 +94,12 @@ def display(s, replays=0, menu=False):
     backglass = pygame.Surface(screen.get_size(), flags=pygame.SRCALPHA)
     backglass.fill((0, 0, 0))
     if menu == True:
-        backglass = pygame.image.load('mystic_gate/assets/mystic_gate_menu.png').convert_alpha()
+        screen.blit(bg_menu, backglass_position)
     else:
         if (s.game.anti_cheat.status == True):
-            backglass = pygame.image.load('mystic_gate/assets/mystic_gate_gi.png').convert_alpha()
+            screen.blit(bg_gi, backglass_position)
         else:
-            backglass = pygame.image.load('mystic_gate/assets/mystic_gate_off.png').convert_alpha()
-    backglass = pygame.transform.scale(backglass, (720, 1280))
-    
-    screen.blit(backglass, backglass_position)
+            screen.blit(bg_off, backglass_position)
 
     if s.game.mystic_lines.position >= 2:
         if s.game.selection_feature.position in [1,2,3]:
@@ -146,14 +146,16 @@ def display(s, replays=0, menu=False):
         screen.blit(mg_letter, p)
 
     if s.game.mystic_lines.position >= 2:
-        t = 4
+        t = 3
         if s.game.selection_feature.position in [4,5]:
-            t = 5
+            t = 4
         if s.game.selection_feature.position == 6:
-            t = 6
+            t = 5
         if s.game.ball_count.position == t:
-            p = [517,655]
-            screen.blit(select_now, p)
+            s.cancel_delayed(name="blink")
+            blink([s,1,1])
+        else:
+            s.cancel_delayed(name="blink")
 
     if s.game.tilt.status == False:
         if s.holes:
@@ -472,6 +474,28 @@ def display(s, replays=0, menu=False):
         screen.blit(gate, p)
 
     pygame.display.update()
+
+def blink(args):
+    dirty_rects = []
+    s = args[0]
+    b = args[1]
+    sn = args[2]
+
+    if b == 0:
+        if sn == 1:
+            p = [517,655]
+            dirty_rects.append(screen.blit(select_now, p))
+        pygame.display.update(dirty_rects)
+    else:
+        dirty_rects.append(screen.blit(bg_gi, (517,655), pygame.Rect(517,655,87,68)))
+        pygame.display.update(dirty_rects)
+    b = not b
+
+    args = [s,b,sn]
+
+    s.delay(name="blink", delay=0.1, handler=blink, param=args)
+
+p = [517,655]
 
 def feature_animation(num):
     global screen

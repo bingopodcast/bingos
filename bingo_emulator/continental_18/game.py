@@ -18,8 +18,8 @@ class SinglecardBingo(procgame.game.Mode):
         super(SinglecardBingo, self).__init__(game=game, priority=5)
         self.holes = []
         self.startup()
-        self.game.sound.register_music('motor', "audio/six_card_motor.wav")
-        self.game.sound.register_music('search', "audio/six_card_search_old.wav")
+        self.game.sound.register_music('motor', "audio/other_motor.wav")
+        self.game.sound.register_sound('search', "audio/six_card_search_old.wav")
         self.game.sound.register_sound('add', "audio/six_card_add_card.wav")
         self.game.sound.register_sound('tilt', "audio/tilt.wav")
         self.game.sound.register_sound('step', "audio/step.wav")
@@ -81,9 +81,11 @@ class SinglecardBingo(procgame.game.Mode):
         else:
             if self.game.ball_count.position >= 2:
                 self.game.sound.stop_music()
+                self.game.sound.play_music('motor', -1)
+                self.game.timer.reset()
                 if self.game.search_index.status == False:
-                    self.game.sound.play('search')
                     self.search()
+                    self.timeout_actions()
                                 
                 self.delay(name="display", delay=0.1, handler=graphics.continental_18.display, param=self)
 
@@ -92,55 +94,59 @@ class SinglecardBingo(procgame.game.Mode):
             self.timeout_actions()
     
     def timeout_actions(self):
-        if (self.game.timer.position < 8):
+        if (self.game.timer.position < 7):
             self.game.timer.step()
-            self.delay(delay=5.0, handler=self.timeout_actions)
+            self.delay(name="timeout", delay=5.0, handler=self.timeout_actions)
         else:
+            self.game.timer.step()
             self.tilt_actions()
 
-    def sw_trough8_inactive_for_1ms(self, sw):
+    def sw_trough8_closed(self, sw):
         if self.game.start.status == False:
             self.game.ball_count.position -= 1
             self.game.returned = True
             self.check_lifter_status()
+        else:
+            self.check_lifter_status()
 
     def sw_left_active(self, sw):
         if self.game.ball_count.position > 0:
-            max_ball = 3
+            max_ball = 4
             if self.game.ball_count.position < max_ball:
                 if self.game.line_feature.position in [3,4]:
                     if self.game.down.status == False:
                         if self.game.line.position in [0,2]:
-                            self.game.line.position == 3
+                            self.game.line.position = 3
                         else:
-                            self.game.line.position == 0
+                            self.game.line.position = 0
                     else:
                         pass
-                else:
+                elif self.game.line_feature.position == 5:
                     self.game.line.step()
             self.delay(name="display", delay=0.1, handler=graphics.continental_18.display, param=self)
 
     def sw_right_active(self, sw):
-        max_ball = 3
-        if self.game.ball_count.position < max_ball:
-            if self.game.line_feature.position in [3,4]:
-                if self.game.down.status == True:
-                    if self.game.line.position in [0,2]:
-                        self.game.line.position == 1
+        if self.game.ball_count.position > 0:
+            max_ball = 4
+            if self.game.ball_count.position < max_ball:
+                if self.game.line_feature.position in [3,4]:
+                    if self.game.down.status == True:
+                        if self.game.line.position in [0,2]:
+                            self.game.line.position = 1
+                        else:
+                            self.game.line.position = 0
                     else:
-                        self.game.line.position == 0
-                else:
-                    pass
-            else:
-                self.game.line.stepdown()
-        self.delay(name="display", delay=0.1, handler=graphics.continental_18.display, param=self)
+                        pass
+                elif self.game.line_feature.position == 5:
+                    self.game.line.stepdown()
+            self.delay(name="display", delay=0.1, handler=graphics.continental_18.display, param=self)
 
 
     def check_selection(self):
         self.delay(name="display", delay=0.1, handler=graphics.continental_18.display, param=self)
 
     def check_shutter(self, start=0):
-        if start == 1 or self.game.ball_return.status == True:
+        if start == 1:
             if self.game.switches.smRunout.is_active():
                 if self.game.switches.shutter.is_active():
                     self.game.coils.shutter.disable()
@@ -152,7 +158,13 @@ class SinglecardBingo(procgame.game.Mode):
 
     def regular_play(self):
         self.cancel_delayed(name="search")
-        self.cancel_delayed(name="lifter_status")
+        self.cancel_delayed(name="red_replay_step_up")
+        self.cancel_delayed(name="yellow_replay_step_up")
+        self.cancel_delayed(name="green_replay_step_up")
+        self.cancel_delayed(name="corners_replay_step_up")
+        self.cancel_delayed(name="blink")
+        self.cancel_delayed(name="blink_screen")
+        self.cancel_delayed(name="timeout")
         self.game.search_index.disengage()
         self.game.coils.counter.pulse()
 
@@ -201,19 +213,21 @@ class SinglecardBingo(procgame.game.Mode):
 
     def check_lifter_status(self):
         if self.game.tilt.status == False:
-            if self.game.switches.trough8.is_inactive() and self.game.switches.trough5.is_active() and self.game.switches.trough4.is_active() and self.game.switches.trough3.is_active() and self.game.switches.trough2.is_active():
-                if self.game.switches.shooter.is_inactive():
+            if self.game.switches.trough8.is_closed() and self.game.switches.trough5.is_open() and self.game.switches.trough4.is_open() and self.game.switches.trough3.is_closed() and self.game.switches.trough2.is_closed():
+                if self.game.switches.shooter.is_open():
                     self.game.coils.lifter.enable()
+                    self.game.returned = False
             else:
-                if self.game.ball_count <= 4:
-                    if self.game.switches.shooter.is_inactive():
-                        if self.game.switches.gate.is_active():
-                            self.game.coils.lifter.enable()
-                if self.game.returned == True and self.game.ball_count.position == 4:
-                    if self.game.switches.shooter.is_inactive():
-                        self.game.coils.lifter.enable()
-                        self.game.returned = False
-        self.delay(name="lifter_status", delay=0, handler=self.check_lifter_status)
+                if self.game.start.status == False:
+                    if self.game.switches.trough4.is_open():
+                        if self.game.switches.shooter.is_open():
+                            if self.game.switches.gate.is_closed():
+                                self.game.coils.lifter.enable()
+                    else:
+                        if self.game.returned == True and self.game.ball_count.position == 4:
+                            if self.game.switches.shooter.is_open():
+                                self.game.coils.lifter.enable()
+                                self.game.returned = False
 
     def sw_smRunout_active_for_1ms(self, sw):
         if self.game.start.status == True:
@@ -221,8 +235,8 @@ class SinglecardBingo(procgame.game.Mode):
         else:
             self.check_shutter()
 
-    def sw_trough1_active(self, sw):
-        if self.game.switches.shooter.is_active():
+    def sw_trough1_closed(self, sw):
+        if self.game.switches.shooter.is_closed():
             self.game.coils.lifter.disable()
 
     def sw_shooter_active(self, sw):
@@ -232,7 +246,7 @@ class SinglecardBingo(procgame.game.Mode):
 
     def sw_ballLift_active_for_500ms(self, sw):
         if self.game.tilt.status == False:
-            if self.game.switches.shooter.is_inactive():
+            if self.game.switches.shooter.is_open():
                 if self.game.ball_count.position < 3:
                     self.game.coils.lifter.enable()
 
@@ -242,6 +256,8 @@ class SinglecardBingo(procgame.game.Mode):
         if self.game.switches.shutter.is_active():
             self.game.coils.shutter.enable()
             self.check_spot()
+        if self.game.ball_count.position <= 4:
+            self.check_lifter_status()
         self.delay(name="display", delay=0.1, handler=graphics.continental_18.display, param=self)
 
     def check_spot(self):
@@ -429,10 +445,8 @@ class SinglecardBingo(procgame.game.Mode):
     def sw_replayReset_active(self, sw):
         self.game.anti_cheat.disengage()
         self.holes = []
-#        self.cancel_delayed(name="blink_title")
         graphics.continental_18.display(self)
         self.tilt_actions()
-#        self.delay(name="blink_title", delay=1, handler=self.blink_title)
         self.replay_step_down(self.game.replays)
 
     def tilt_actions(self):
@@ -443,6 +457,9 @@ class SinglecardBingo(procgame.game.Mode):
         self.cancel_delayed(name="yellow_replay_step_up")
         self.cancel_delayed(name="green_replay_step_up")
         self.cancel_delayed(name="corners_replay_step_up")
+        self.cancel_delayed(name="blink")
+        self.cancel_delayed(name="blink_screen")
+        self.cancel_delayed(name="timeout")
         self.game.search_index.disengage()
         if self.game.ball_count.position == 0:
             if self.game.switches.shutter.is_active():
@@ -483,14 +500,14 @@ class SinglecardBingo(procgame.game.Mode):
         if number > 0:
             if number > 1:
                 self.game.replays -= 1
-                graphics.replay_step_down(self.game.replays, graphics.continental_18.reel1, graphics.continental_18.reel10, graphics.continental_18.reel100)
+                graphics.replay_step_down(self.game.replays, graphics.continental_18.reel1, graphics.continental_18.reel10, graphics.continental_18.reel100, graphics.continental_18.reel1000)
                 self.game.coils.registerDown.pulse()
                 number -= 1
                 self.delay(name="display", delay=0, handler=graphics.continental_18.display, param=self)
-                self.delay(name="replay_reset", delay=0.0, handler=self.replay_step_down, param=number)
+                self.delay(name="replay_reset", delay=0.13, handler=self.replay_step_down, param=number)
             elif number == 1:
                 self.game.replays -= 1
-                graphics.replay_step_down(self.game.replays, graphics.continental_18.reel1, graphics.continental_18.reel10, graphics.continental_18.reel100)
+                graphics.replay_step_down(self.game.replays, graphics.continental_18.reel1, graphics.continental_18.reel10, graphics.continental_18.reel100, graphics.continental_18.reel1000)
                 self.game.coils.registerDown.pulse()
                 number -= 1
                 self.delay(name="display", delay=0, handler=graphics.continental_18.display, param=self)
@@ -498,14 +515,14 @@ class SinglecardBingo(procgame.game.Mode):
         else: 
             if self.game.replays > 0:
                 self.game.replays -= 1
-                graphics.replay_step_down(self.game.replays, graphics.continental_18.reel1, graphics.continental_18.reel10, graphics.continental_18.reel100)
+                graphics.replay_step_down(self.game.replays, graphics.continental_18.reel1, graphics.continental_18.reel10, graphics.continental_18.reel100, graphics.continental_18.reel1000)
                 self.delay(name="display", delay=0.1, handler=graphics.continental_18.display, param=self)
             self.game.coils.registerDown.pulse()
 
     def replay_step_up(self):
-        if self.game.replays < 899:
+        if self.game.replays < 8999:
             self.game.replays += 1
-            graphics.replay_step_up(self.game.replays, graphics.continental_18.reel1, graphics.continental_18.reel10, graphics.continental_18.reel100)
+            graphics.replay_step_up(self.game.replays, graphics.continental_18.reel1, graphics.continental_18.reel10, graphics.continental_18.reel100, graphics.continental_18.reel1000)
         self.game.coils.registerUp.pulse()
         self.game.reflex.increase()
         graphics.continental_18.display(self)
@@ -521,9 +538,7 @@ class SinglecardBingo(procgame.game.Mode):
         # search activity.  For each revolution of the search disc (which happens about every 5-7 seconds), the
         # game will activate() each search relay for each 'hot' rivet on the search disc.  This can be on a different
         # wiper finger for each set of rivets on the search disc.
-#        self.cancel_delayed(name="blink_title")
-        self.game.sound.stop_music()
-        self.game.sound.play_music('search', -1)
+        self.game.sound.play('search')
        
         for i in range(0, 12):
             self.r = self.closed_search_relays(self.game.searchdisc.position)
@@ -544,15 +559,13 @@ class SinglecardBingo(procgame.game.Mode):
                 for number in self.holes:
                     if number == key:
                         self.match.append(self.wipers[key])
-                        relays += 1
+                        relays = sorted(set(self.match))
                         #TODO Play sound for each relay closure.
-                        s = relays 
+                        s = functions.count_seq(relays)
                         if s >= 2:
                             self.find_winner(s, self.red, self.yellow, self.green, self.corners)
                             break
-                            
 
-    #        self.delay(name="blink_title", delay=3, handler=self.blink_title)
 
     def find_winner(self, relays, red, yellow, green, corners):
         if self.game.search_index.status == False and self.game.replays < 8999:
@@ -866,7 +879,7 @@ class SinglecardBingo(procgame.game.Mode):
         corners = False
 
         self.pos[0] = {}
-        self.pos[1] = {16:1, 6:2, 4:3, 11:4, 9:5, 6:6}
+        self.pos[1] = {16:1, 6:2, 4:3, 11:4, 9:5, 5:6}
         self.pos[2] = {7:1, 8:2, 14:3, 18:4, 2:5, 13:6}
         self.pos[3] = {10:1, 12:2, 3:3, 17:4, 1:5, 15:6}
         self.pos[4] = {}
@@ -1007,7 +1020,6 @@ class SinglecardBingo(procgame.game.Mode):
                 self.game.magic_spot.engage(self.game)
                 if self.game.selection_feature.position == 0:
                     self.game.selection_feature.step()
-                self.game.coils.bell.pulse()
             else:
                 self.game.selection_feature.step()
         if sd in [14,20,35,12,21,23]:
@@ -1015,19 +1027,15 @@ class SinglecardBingo(procgame.game.Mode):
                 self.game.magic_spot.engage(self.game)
                 if self.game.selection_feature.position == 0:
                     self.game.selection_feature.step()
-                self.game.coils.bell.pulse()
             else:
                 self.game.line_feature.step()
         if sd in [15,34,38]:
             if self.game.reflex.connected_rivet() >= 2:
                 self.game.corners384.engage(self.game)
-                self.game.coils.bell.pulse()
             else:
                 self.game.corners192.engage(self.game)
-                self.game.coils.bell.pulse()
         if sd == 17:
             self.game.corners192.engage(self.game)
-            self.game.coils.bell.pulse()
         if self.game.cu:
             if self.game.coin.position == 15:
                 self.game.down.engage(self.game)
@@ -1096,32 +1104,6 @@ class SinglecardBingo(procgame.game.Mode):
         else:
             self.delay(name="display", delay=0.1, handler=graphics.continental_18.display, param=self)
 
-    def blink_title(self):
-        title1 = random.randint(0,1)
-        title2 = random.randint(0,1)
-        title3 = random.randint(0,1)
-        title4 = random.randint(0,1)
-        if title1 == 1:
-            pos = [167,257]
-            image = pygame.image.load('continental_18/assets/title1_on.png').convert_alpha()
-            screen.blit(image, pos)
-        if title2 == 1:
-            pos = [241,290]
-            image = pygame.image.load('continental_18/assets/title2_on.png').convert_alpha()
-            screen.blit(image, pos)
-        if title3 == 1:
-            pos = [346,298]
-            image = pygame.image.load('continental_18/assets/title3_on.png').convert_alpha()
-            screen.blit(image, pos)
-        if title4 == 1:
-            pos = [431,264]
-            image = pygame.image.load('continental_18/assets/title4_on.png').convert_alpha()
-            screen.blit(image, pos)
-            
-        pygame.display.update()
-        self.delay(name="display", delay=0.1, handler=graphics.continental_18.display, param=self)
-#        self.delay(name="blink_title", delay=3, handler=self.blink_title)
-
     # Define reset as the knock-off, anti-cheat relay disabled, and replay reset enabled.  Motors turn while credits are knocked off.
     # When meter reaches zero and the zero limit switch is hit, turn off motor sound and leave backglass gi on, but with tilt displayed.
 
@@ -1132,11 +1114,9 @@ class SinglecardBingo(procgame.game.Mode):
         self.eb = False
         self.game.anti_cheat.engage(self.game)
         self.tilt_actions()
-#        self.delay(name="blink_title", delay=1, handler=self.blink_title)
-
 
 class Continental18(procgame.game.BasicGame):
-    """ Palm Beach was the first game with Super Cards """
+    """ This Continental is a 5 ball remake of Miss Universe """
     def __init__(self, machine_type):
         super(Continental18, self).__init__(machine_type)
         pygame.mixer.pre_init(44100,-16,2,512)
@@ -1186,10 +1166,6 @@ class Continental18(procgame.game.BasicGame):
         self.ball_count = units.Stepper("ball_count", 8)
 
         # Initialize reflex(es) and mixers unique to this game
-        # NOTE: reflex unit drawing was not available for this game, so until I convince
-        #       another Palm Beach owner to take their game apart, I'll note that there
-        #       are five lugs, four of which provide another path to the mixer, and one which is always connected
-        #       and bypasses the mixer entirely.  There are no games from 1951 or 52 that have the reflex documented.
         self.reflex = units.Reflex("primary", 200)
 
         #This is a disc which has 50 positions

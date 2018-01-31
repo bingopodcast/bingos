@@ -35,7 +35,9 @@ super_line = pygame.image.load('surf_club/assets/super_line.png').convert_alpha(
 super_line_info = pygame.image.load('surf_club/assets/super_line_info.png').convert_alpha()
 spot_arrow = pygame.image.load('surf_club/assets/super_line_arrow.png').convert_alpha()
 rollover = pygame.image.load('surf_club/assets/rollover.png').convert_alpha()
-
+bg_menu = pygame.image.load('surf_club/assets/surf_club_menu.png')
+bg_gi = pygame.image.load('surf_club/assets/surf_club_gi.png')
+bg_off = pygame.image.load('surf_club/assets/surf_club_off.png')
 
 class scorereel():
     """ Score Reels are used to count replays """
@@ -62,13 +64,12 @@ def display(s, replays=0, menu=False):
     backglass = pygame.Surface((0,0), pygame.SRCALPHA)
     backglass.fill((0, 0, 0))
     if menu == True:
-        backglass = pygame.image.load('surf_club/assets/surf_club_menu.png')
+        screen.blit(bg_menu, backglass_position)
     else:
         if (s.game.anti_cheat.status == True):
-            backglass = pygame.image.load('surf_club/assets/surf_club_gi.png')
+            screen.blit(bg_gi, backglass_position)
         else:
-            backglass = pygame.image.load('surf_club/assets/surf_club_off.png')
-    screen.blit(backglass, backglass_position)
+            screen.blit(bg_off, backglass_position)
 
     if s.game.odds.position == 1:
         p = [107,818]
@@ -257,16 +258,20 @@ def display(s, replays=0, menu=False):
             p = [523,705]
             screen.blit(hold, p)
             if s.game.ball_count.position == 5:
-                p = [534,782]
-                screen.blit(hold_now, p)
+                s.cancel_delayed(name="blink_return")
+                blink_return([s,1,1])
+            else:
+                s.cancel_delayed("blink_return")
         elif s.game.hold_feature.position == 5 or s.game.hold_feature.position == 6:
             p = [658,663]
             screen.blit(hold_arrow, p)
             p = [615,705]
             screen.blit(double_hold, p)
             if s.game.ball_count.position == 5:
-                p = [534,782]
-                screen.blit(hold_now, p)
+                s.cancel_delayed(name="blink_return")
+                blink_return([s,1,1])
+            else:
+                s.cancel_delayed("blink_return")
 
         if s.game.super_card.position == 1:
             p = [34,454]
@@ -324,6 +329,11 @@ def display(s, replays=0, menu=False):
         if s.game.spotted_numbers.position >= 5:
             p = [19,747]
             screen.blit(spot_number, p)
+            if s.game.ball_count.position == 3 and s.game.spotted.position < 3:
+                s.cancel_delayed(name="blink")
+                blink([s,1,1])
+            else:
+                s.cancel_delayed(name="blink")
         if s.game.spotted_numbers.position >= 6:
             p = [56,747]
             screen.blit(spot_number, p)
@@ -335,8 +345,13 @@ def display(s, replays=0, menu=False):
             screen.blit(super_line, p)
 
             if s.game.spotted.position >= 3:
-                p = [259,681]
-                screen.blit(super_line_info, p)
+                if s.game.ball_count.position == 3:
+                    s.cancel_delayed(name="blink_super")
+                    blink_super([s,1,1])
+                else:
+                    s.cancel_delayed(name="blink_super")
+                    p = [259,681]
+                    screen.blit(super_line_info, p)
                 if s.game.spotted.position == 3:
                     if 3 in s.holes:
                         p = [231,734]
@@ -410,8 +425,67 @@ def display(s, replays=0, menu=False):
         tilt_position = [35,330]
         screen.blit(tilt, tilt_position)
 
-    pygame.display.flip()
     pygame.display.update()
+
+def blink_super(args):
+    dirty_rects = []
+    s = args[0]
+    b = args[1]
+    sn = args[2]
+
+    if b == 0:
+        if sn == 1:
+            p = [259,681]
+            dirty_rects.append(screen.blit(super_line_info, p))
+        pygame.display.update(dirty_rects)
+    else:
+        dirty_rects.append(screen.blit(bg_gi, (259,681), pygame.Rect(259,681,207,55)))
+        pygame.display.update(dirty_rects)
+    b = not b
+
+    args = [s,b,sn]
+
+    s.delay(name="blink_super", delay=0.1, handler=blink_super, param=args)
+
+def blink(args):
+    dirty_rects = []
+    s = args[0]
+    b = args[1]
+    sn = args[2]
+
+    if b == 0:
+        if sn == 1:
+            p = [45,783]
+            dirty_rects.append(screen.blit(select_now, p))
+        pygame.display.update(dirty_rects)
+    else:
+        dirty_rects.append(screen.blit(bg_gi, (45,783), pygame.Rect(45,783,147,33)))
+        pygame.display.update(dirty_rects)
+    b = not b
+
+    args = [s,b,sn]
+
+    s.delay(name="blink", delay=0.1, handler=blink, param=args)
+
+def blink_return(args):
+    dirty_rects = []
+    s = args[0]
+    b = args[1]
+    sn = args[2]
+
+    if b == 0:
+        if sn == 1:
+            p = [534,782]
+            dirty_rects.append(screen.blit(hold_now, p))
+        pygame.display.update(dirty_rects)
+    else:
+        dirty_rects.append(screen.blit(bg_gi, (534,782), pygame.Rect(534,782,143,32)))
+        pygame.display.update(dirty_rects)
+    b = not b
+
+    args = [s,b,sn]
+
+    s.delay(name="blink_return", delay=0.1, handler=blink_return, param=args)
 
 def eb_animation(num):
     global screen

@@ -12,6 +12,9 @@ number = pygame.image.load('coney_island/assets/number.png').convert_alpha()
 extra_ball = pygame.image.load('coney_island/assets/extra_balls.png').convert_alpha()
 eb = pygame.image.load('coney_island/assets/extra_ball.png').convert_alpha()
 tilt = pygame.image.load('coney_island/assets/tilt.png').convert_alpha()
+bg_menu = pygame.image.load('coney_island/assets/coney_island_menu.png')
+bg_gi = pygame.image.load('coney_island/assets/coney_island_gi.png')
+bg_off = pygame.image.load('coney_island/assets/coney_island_off.png')
 
 class scorereel():
     """ Score Reels are used to count replays """
@@ -37,15 +40,13 @@ def display(s, replays=0, menu=False):
 
     backglass_position = [0, 0]
     if menu == True:
-        backglass = pygame.image.load('coney_island/assets/coney_island_menu.png')
+        screen.blit(bg_menu, backglass_position)
     else:
         if (s.game.anti_cheat.status == True):
-            backglass = pygame.image.load('coney_island/assets/coney_island_gi.png')
+            screen.blit(bg_gi, backglass_position)
         else:
-            backglass = pygame.image.load('coney_island/assets/coney_island_off.png')
-    backglass = pygame.transform.scale(backglass, (720, 1280))
+            screen.blit(bg_off, backglass_position)
     
-    screen.blit(backglass, backglass_position)
 
     if s.game.selector.position >= 1:
         card1_position = [52,906]

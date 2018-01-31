@@ -19,7 +19,7 @@ class MulticardBingo(procgame.game.Mode):
         self.holes = []
         self.game.anti_cheat.engage(self.game)
         self.startup()
-        self.game.sound.register_music('motor', "audio/six_card_motor.wav")
+        self.game.sound.register_music('motor', "audio/other_motor.wav")
         self.game.sound.register_music('search', "audio/six_card_search_old.wav")
         self.game.sound.register_sound('add', "audio/six_card_add_card.wav")
         self.game.sound.register_sound('tilt', "audio/tilt.wav")
@@ -43,17 +43,19 @@ class MulticardBingo(procgame.game.Mode):
             self.timeout_actions()
     
     def timeout_actions(self):
-        if (self.game.timer.position < 40):
+        if (self.game.timer.position < 39):
             self.game.timer.step()
-            print self.game.timer.position
-            self.delay(delay=5.0, handler=self.timeout_actions)
+            self.delay(name="timeout", delay=5.0, handler=self.timeout_actions)
         else:
+            self.game.timer.step()
             self.tilt_actions()
 
-    def sw_trough8_inactive_for_1ms(self, sw):
+    def sw_trough8_closed(self, sw):
         if self.game.start.status == False:
             self.game.ball_count.position -= 1
             self.game.returned = True
+            self.check_lifter_status()
+        else:
             self.check_lifter_status()
 
     def sw_enter_active(self, sw):
@@ -73,10 +75,10 @@ class MulticardBingo(procgame.game.Mode):
 
     def regular_play(self):
         self.cancel_delayed(name="search")
-        self.cancel_delayed(name="lifter_status")
         self.cancel_delayed(name="card1_replay_step_up")
         self.cancel_delayed(name="card2_replay_step_up")
         self.cancel_delayed(name="card3_replay_step_up")
+        self.cancel_delayed(name="timeout")
         self.game.search_index.disengage()
         self.game.coils.counter.pulse()
         self.game.returned = False
@@ -103,19 +105,21 @@ class MulticardBingo(procgame.game.Mode):
 
     def check_lifter_status(self):
         if self.game.tilt.status == False:
-            if self.game.switches.trough8.is_inactive() and self.game.switches.trough5.is_active() and self.game.switches.trough4.is_active() and self.game.switches.trough3.is_active() and self.game.switches.trough2.is_active():
-                if self.game.switches.shooter.is_inactive():
+            if self.game.switches.trough8.is_closed() and self.game.switches.trough5.is_open() and self.game.switches.trough4.is_open() and self.game.switches.trough3.is_closed() and self.game.switches.trough2.is_closed():
+                if self.game.switches.shooter.is_open():
                     self.game.coils.lifter.enable()
+                    self.game.returned = False
             else:
-                if self.game.switches.trough4.is_active():
-                    if self.game.switches.shooter.is_inactive():
-                        if self.game.switches.gate.is_active():
-                            self.game.coils.lifter.enable()
-                if self.game.returned == True and self.game.ball_count.position == 4:
-                    if self.game.switches.shooter.is_inactive():
-                        self.game.coils.lifter.enable()
-                        self.game.returned = False
-        self.delay(name="lifter_status", delay=0, handler=self.check_lifter_status)
+                if self.game.start.status == False:
+                    if self.game.switches.trough4.is_open():
+                        if self.game.switches.shooter.is_open():
+                            if self.game.switches.gate.is_closed():
+                                self.game.coils.lifter.enable()
+                    else:
+                        if self.game.returned == True and self.game.ball_count.position == 4:
+                            if self.game.switches.shooter.is_open():
+                                self.game.coils.lifter.enable()
+                                self.game.returned = False
 
     def sw_smRunout_active_for_1ms(self, sw):
         if self.game.start.status == True:
@@ -123,8 +127,8 @@ class MulticardBingo(procgame.game.Mode):
         else:
             self.check_shutter()
 
-    def sw_trough1_active(self, sw):
-        if self.game.switches.shooter.is_active():
+    def sw_trough1_closed(self, sw):
+        if self.game.switches.shooter.is_closed():
             self.game.coils.lifter.disable()
 
     def sw_shooter_active(self, sw):
@@ -132,7 +136,7 @@ class MulticardBingo(procgame.game.Mode):
             self.game.coils.lifter.disable()
 
     def sw_ballLift_active_for_500ms(self, sw):
-        if self.game.switches.shooter.is_inactive():
+        if self.game.switches.shooter.is_open():
             if self.game.ball_count.position < 5:
                 self.game.coils.lifter.enable()
 
@@ -144,6 +148,8 @@ class MulticardBingo(procgame.game.Mode):
         if self.game.ball_count.position >= 4:
             if self.game.search_index.status == False:
                 self.search()
+        if self.game.ball_count.position <= 4:
+            self.check_lifter_status()
 
     # This is really nasty, but it is how we render graphics for each individual hole.
     # numbers are added (or removed from) a list.  In this way, I can re-use the same
@@ -352,10 +358,8 @@ class MulticardBingo(procgame.game.Mode):
     def sw_replayReset_active(self, sw):
         self.game.anti_cheat.disengage()
         self.holes = []
-#        self.cancel_delayed(name="blink_title")
         graphics.zingo.display(self)
         self.tilt_actions()
-#        self.delay(name="blink_title", delay=1, handler=self.blink_title)
         self.replay_step_down(self.game.replays)
 
     def tilt_actions(self):
@@ -364,6 +368,7 @@ class MulticardBingo(procgame.game.Mode):
         self.cancel_delayed(name="card1_replay_step_up")
         self.cancel_delayed(name="card2_replay_step_up")
         self.cancel_delayed(name="card3_replay_step_up")
+        self.cancel_delayed(name="timeout")
         self.game.search_index.disengage()
         if self.game.ball_count.position == 0:
             if self.game.switches.shutter.is_active():
@@ -389,7 +394,7 @@ class MulticardBingo(procgame.game.Mode):
                 self.game.coils.registerDown.pulse()
                 number -= 1
                 graphics.zingo.display(self)
-                self.delay(name="replay_reset", delay=0.0, handler=self.replay_step_down, param=number)
+                self.delay(name="replay_reset", delay=0.13, handler=self.replay_step_down, param=number)
             elif number == 1:
                 self.game.replays -= 1
                 self.game.coils.registerDown.pulse()
@@ -421,7 +426,6 @@ class MulticardBingo(procgame.game.Mode):
         # search activity.  For each revolution of the search disc (which happens about every 5-7 seconds), the
         # game will activate() each search relay for each 'hot' rivet on the search disc.  This can be on a different
         # wiper finger for each set of rivets on the search disc.
-#        self.cancel_delayed(name="blink_title")
         self.game.sound.stop_music()
         self.game.sound.play_music('search', -1)
 
@@ -447,7 +451,6 @@ class MulticardBingo(procgame.game.Mode):
                             if s >= 3:
                                 self.find_winner(s, self.card)
                                 break
-#        self.delay(name="blink_title", delay=3, handler=self.blink_title)
 
     def find_winner(self, relays, card):
         if self.game.search_index.status == False and self.game.replays < 400:
@@ -599,36 +602,14 @@ class MulticardBingo(procgame.game.Mode):
 
         return (self.pos[rivets], card)
             
-    def blink_title(self):
-        title1 = random.randint(0,1)
-        title2 = random.randint(0,1)
-        title3 = random.randint(0,1)
-        if title1 == 1:
-            pos = [298,215]
-            image = pygame.image.load('zingo/assets/title1_on.png').convert_alpha()
-            screen.blit(image, pos)
-        if title2 == 1:
-            pos = [181,239]
-            image = pygame.image.load('zingo/assets/title2_on.png').convert_alpha()
-            screen.blit(image, pos)
-        if title3 == 1:
-            pos = [385,243]
-            image = pygame.image.load('zingo/assets/title3_on.png').convert_alpha()
-            screen.blit(image, pos)
-
-        pygame.display.update()
-        self.delay(name="display", delay=0.1, handler=graphics.zingo.display, param=self)
-#        self.delay(name="blink_title", delay=3, handler=self.blink_title)
-                                   
     # Define reset as the knock-off, anti-cheat relay disabled, and replay reset enabled.  Motors turn while credits are knocked off.
     # When meter reaches zero and the zero limit switch is hit, turn off motor sound and leave backglass gi on, but with tilt displayed.
 
     def startup(self):        
         self.tilt_actions()
-#        self.delay(name="blink_title", delay=1, handler=self.blink_title)
 
 class Zingo(procgame.game.BasicGame):
-    """ Zingo was the second game United produced using the standard Bally playfield layout """
+    """ Zingo was one of the first games United produced using the standard Bally playfield layout """
     def __init__(self, machine_type):
         super(Zingo, self).__init__(machine_type)
         pygame.mixer.pre_init(44100,-16,2,512)

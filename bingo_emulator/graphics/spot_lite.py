@@ -16,6 +16,9 @@ o10 = pygame.image.load('spot_lite/assets/odds10.png').convert_alpha()
 c = pygame.image.load('spot_lite/assets/corners.png').convert_alpha()
 number = pygame.image.load('spot_lite/assets/number.png').convert_alpha()
 tilt = pygame.image.load('spot_lite/assets/tilt.png').convert_alpha()
+bg_menu = pygame.image.load('spot_lite/assets/spot_lite_menu.png')
+bg_gi = pygame.image.load('spot_lite/assets/spot_lite_gi.png')
+bg_off = pygame.image.load('spot_lite/assets/spot_lite_off.png')
 
 class scorereel():
     """ Score Reels are used to count replays """
@@ -42,15 +45,12 @@ def display(s, replays=0, menu=False):
     backglass = pygame.Surface(screen.get_size(), flags=pygame.SRCALPHA)
     backglass.fill((0, 0, 0))
     if menu == True:
-        backglass = pygame.image.load('spot_lite/assets/spot_lite_menu.png')
+        screen.blit(bg_menu, backglass_position)
     else:
         if (s.game.anti_cheat.status == True):
-            backglass = pygame.image.load('spot_lite/assets/spot_lite_gi.png')
+            screen.blit(bg_gi, backglass_position)
         else:
-            backglass = pygame.image.load('spot_lite/assets/spot_lite_off.png')
-    backglass = pygame.transform.scale(backglass, (720, 1280))
-    
-    screen.blit(backglass, backglass_position)
+            screen.blit(bg_off, backglass_position)
 
     if s.game.extra_ball.position == 1:
         eb_position = [32,934]

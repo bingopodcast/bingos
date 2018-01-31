@@ -16,6 +16,9 @@ red_button = pygame.image.load('venus/assets/red_button.png').convert_alpha()
 double = pygame.image.load('venus/assets/double.png').convert_alpha()
 nothing = pygame.image.load('venus/assets/nothing.png').convert_alpha()
 feature = pygame.image.load('venus/assets/feature.png').convert_alpha()
+bg_menu = pygame.image.load('venus/assets/venus_menu.png')
+bg_gi = pygame.image.load('venus/assets/venus_gi.png')
+bg_off = pygame.image.load('venus/assets/venus_off.png')
 
 class scorereel():
     """ Score Reels are used to count replays """
@@ -44,13 +47,12 @@ def display(s, replays=0, menu=False):
     backglass = pygame.Surface((0,0), pygame.SRCALPHA)
     backglass.fill((0, 0, 0))
     if menu == True:
-        backglass = pygame.image.load('venus/assets/venus_menu.png')
+        screen.blit(bg_menu, backglass_position)
     else:
         if (s.game.anti_cheat.status == True):
-            backglass = pygame.image.load('venus/assets/venus_gi.png')
+            screen.blit(bg_gi, backglass_position)
         else:
-            backglass = pygame.image.load('venus/assets/venus_off.png')
-    screen.blit(backglass, backglass_position)
+            screen.blit(bg_off, backglass_position)
 
     if s.game.selector.position >= 1:
         card1_position = [16,673]
@@ -77,12 +79,12 @@ def display(s, replays=0, menu=False):
             screen.blit(feature, f)
             d = [295,325]
             screen.blit(double, d)
-
-    if s.game.nothing.status == True:
-        f = [255,366]
-        screen.blit(feature, f)
-        n = [280,367]
-        screen.blit(nothing, n)
+        if s.game.nothing.status == True:
+            print "HERE"
+            f = [255,366]
+            screen.blit(feature, f)
+            n = [280,367]
+            screen.blit(nothing, n)
 
 
     if s.game.tilt.status == False:
@@ -440,22 +442,26 @@ def display(s, replays=0, menu=False):
         tilt_position = [330,405]
         screen.blit(tilt, tilt_position)
 
-
-    pygame.display.flip()
     pygame.display.update()
 
 
 def blink_double(s):
+    dirty_rects = []
     s.game.blink = not s.game.blink
     if s.game.blink == 1:
-        p = [251,234]
-        screen.blit(green_button, p)
+        blink_pos = [251,234]
+        dirty_rects.append(screen.blit(green_button, blink_pos))
         b = [277,236]
-        screen.blit(green_button_info, b)
+        dirty_rects.append(screen.blit(green_button_info, b))
         r = [256,280]
-        screen.blit(feature, r)
+        dirty_rects.append(screen.blit(feature, r))
         b = [271,284]
-        screen.blit(red_button, b)
-        pygame.display.update()
+        dirty_rects.append(screen.blit(red_button, b))
+        pygame.display.update(dirty_rects)
     else:
-        display(s)
+        dirty_rects.append(screen.blit(bg_gi, (251,234), pygame.Rect(251,234,218,54)))
+        dirty_rects.append(screen.blit(bg_gi, (277,236), pygame.Rect(277,236,162,43)))
+        dirty_rects.append(screen.blit(bg_gi, (256,280), pygame.Rect(256,280,207,50)))
+        dirty_rects.append(screen.blit(bg_gi, (271,284), pygame.Rect(271,284,176,42)))
+        pygame.display.update(dirty_rects)
+

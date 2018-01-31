@@ -73,7 +73,10 @@ class MainMenu(procgame.game.Mode):
         self.game.ball_count = units.Stepper("ball_count", 8)
         self.game.ball_return = units.Stepper("ball_return", 15)
         self.game.extra_ball = units.Stepper("extra_ball", 3)
-        self.game.double = units.Relay("double")
+        self.game.double= units.Relay("double")
+        self.game.double1 = units.Relay("double1")
+        self.game.double2 = units.Relay("double2")
+        self.game.double3 = units.Relay("double3")
         self.game.b_return = units.Relay("b_return")
         self.game.ball_return_played = units.Relay("ball_return_played")
         self.game.diagonal_score = units.Relay("diagonal_score")
@@ -123,6 +126,7 @@ class MainMenu(procgame.game.Mode):
         self.game.super_line_feature = units.Relay("super_line_feature")
         self.game.extra_ok = units.Relay("extra_ok")
         self.game.super_ok = units.Relay("super_ok")
+        self.game.delay = units.Relay("delay")
         self.game.super_card = units.Stepper("super_card", 8)
         self.game.selection_feature = units.Stepper("selection_feature", 8)
         self.game.magic_screen_feature = units.Stepper("magic_screen_feature", 8)
@@ -674,21 +678,21 @@ def main(sel):
     selection[114] = "hole_in_one"
     selection[115] = "stock_market"
     selection[116] = "double_up"
-    selection[117] = "ticker_tape"
-    selection[118] = "hawaii_2"
-    selection[119] = "wall_street"
+    selection[117] = "wall_street"
+    selection[118] = "ticker_tape"
+    selection[119] = "hawaii_2"
     selection[120] = "bali"
     selection[121] = "super_wall_street"
     selection[122] = "miss_america_75"
     selection[123] = "mystic_gate"
     selection[124] = "miss_universe"
-    selection[125] = "continental_18"
-    selection[126] = "blue_chip"
-    selection[127] = "bull_market"
-    selection[128] = "bonanza"
-    selection[129] = "miss_america_supreme"
-    selection[130] = "high_flyer"
-    selection[131] = "miss_america_deluxe"
+    selection[125] = "blue_chip"
+    selection[126] = "bull_market"
+    selection[127] = "bonanza"
+    selection[128] = "miss_america_supreme"
+    selection[129] = "high_flyer"
+    selection[130] = "miss_america_deluxe"
+    selection[131] = "continental_18"
     selection[132] = "galaxy"
     selection[133] = "nashville"
     selection[134] = "dixieland"
@@ -697,7 +701,7 @@ def main(sel):
     selection[137] = "continental"
     selection[138] = "mississippi_showboat"
 
-    for i in range(1,135):
+    for i in range(1,139):
         if sel in selection[i]:
             select = i
             break

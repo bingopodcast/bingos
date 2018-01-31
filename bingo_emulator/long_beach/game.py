@@ -50,15 +50,17 @@ class MulticardBingo(procgame.game.Mode):
             self.timeout_actions()
     
     def timeout_actions(self):
-        if (self.game.timer.position < 40):
+        if (self.game.timer.position < 39):
             self.game.timer.step()
-            print self.game.timer.position
-            self.delay(delay=5.0, handler=self.timeout_actions)
+            self.delay(name="timeout", delay=5.0, handler=self.timeout_actions)
         else:
+            self.game.timer.step()
             self.tilt_actions()
 
-    def sw_trough8_inactive_for_1ms(self, sw):
+    def sw_trough8_closed(self, sw):
         if self.game.start.status == False:
+            if self.game.ball_count.position >= 5:
+                self.game.returned = True
             self.game.ball_count.position -= 1
             if self.game.selector.position < 3:
                 if self.game.ball_count.position <= 3:
@@ -67,10 +69,13 @@ class MulticardBingo(procgame.game.Mode):
                 if self.game.ball_count.position <= 5:
                     self.game.ball_return.step()
             if self.game.ball_return.position == 15:
-                self.game.double.engage(self.game)
-            self.game.returned = True
+                self.game.double1.engage(self.game)
+                self.game.double2.engage(self.game)
+                self.game.double3.engage(self.game)
             self.check_lifter_status()
             self.delay(name="display", delay=0.1, handler=graphics.long_beach.display, param=self)
+        else:
+            self.check_lifter_status()
 
     def sw_enter_active(self, sw):
         if self.game.switches.left.is_active() and self.game.switches.right.is_active():
@@ -89,10 +94,10 @@ class MulticardBingo(procgame.game.Mode):
 
     def regular_play(self):
         self.cancel_delayed(name="search")
-        self.cancel_delayed(name="lifter_status")
         self.cancel_delayed(name="card1_replay_step_up")
         self.cancel_delayed(name="card2_replay_step_up")
         self.cancel_delayed(name="card3_replay_step_up")
+        self.cancel_delayed(name="timeout")
         self.game.search_index.disengage()
         self.game.coils.counter.pulse()
         self.game.returned = False
@@ -108,9 +113,17 @@ class MulticardBingo(procgame.game.Mode):
         else:
             self.holes = []
             self.game.start.engage(self.game)
-            if self.game.card1_replay_counter.position > 0 or self.game.card2_replay_counter.position > 0 or self.game.card3_replay_counter.position > 0:
-                if self.game.double.status == True:
-                    self.game.double.disengage()
+            if self.game.card1_replay_counter.position > 0:
+                if self.game.double1.status == True:
+                    self.game.double1.disengage()
+                    self.game.ball_return.reset()
+            if self.game.card2_replay_counter.position > 0:
+                if self.game.double2.status == True:
+                    self.game.double2.disengage()
+                    self.game.ball_return.reset()
+            if self.game.card3_replay_counter.position > 0:
+                if self.game.double3.status == True:
+                    self.game.double3.disengage()
                     self.game.ball_return.reset()
             self.game.card1_replay_counter.reset()
             self.game.card2_replay_counter.reset()
@@ -128,38 +141,34 @@ class MulticardBingo(procgame.game.Mode):
 
     def check_lifter_status(self):
         if self.game.tilt.status == False:
-            if self.game.switches.trough8.is_inactive() and self.game.switches.trough5.is_active() and self.game.switches.trough4.is_active() and self.game.switches.trough3.is_active() and self.game.switches.trough2.is_active():
-                if self.game.switches.shooter.is_inactive():
+            if self.game.switches.trough8.is_closed() and self.game.switches.trough5.is_open() and self.game.switches.trough4.is_open() and self.game.switches.trough3.is_closed() and self.game.switches.trough2.is_closed():
+                if self.game.switches.shooter.is_open():
                     self.game.coils.lifter.enable()
+                    self.game.returned = False
             else:
-                if self.game.switches.trough4.is_active():
-                    if self.game.switches.shooter.is_inactive():
-                        if self.game.switches.gate.is_active():
-                            self.game.coils.lifter.enable()
-                else:
-                    if self.game.switches.trough4.is_inactive():
-                        if self.game.extra_ball.position >= 1 and self.game.ball_count.position <= 5:
-                            if self.game.switches.shooter.is_inactive() and self.game.switches.trough3.is_active():
+                if self.game.start.status == False:
+                    if self.game.switches.trough4.is_open():
+                        if self.game.switches.shooter.is_open():
+                            if self.game.switches.gate.is_closed():
                                 self.game.coils.lifter.enable()
-                    if self.game.switches.trough3.is_inactive():
-                        if self.game.extra_ball.position >= 2 and self.game.ball_count.position <= 6:
-                            if self.game.switches.shooter.is_inactive() and self.game.switches.trough2.is_active():
-                                self.game.coils.lifter.enable()
-                    if self.game.switches.trough2.is_inactive() and self.game.ball_count.position <= 7:
-                        if self.game.extra_ball.position >= 3 and self.game.ball_count.position <= 7:
-                            if self.game.switches.shooter.is_inactive():
-                                self.game.coils.lifter.enable()
-                    if self.game.ball_count.position >= 8:
-                        self.game.coils.lifter.disable()
-                    if self.game.returned == True and self.game.ball_count.position == 4:
-                        if self.game.switches.shooter.is_inactive():
-                            self.game.coils.lifter.enable()
-                            self.game.returned = False
-                    if self.game.returned == True and self.game.ball_count.position == 8:
-                        if self.game.switches.shooter.is_inactive():
+                    else:
+                        if self.game.switches.trough4.is_closed():
+                            if self.game.extra_ball.position >= 1 and self.game.ball_count.position <= 5:
+                                if self.game.switches.shooter.is_open() and self.game.switches.trough3.is_closed():
+                                    self.game.coils.lifter.enable()
+                        if self.game.switches.trough3.is_open():
+                            if self.game.extra_ball.position >= 2 and self.game.ball_count.position <= 6:
+                                if self.game.switches.shooter.is_open() and self.game.switches.trough2.is_closed():
+                                    self.game.coils.lifter.enable()
+                        if self.game.switches.trough2.is_inactive() and self.game.ball_count.position <= 7:
+                            if self.game.ball_count.position <= 7:
+                                if self.game.extra_ball.position >= 3:
+                                    if self.game.switches.shooter.is_open():
+                                        self.game.coils.lifter.enable()
+                    if self.game.returned == True and self.game.ball_count.position in [4,5,6,7]:
+                        if self.game.switches.shooter.is_open():
                             self.game.coils.lifter.enable()
                             self.game.returned = False
-        self.delay(name="lifter_status", delay=0, handler=self.check_lifter_status)
 
     def sw_smRunout_active_for_1ms(self, sw):
         if self.game.start.status == True:
@@ -167,8 +176,8 @@ class MulticardBingo(procgame.game.Mode):
         else:
             self.check_shutter()
 
-    def sw_trough1_active(self, sw):
-        if self.game.switches.shooter.is_active():
+    def sw_trough1_closed(self, sw):
+        if self.game.switches.shooter.is_closed():
             self.game.coils.lifter.disable()
 
     def sw_shooter_active(self, sw):
@@ -177,7 +186,7 @@ class MulticardBingo(procgame.game.Mode):
             self.cancel_delayed("lifter_status")
 
     def sw_ballLift_active_for_500ms(self, sw):
-        if self.game.switches.shooter.is_inactive():
+        if self.game.switches.shooter.is_open():
             if self.game.ball_count.position < 5:
                 self.game.coils.lifter.enable()
             if self.game.ball_count.position == 5 and self.game.extra_ball.position >= 1:
@@ -196,6 +205,8 @@ class MulticardBingo(procgame.game.Mode):
             self.game.sound.stop_music()
             if self.game.search_index.status == False:
                 self.search()
+        if self.game.ball_count.position <= 7:
+            self.check_lifter_status()
 
     # This is really nasty, but it is how we render graphics for each individual hole.
     # numbers are added (or removed from) a list.  In this way, I can re-use the same
@@ -404,10 +415,8 @@ class MulticardBingo(procgame.game.Mode):
     def sw_replayReset_active(self, sw):
         self.game.anti_cheat.disengage()
         self.holes = []
-#        self.cancel_delayed(name="blink_title")
         graphics.long_beach.display(self)
         self.tilt_actions()
-#        self.delay(name="blink_title", delay=1, handler=self.blink_title)
         self.replay_step_down(self.game.replays)
 
     def tilt_actions(self):
@@ -416,6 +425,7 @@ class MulticardBingo(procgame.game.Mode):
         self.cancel_delayed(name="card1_replay_step_up")
         self.cancel_delayed(name="card2_replay_step_up")
         self.cancel_delayed(name="card3_replay_step_up")
+        self.cancel_delayed(name="timeout")
         self.game.search_index.disengage()
         if self.game.ball_count.position == 0:
             if self.game.switches.shutter.is_active():
@@ -442,7 +452,7 @@ class MulticardBingo(procgame.game.Mode):
                 self.game.coils.registerDown.pulse()
                 number -= 1
                 graphics.long_beach.display(self)
-                self.delay(name="replay_reset", delay=0.0, handler=self.replay_step_down, param=number)
+                self.delay(name="replay_reset", delay=0.13, handler=self.replay_step_down, param=number)
             elif number == 1:
                 self.game.replays -= 1
                 self.game.coils.registerDown.pulse()
@@ -487,7 +497,6 @@ class MulticardBingo(procgame.game.Mode):
         # game will activate() each search relay for each 'hot' rivet on the search disc.  This can be on a different
         # wiper finger for each set of rivets on the search disc.
         # Replay counters also need to be implemented to prevent the supplemental searches from scoring.
-#        self.cancel_delayed(name="blink_title")
         self.game.sound.stop_music()
         self.game.sound.play_music('search', -1)
 
@@ -513,13 +522,12 @@ class MulticardBingo(procgame.game.Mode):
                             if s >= 3:
                                 self.find_winner(s, self.card)
                                 break
-#        self.delay(name="blink_title", delay=3, handler=self.blink_title)
 
     def find_winner(self, relays, card):
         if self.game.search_index.status == False and self.game.replays < 999:
             if card == 1:
                 if relays == 3:
-                    if self.game.double.status == True:
+                    if self.game.double1.status == True:
                         if self.game.card1_replay_counter.position < 8:
                             self.game.search_index.engage(self.game)
                             self.card1_replay_step_up(8 - self.game.card1_replay_counter.position)
@@ -528,7 +536,7 @@ class MulticardBingo(procgame.game.Mode):
                             self.game.search_index.engage(self.game)
                             self.card1_replay_step_up(4 - self.game.card1_replay_counter.position)
                 if relays == 4:
-                    if self.game.double.status == True:
+                    if self.game.double1.status == True:
                         if self.game.card1_replay_counter.position < 40:
                             self.game.search_index.engage(self.game)
                             self.card1_replay_step_up(40 - self.game.card1_replay_counter.position)
@@ -537,7 +545,7 @@ class MulticardBingo(procgame.game.Mode):
                             self.game.search_index.engage(self.game)
                             self.card1_replay_step_up(20 - self.game.card1_replay_counter.position)
                 if relays == 5:
-                    if self.game.double.status == True:
+                    if self.game.double1.status == True:
                         if self.game.card1_replay_counter.position < 200:
                             self.game.search_index.engage(self.game)
                             self.card1_replay_step_up(200 - self.game.card1_replay_counter.position)
@@ -547,7 +555,7 @@ class MulticardBingo(procgame.game.Mode):
                             self.card1_replay_step_up(100 - self.game.card1_replay_counter.position)
             if card == 2:
                 if relays == 3:
-                    if self.game.double.status == True:
+                    if self.game.double2.status == True:
                         if self.game.card2_replay_counter.position < 8:
                             self.game.search_index.engage(self.game)
                             self.card2_replay_step_up(8 - self.game.card2_replay_counter.position)
@@ -556,7 +564,7 @@ class MulticardBingo(procgame.game.Mode):
                             self.game.search_index.engage(self.game)
                             self.card2_replay_step_up(4 - self.game.card2_replay_counter.position)
                 if relays == 4:
-                    if self.game.double.status == True:
+                    if self.game.double2.status == True:
                         if self.game.card2_replay_counter.position < 40:
                             self.game.search_index.engage(self.game)
                             self.card2_replay_step_up(40 - self.game.card2_replay_counter.position)
@@ -565,7 +573,7 @@ class MulticardBingo(procgame.game.Mode):
                             self.game.search_index.engage(self.game)
                             self.card2_replay_step_up(20 - self.game.card2_replay_counter.position)
                 if relays == 5:
-                    if self.game.double.status == True:
+                    if self.game.double2.status == True:
                         if self.game.card2_replay_counter.position < 200:
                             self.game.search_index.engage(self.game)
                             self.card2_replay_step_up(200 - self.game.card2_replay_counter.position)
@@ -575,7 +583,7 @@ class MulticardBingo(procgame.game.Mode):
                             self.card2_replay_step_up(100 - self.game.card2_replay_counter.position)
             if card == 3:
                 if relays == 3:
-                    if self.game.double.status == True:
+                    if self.game.double3.status == True:
                         if self.game.card3_replay_counter.position < 8:
                             self.game.search_index.engage(self.game)
                             self.card3_replay_step_up(8 - self.game.card3_replay_counter.position)
@@ -584,7 +592,7 @@ class MulticardBingo(procgame.game.Mode):
                             self.game.search_index.engage(self.game)
                             self.card3_replay_step_up(4 - self.game.card3_replay_counter.position)
                 if relays == 4:
-                    if self.game.double.status == True:
+                    if self.game.double3.status == True:
                         if self.game.card3_replay_counter.position < 40:
                             self.game.search_index.engage(self.game)
                             self.card3_replay_step_up(40 - self.game.card3_replay_counter.position)
@@ -593,7 +601,7 @@ class MulticardBingo(procgame.game.Mode):
                             self.game.search_index.engage(self.game)
                             self.card3_replay_step_up(20 - self.game.card3_replay_counter.position)
                 if relays == 5:
-                    if self.game.double.status == True:
+                    if self.game.double3.status == True:
                         if self.game.card3_replay_counter.position < 200:
                             self.game.search_index.engage(self.game)
                             self.card3_replay_step_up(200 - self.game.card3_replay_counter.position)
@@ -717,35 +725,8 @@ class MulticardBingo(procgame.game.Mode):
 
         return (self.pos[rivets], card)
 
-    def blink_title(self):
-        title1 = random.randint(0,1)
-        title2 = random.randint(0,1)
-        title3 = random.randint(0,1)
-        title4 = random.randint(0,1)
-        if title1 == 1:
-            pos = [222,332]
-            image = pygame.image.load('long_beach/assets/title1_on.png').convert_alpha()
-            screen.blit(image, pos)
-        if title2 == 1:
-            pos = [394,334]
-            image = pygame.image.load('long_beach/assets/title2_on.png').convert_alpha()
-            screen.blit(image, pos)
-        if title3 == 1:
-            pos = [214,388]
-            image = pygame.image.load('long_beach/assets/title3_on.png').convert_alpha()
-            screen.blit(image, pos)
-        if title4 == 1:
-            pos = [342,390]
-            image = pygame.image.load('long_beach/assets/title4_on.png').convert_alpha()
-            screen.blit(image, pos)
-        
-        pygame.display.update()    
-        self.delay(name="display", delay=0.1, handler=graphics.long_beach.display, param=self)
-#        self.delay(name="blink_title", delay=3, handler=self.blink_title)
-   
-                                            
     def scan_eb(self):
-        s = random.randint(1,3)
+        s = random.randint(2,3)
         self.animate_eb_scan(s)
         self.game.mixer.step()
         self.replay_step_down()
@@ -777,24 +758,23 @@ class MulticardBingo(procgame.game.Mode):
             self.delay(name="display", delay=0.1, handler=graphics.long_beach.display, param=self)
 
     def eb_probability(self):
-        print self.game.ebselector.position
         if self.game.percentage.position <= 5 and self.game.mixer.position <= 7:
             self.game.ebselector.step()
-            if self.game.ebselector.position == 5 or self.game.ebselector.position == 8 or self.game.ebselector.position == 10 or self.game.ebselector.position == 11 or self.game.ebselector.position == 13 or self.game.ebselector == 15:
+            if self.game.ebselector.position in [5,8,10,11,13,15]:
                 return 1
             else:
                 return 0
         elif self.game.percentage.position >= 6 and self.game.percentage.position <= 10:
-            if self.game.mixer.position == 8 or self.game.mixer.position == 10:
+            if self.game.mixer.position in [8,10]:
                 self.game.ebselector.step()
-                if self.game.ebselector.position == 5 or self.game.ebselector.position == 8 or self.game.ebselector.position == 10 or self.game.ebselector.position == 11 or self.game.ebselector.position == 13 or self.game.ebselector == 15:
+                if self.game.ebselector.position in [5,8,10,11,13,15]:
                     return 1
                 else:
                     return 0
         elif self.game.percentage.position >= 11 and self.game.percentage.position <= 20:
-            if self.game.mixer.position == 11 or self.game.mixer.position == 12 or self.game.mixer.position == 13:
+            if self.game.mixer.position in [11,12,13]:
                 self.game.ebselector.step()
-                if self.game.ebselector.position == 5 or self.game.ebselector.position == 8 or self.game.ebselector.position == 10 or self.game.ebselector.position == 11 or self.game.ebselector.position == 13 or self.game.ebselector == 15:
+                if self.game.ebselector.position in [5,8,10,11,13,15]:
                     return 1
                 else:
                     return 0
@@ -805,8 +785,6 @@ class MulticardBingo(procgame.game.Mode):
     def startup(self):        
         self.eb = False
         self.tilt_actions()
-#        self.delay(name="blink_title", delay=1, handler=self.blink_title)
-
 
 class LongBeach(procgame.game.BasicGame):
     """ Long Beach was the only bingo produced by Williams """
@@ -857,7 +835,9 @@ class LongBeach(procgame.game.BasicGame):
         self.ball_return = units.Stepper("ball_return", 15)
         br = random.randint(4,8)
         self.ball_return.position = br
-        self.double = units.Relay("double")
+        self.double1 = units.Relay("double1")
+        self.double2 = units.Relay("double2")
+        self.double3 = units.Relay("double3")
 
         #Check for status of the replay register zero switch.  If positive
         #and machine is just powered on, this will zero out the replays.

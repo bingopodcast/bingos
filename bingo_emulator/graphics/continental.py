@@ -21,6 +21,9 @@ d = pygame.image.load('continental/assets/double.png').convert_alpha()
 n = pygame.image.load('continental/assets/nothing.png').convert_alpha()
 tilt = pygame.image.load('continental/assets/tilt.png').convert_alpha()
 blink_image = pygame.image.load('continental/assets/double_or_nothing.png').convert_alpha()
+bg_menu = pygame.image.load('continental/assets/continental_menu.png')
+bg_gi = pygame.image.load('continental/assets/continental_gi.png')
+bg_off = pygame.image.load('continental/assets/continental_off.png')
 
 class scorereel():
     """ Score Reels are used to count replays """
@@ -36,11 +39,6 @@ reel1000 = scorereel([230,660], "graphics/assets/digital_reel.png")
 
 def display(s, replays=0, menu=False):
     
-    #meter = pygame.image.load('graphics/assets/digital_register.png').convert()
-    #meter.set_colorkey((255,0,252))
-    #meter_position = [225,660]
-
-    #screen.blit(meter, meter_position)
     screen.blit(reel1.image, reel1.position)
     screen.blit(reel10.image, reel10.position)
     screen.blit(reel100.image, reel100.position)
@@ -50,14 +48,12 @@ def display(s, replays=0, menu=False):
     backglass = pygame.Surface((720,1280), pygame.SRCALPHA | pygame.FULLSCREEN)
     backglass.fill((0, 0, 0))
     if menu == True:
-        backglass = pygame.image.load('continental/assets/continental_menu.png')
+        screen.blit(bg_menu, backglass_position)
     else:
         if (s.game.anti_cheat.status == True):
-            backglass = pygame.image.load('continental/assets/continental_gi.png')
+            screen.blit(bg_gi, backglass_position)
         else:
-            backglass = pygame.image.load('continental/assets/continental_off.png')
-    #backglass = pygame.transform.scale(backglass, (1280,720))
-    screen.blit(backglass, backglass_position)
+            screen.blit(bg_off, backglass_position)
 
     if s.game.selector.position >= 1:
         position = [10,278]
@@ -614,10 +610,12 @@ def display(s, replays=0, menu=False):
     pygame.display.update()
 
 def blink_double(s):
+    dirty_rects = []
     s.game.blink = not s.game.blink
     if s.game.blink == 1:
         blink_pos = [218,569]
-        screen.blit(blink_image, blink_pos)
-        pygame.display.update()
+        dirty_rects.append(screen.blit(blink_image, blink_pos))
+        pygame.display.update(dirty_rects)
     else:
-        display(s)
+        dirty_rects.append(screen.blit(bg_gi, (218,569), pygame.Rect(218,569,109,69)))
+        pygame.display.update(dirty_rects)

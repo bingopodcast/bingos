@@ -20,7 +20,9 @@ extra_balls = pygame.image.load('frolics/assets/extra_balls.png').convert_alpha(
 i = pygame.image.load('frolics/assets/eb.png').convert_alpha()
 number = pygame.image.load('frolics/assets/number.png').convert_alpha()
 tilt = pygame.image.load('frolics/assets/tilt.png').convert_alpha()
-
+bg_menu = pygame.image.load('frolics/assets/frolics_menu.png')
+bg_gi = pygame.image.load('frolics/assets/frolics_gi.png')
+bg_off = pygame.image.load('frolics/assets/frolics_off.png')
 
 class scorereel():
     """ Score Reels are used to count replays """
@@ -47,13 +49,12 @@ def display(s, replays=0, menu=False):
     backglass = pygame.Surface((0,0), pygame.SRCALPHA)
     backglass.fill((0, 0, 0))
     if menu == True:
-        backglass = pygame.image.load('frolics/assets/frolics_menu.png')
+        screen.blit(bg_menu, backglass_position)
     else:
         if (s.game.anti_cheat.status == True):
-            backglass = pygame.image.load('frolics/assets/frolics_gi.png')
+            screen.blit(bg_gi, backglass_position)
         else:
-            backglass = pygame.image.load('frolics/assets/frolics_off.png')
-    screen.blit(backglass, backglass_position)
+            screen.blit(bg_off, backglass_position)
 
     if s.game.selector.position >= 1:
         card1_position = [86,279]
@@ -494,12 +495,10 @@ def display(s, replays=0, menu=False):
                 number_position = [568,699]
                 screen.blit(number, number_position)
 
-
     if s.game.tilt.status == True:
         tilt_position = [577,215]
         screen.blit(tilt, tilt_position)
 
-    pygame.display.flip()
     pygame.display.update()
 
 def eb_animation(num):

@@ -12,6 +12,9 @@ triple = pygame.image.load('holiday/assets/triple.png').convert_alpha()
 number = pygame.image.load('holiday/assets/number.png').convert_alpha()
 tilt = pygame.image.load('holiday/assets/tilt.png').convert_alpha()
 sf = pygame.image.load('holiday/assets/sf.png').convert_alpha()
+bg_menu = pygame.image.load('holiday/assets/holiday_menu.png')
+bg_gi = pygame.image.load('holiday/assets/holiday_gi.png')
+bg_off = pygame.image.load('holiday/assets/holiday_off.png')
 
 class scorereel():
     """ Score Reels are used to count replays """
@@ -38,13 +41,12 @@ def display(s, replays=0, menu=False):
     backglass = pygame.Surface((0,0), pygame.SRCALPHA)
     backglass.fill((0, 0, 0))
     if menu == True:
-        backglass = pygame.image.load('holiday/assets/holiday_menu.png')
+        screen.blit(bg_menu, backglass_position)
     else:
         if (s.game.anti_cheat.status == True):
-            backglass = pygame.image.load('holiday/assets/holiday_gi.png')
+            screen.blit(bg_gi, backglass_position)
         else:
-            backglass = pygame.image.load('holiday/assets/holiday_off.png')
-    screen.blit(backglass, backglass_position)
+            screen.blit(bg_off, backglass_position)
 
     if s.game.selector.position >= 1:
         card1_position = [91,683]
@@ -442,7 +444,4 @@ def display(s, replays=0, menu=False):
         tilt_position = [11,378]
         screen.blit(tilt, tilt_position)
 
-    pygame.display.flip()
     pygame.display.update()
-
-

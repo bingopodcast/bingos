@@ -32,6 +32,9 @@ cards = pygame.image.load('yacht_club/assets/cards.png').convert_alpha()
 tilt = pygame.image.load('yacht_club/assets/tilt.png').convert_alpha()
 select_now = pygame.image.load('yacht_club/assets/select_now.png').convert_alpha()
 ebs = pygame.image.load('yacht_club/assets/extra_ball.png').convert_alpha()
+bg_menu = pygame.image.load('yacht_club/assets/yacht_club_menu.png')
+bg_gi = pygame.image.load('yacht_club/assets/yacht_club_gi.png')
+bg_off = pygame.image.load('yacht_club/assets/yacht_club_off.png')
 
 class scorereel():
     """ Score Reels are used to count replays """
@@ -58,16 +61,13 @@ def display(s, replays=0, menu=False):
     backglass = pygame.Surface(screen.get_size(), flags=pygame.SRCALPHA)
     backglass.fill((0, 0, 0))
     if menu == True:
-        backglass = pygame.image.load('yacht_club/assets/yacht_club_menu.png')
+        screen.blit(bg_menu, backglass_position)
     else:
         if (s.game.anti_cheat.status == True):
-            backglass = pygame.image.load('yacht_club/assets/yacht_club_gi.png')
+            screen.blit(bg_gi, backglass_position)
         else:
-            backglass = pygame.image.load('yacht_club/assets/yacht_club_off.png')
-    backglass = pygame.transform.scale(backglass, (720, 1280))
+            screen.blit(bg_off, backglass_position)
     
-    screen.blit(backglass, backglass_position)
-
     if s.game.super_card.position == 1:
         p = [38,362]
         screen.blit(sa, p)
@@ -676,14 +676,36 @@ def display(s, replays=0, menu=False):
 
 
     if s.game.select_card.position >= 6 and s.game.ball_count.position == 3:
-        p = [362,717]
-        screen.blit(select_now, p)
+        s.cancel_delayed(name="blink")
+        blink([s,1,1])
+    else:
+        s.cancel_delayed(name="blink")
     
     if s.game.eb_play.status == True:
         ebs_position = [285,929]
         screen.blit(ebs, ebs_position)
 
     pygame.display.update()
+
+def blink(args):
+    dirty_rects = []
+    s = args[0]
+    b = args[1]
+    sn = args[2]
+
+    if b == 0:
+        if sn == 1:
+            p = [362,717]
+            dirty_rects.append(screen.blit(select_now, p))
+        pygame.display.update(dirty_rects)
+    else:
+        dirty_rects.append(screen.blit(bg_gi, (362,717), pygame.Rect(362,717,180,30)))
+        pygame.display.update(dirty_rects)
+    b = not b
+
+    args = [s,b,sn]
+
+    s.delay(name="blink", delay=0.1, handler=blink, param=args)
 
 def eb_animation(num):
     global screen

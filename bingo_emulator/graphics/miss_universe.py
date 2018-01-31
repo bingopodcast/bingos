@@ -26,7 +26,9 @@ yellow_mystery = pygame.image.load('miss_universe/assets/yellow_mystery.png').co
 screen_card = pygame.image.load('miss_universe/assets/screen.png').convert_alpha()
 number_card = pygame.image.load('miss_universe/assets/number_card.png').convert_alpha()
 number = pygame.image.load('miss_universe/assets/number.png').convert_alpha()
-
+bg_menu = pygame.image.load('miss_universe/assets/miss_universe_menu.png').convert_alpha()
+bg_gi = pygame.image.load('miss_universe/assets/miss_universe_gi.png').convert_alpha()
+bg_off = pygame.image.load('miss_universe/assets/miss_universe_off.png').convert_alpha()
 
 class scorereel():
     """ Score Reels are used to count replays """
@@ -68,16 +70,12 @@ def display(s, replays=0, menu=False):
     backglass = pygame.Surface(screen.get_size(), flags=pygame.SRCALPHA)
     backglass.fill((0, 0, 0))
     if menu == True:
-        backglass = pygame.image.load('miss_universe/assets/miss_universe_menu.png').convert_alpha()
+        screen.blit(bg_menu, backglass_position)
     else:
         if (s.game.anti_cheat.status == True):
-            backglass = pygame.image.load('miss_universe/assets/miss_universe_gi.png').convert_alpha()
+            screen.blit(bg_gi, backglass_position)
         else:
-            backglass = pygame.image.load('miss_universe/assets/miss_universe_off.png').convert_alpha()
-    backglass = pygame.transform.scale(backglass, (720, 1280))
-    
-    screen.blit(backglass, backglass_position)
-
+            screen.blit(bg_off, backglass_position)
 
     if s.game.tilt.status == False:
         if s.holes:
@@ -321,8 +319,10 @@ def display(s, replays=0, menu=False):
 
     if s.game.line_feature.position >= 3:
         if s.game.ball_count.position == 2:
-            p = [563,539]
-            screen.blit(screen_select_now, p)
+            s.cancel_delayed(name="blink_screen")
+            blink_screen([s,1,1])
+        else:
+            s.cancel_delayed(name="blink_screen")
 
     if s.game.corners384.status == True:
         p = [22,470]
@@ -348,8 +348,10 @@ def display(s, replays=0, menu=False):
             p = [55,725]
             screen.blit(spot_letter, p)
         if s.game.ball_count.position == 1:
-            p = [77,811]
-            screen.blit(select_now, p)
+            s.cancel_delayed(name="blink")
+            blink([s,1,1])
+        else:
+            s.cancel_delayed(name="blink")
     if s.game.spot.position >= 2:
         p = [145,626]
         screen.blit(circle, p)
@@ -372,13 +374,51 @@ def display(s, replays=0, menu=False):
         p = [223,728]
         screen.blit(circle, p)
 
-    
-
     if s.game.tilt.status == True:
         tilt_position = [682,768]
         screen.blit(tilt, tilt_position)
 
     pygame.display.update()
+
+def blink_screen(args):
+    dirty_rects = []
+    s = args[0]
+    b = args[1]
+    sn = args[2]
+
+    if b == 0:
+        if sn == 1:
+            p = [563,539]
+            dirty_rects.append(screen.blit(screen_select_now, p))
+        pygame.display.update(dirty_rects)
+    else:
+        dirty_rects.append(screen.blit(bg_gi, (563,539), pygame.Rect(563,539,137,51)))
+        pygame.display.update(dirty_rects)
+    b = not b
+
+    args = [s,b,sn]
+
+    s.delay(name="blink_screen", delay=0.1, handler=blink_screen, param=args)
+
+def blink(args):
+    dirty_rects = []
+    s = args[0]
+    b = args[1]
+    sn = args[2]
+
+    if b == 0:
+        if sn == 1:
+            p = [77,811]
+            dirty_rects.append(screen.blit(select_now, p))
+        pygame.display.update(dirty_rects)
+    else:
+        dirty_rects.append(screen.blit(bg_gi, (77,811), pygame.Rect(77,811,156,30)))
+        pygame.display.update(dirty_rects)
+    b = not b
+
+    args = [s,b,sn]
+
+    s.delay(name="blink", delay=0.1, handler=blink, param=args)
 
 def feature_animation(num):
     global screen

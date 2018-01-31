@@ -13,8 +13,6 @@ import bingo_emulator.common.functions as functions
 from bingo_emulator.graphics import methods as graphics
 from bingo_emulator.graphics.venus import *
 
-#from modes.timeout import Timeout
-
 class MulticardBingo(procgame.game.Mode):
     def __init__(self, game):
         super(MulticardBingo, self).__init__(game=game, priority=5)
@@ -40,13 +38,23 @@ class MulticardBingo(procgame.game.Mode):
 
     def sw_trough4_active_for_1s(self, sw):
         if self.game.ball_count.position >= 4:
-        #    self.game.modes.add(Timeout(self.game, 7))
             self.game.probability.spin()
+            self.timeout_actions()
+    
+    def timeout_actions(self):
+        if (self.game.timer.position < 7):
+            self.game.timer.step()
+            self.delay(name="timeout", delay=5.0, handler=self.timeout_actions)
+        else:
+            self.game.timer.step()
+            self.game.sound.stop_music()
 
-    def sw_trough8_inactive_for_1ms(self, sw):
+    def sw_trough8_closed(self, sw):
         if self.game.start.status == False:
             self.game.ball_count.position -= 1
             self.game.returned = True
+            self.check_lifter_status()
+        else:
             self.check_lifter_status()
 
     def sw_enter_active(self, sw):
@@ -59,6 +67,8 @@ class MulticardBingo(procgame.game.Mode):
                 if self.game.search_index.status == False:
                     self.game.sound.play('search')
                     self.search()
+                    self.game.timer.reset()
+                    self.timeout_actions()
 
     def check_shutter(self, start=0):
         if start == 1:
@@ -73,13 +83,14 @@ class MulticardBingo(procgame.game.Mode):
     def regular_play(self):
         self.holes = []
         self.cancel_delayed(name="search")
-        self.cancel_delayed(name="lifter_status")
         self.cancel_delayed(name="card1_replay_step_up")
         self.cancel_delayed(name="card2_replay_step_up")
         self.cancel_delayed(name="card3_replay_step_up")
         self.cancel_delayed(name="card4_replay_step_up")
         self.cancel_delayed(name="card5_replay_step_up")
         self.cancel_delayed(name="card6_replay_step_up")
+        self.cancel_delayed(name="blink_double")
+        self.cancel_delayed(name="timeout")
         self.game.search_index.disengage()
         self.game.coils.counter.pulse()
         self.game.returned = False
@@ -133,20 +144,21 @@ class MulticardBingo(procgame.game.Mode):
 
     def check_lifter_status(self):
         if self.game.tilt.status == False:
-            if self.game.switches.trough8.is_inactive() and self.game.switches.trough5.is_active() and self.game.switches.trough4.is_active() and self.game.switches.trough3.is_active() and self.game.switches.trough2.is_active():
-                if self.game.switches.shooter.is_inactive():
-                    self.game.coils.lifter.enable()
-            else:
-                if self.game.switches.trough4.is_active():
-                    if self.game.switches.shooter.is_inactive():
-                        if self.game.switches.gate.is_active():
-                            self.game.coils.lifter.enable()
-
-            if self.game.returned == True and self.game.ball_count.position == 4:
-                if self.game.switches.shooter.is_inactive():
+            if self.game.switches.trough8.is_closed() and self.game.switches.trough5.is_open() and self.game.switches.trough4.is_open() and self.game.switches.trough3.is_closed() and self.game.switches.trough2.is_closed():
+                if self.game.switches.shooter.is_open():
                     self.game.coils.lifter.enable()
                     self.game.returned = False
-        self.delay(name="lifter_status", delay=0, handler=self.check_lifter_status)
+            else:
+                if self.game.start.status == False:
+                    if self.game.switches.trough4.is_open():
+                        if self.game.switches.shooter.is_open():
+                            if self.game.switches.gate.is_closed():
+                                self.game.coils.lifter.enable()
+                    else:
+                        if self.game.returned == True and self.game.ball_count.position == 4:
+                            if self.game.switches.shooter.is_open():
+                                self.game.coils.lifter.enable()
+                                self.game.returned = False
 
     def sw_smRunout_active_for_1ms(self, sw):
         if self.game.start.status == True:
@@ -154,13 +166,13 @@ class MulticardBingo(procgame.game.Mode):
         else:
             self.check_shutter()
 
-    def sw_trough1_active(self, sw):
-        if self.game.switches.shooter.is_active():
+    def sw_trough1_closed(self, sw):
+        if self.game.switches.shooter.is_closed():
             self.game.coils.lifter.disable()
 
     def sw_ballLift_active_for_500ms(self, sw):
         if self.game.tilt.status == False:
-            if self.game.switches.shooter.is_inactive():
+            if self.game.switches.shooter.is_open():
                 if self.game.ball_count.position < 5:
                     self.game.coils.lifter.enable()
 
@@ -172,6 +184,7 @@ class MulticardBingo(procgame.game.Mode):
         if self.game.ball_count.position == 4:
             self.game.sound.stop_music()
         self.game.probability.spin()
+        self.check_lifter_status()
 
     # This is really nasty, but it is how we render graphics for each individual hole.
     # numbers are added (or removed from) a list.  In this way, I can re-use the same
@@ -305,10 +318,8 @@ class MulticardBingo(procgame.game.Mode):
     def sw_replayReset_active(self, sw):
         self.game.anti_cheat.disengage()
         self.holes = []
-#        self.cancel_delayed(name="blink_title")
         graphics.venus.display(self, 0)
         self.tilt_actions()
-#        self.delay(name="blink_title", delay=1, handler=self.blink_title)
         self.replay_step_down(self.game.replays)
 
     def tilt_actions(self):
@@ -320,6 +331,8 @@ class MulticardBingo(procgame.game.Mode):
         self.cancel_delayed(name="card4_replay_step_up")
         self.cancel_delayed(name="card5_replay_step_up")
         self.cancel_delayed(name="card6_replay_step_up")
+        self.cancel_delayed(name="blink_double")
+        self.cancel_delayed(name="timeout")
         self.game.search_index.disengage()
         if self.game.ball_count.position == 0:
             if self.game.switches.shutter.is_active():
@@ -333,7 +346,6 @@ class MulticardBingo(procgame.game.Mode):
         self.game.sound.play('tilt')
         # displays "Tilt" on the backglass, you have to recoin.
         self.delay(name="display", delay=0.1, handler=graphics.venus.display, param=self)
-        #self.game.modes.remove(Timeout)
 
     def sw_tilt_active(self, sw):
         if self.game.tilt.status == False:
@@ -347,7 +359,7 @@ class MulticardBingo(procgame.game.Mode):
                 self.game.coils.registerDown.pulse()
                 number -= 1
                 graphics.venus.display(self)
-                self.delay(name="replay_reset", delay=0.0, handler=self.replay_step_down, param=number)
+                self.delay(name="replay_reset", delay=0.13, handler=self.replay_step_down, param=number)
             elif number == 1:
                 self.game.replays -= 1
                 graphics.replay_step_down(self.game.replays, graphics.venus.reel1, graphics.venus.reel10, graphics.venus.reel100, graphics.venus.reel1000)
@@ -382,8 +394,6 @@ class MulticardBingo(procgame.game.Mode):
         # game will activate() each search relay for each 'hot' rivet on the search disc.  This can be on a different
         # wiper finger for each set of rivets on the search disc.
         # Replay counters also need to be implemented to prevent the supplemental searches from scoring.
-#        self.cancel_delayed(name="blink_title")
-        self.game.sound.stop_music()
 
         self.cancel_delayed(name="research")
         for i in range(0, 100):
@@ -424,7 +434,6 @@ class MulticardBingo(procgame.game.Mode):
                             if g == False:
                                 if s >= 3:
                                     self.find_winner(s, self.card)
-#        self.delay(name="blink_title", delay=3, handler=self.blink_title)
 
     def find_winner(self, relays, card):
         if self.game.search_index.status == False and self.game.replays < 8999:
@@ -672,62 +681,56 @@ class MulticardBingo(procgame.game.Mode):
                     self.game.card1_missed.engage(self.game)
                     self.game.nothing.engage(self.game)
                     self.delay(name="display", delay=0, handler=graphics.venus.display, param=self)
-                    self.game.search_index.disengage()
                     self.cancel_delayed(name="blink_double")
-                    self.delay(name="display", delay=0.1, handler=graphics.venus.display, param=self)
-                    self.game.nothing.disengage()
+                    self.delay(name="si_disengage", delay=1, handler=self.game.search_index.disengage)
+                    self.delay(name="nothing_disengage", delay=1, handler=self.game.nothing.disengage)
                     self.delay(name="research", delay=1, handler=self.search)
                 elif i[0] == 2:
                     self.game.card2_missed.engage(self.game)
                     self.game.nothing.engage(self.game)
                     self.delay(name="display", delay=0, handler=graphics.venus.display, param=self)
-                    self.game.search_index.disengage()
                     self.cancel_delayed(name="blink_double")
-                    self.delay(name="display", delay=0.1, handler=graphics.venus.display, param=self)
-                    self.game.nothing.disengage()
+                    self.delay(name="si_disengage", delay=1, handler=self.game.search_index.disengage)
+                    self.delay(name="nothing_disengage", delay=1, handler=self.game.nothing.disengage)
                     self.delay(name="research", delay=1, handler=self.search)
                 elif i[0] == 3:
                     self.game.card3_missed.engage(self.game)
                     self.game.nothing.engage(self.game)
                     self.delay(name="display", delay=0, handler=graphics.venus.display, param=self)
-                    self.game.search_index.disengage()
                     self.cancel_delayed(name="blink_double")
-                    self.delay(name="display", delay=0.1, handler=graphics.venus.display, param=self)
-                    self.game.nothing.disengage()
+                    self.delay(name="si_disengage", delay=1, handler=self.game.search_index.disengage)
+                    self.delay(name="nothing_disengage", delay=1, handler=self.game.nothing.disengage)
                     self.delay(name="research", delay=1, handler=self.search)
                 elif i[0] == 4:
                     self.game.card4_missed.engage(self.game)
                     self.game.nothing.engage(self.game)
                     self.delay(name="display", delay=0, handler=graphics.venus.display, param=self)
-                    self.game.search_index.disengage()
                     self.cancel_delayed(name="blink_double")
-                    self.delay(name="display", delay=0.1, handler=graphics.venus.display, param=self)
-                    self.game.nothing.disengage()
+                    self.delay(name="si_disengage", delay=1, handler=self.game.search_index.disengage)
+                    self.delay(name="nothing_disengage", delay=1, handler=self.game.nothing.disengage)
                     self.delay(name="research", delay=1, handler=self.search)
                 elif i[0] == 5:
                     self.game.card5_missed.engage(self.game)
                     self.game.nothing.engage(self.game)
                     self.delay(name="display", delay=0, handler=graphics.venus.display, param=self)
-                    self.game.search_index.disengage()
                     self.cancel_delayed(name="blink_double")
-                    self.delay(name="display", delay=0.1, handler=graphics.venus.display, param=self)
-                    self.game.nothing.disengage()
+                    self.delay(name="si_disengage", delay=1, handler=self.game.search_index.disengage)
+                    self.delay(name="nothing_disengage", delay=1, handler=self.game.nothing.disengage)
                     self.delay(name="research", delay=1, handler=self.search)
                 elif i[0] == 6:
                     self.game.card6_missed.engage(self.game)
                     self.game.nothing.engage(self.game)
                     self.delay(name="display", delay=0, handler=graphics.venus.display, param=self)
-                    self.game.search_index.disengage()
                     self.cancel_delayed(name="blink_double")
-                    self.delay(name="display", delay=0.1, handler=graphics.venus.display, param=self)
-                    self.game.nothing.disengage()
+                    self.delay(name="si_disengage", delay=1, handler=self.game.search_index.disengage)
+                    self.delay(name="nothing_disengage", delay=1, handler=self.game.nothing.disengage)
                     self.delay(name="research", delay=1, handler=self.search)
 
     def check_double_probability(self):
         pos = self.game.probability.spin()
-        if pos == 1 or pos == 4 or pos == 5 or pos == 6 or pos == 8 or pos == 10 or pos == 11 or pos == 15 or pos == 16 or pos == 17 or pos == 19 or pos == 21 or pos == 22 or pos == 24 or pos == 25 or pos == 27 or pos == 29 or pos == 30 or pos == 33 or pos == 34 or pos == 39 or pos == 40 or pos == 44 or pos == 46 or pos == 48:
+        if pos in [1,4,5,6,8,10,11,15,16,17,19,21,22,24,25,27,29,30,33,34,39,40,44,46,48]:
             return 1
-        elif self.game.probability.position == 3 or self.game.probability == 10:
+        elif self.game.probability.position in [3,10]:
             if self.game.cu:
                 return 1
         else:
@@ -962,33 +965,6 @@ class MulticardBingo(procgame.game.Mode):
 
         return (self.pos[rivets], card)
          
-    def blink_title(self):
-        title1 = random.randint(0,1)
-        title2 = random.randint(0,1)
-        title3 = random.randint(0,1)
-        title4 = random.randint(0,1)
-        if title1 == 1:
-            pos = [30,266]
-            image = pygame.image.load('venus/assets/title1_on.png').convert_alpha()
-            screen.blit(image, pos)
-        if title2 == 1:
-            pos = [192,270]
-            image = pygame.image.load('venus/assets/title2_on.png').convert_alpha()
-            screen.blit(image, pos)
-        if title3 == 1:
-            pos = [330,272]
-            image = pygame.image.load('venus/assets/title3_on.png').convert_alpha()
-            screen.blit(image, pos)
-        if title4 == 1:
-            pos = [524,270]
-            image = pygame.image.load('venus/assets/title4_on.png').convert_alpha()
-            screen.blit(image, pos)
-
-        pygame.display.update()
-        self.delay(name="display", delay=0.1, handler=graphics.venus.display, param=self)
-#        self.delay(name="blink_title", delay=3, handler=self.blink_title)
-   
-                                            
     # Define reset as the knock-off, anti-cheat relay disabled, and replay reset enabled.  Motors turn while credits are knocked off.
     # When meter reaches zero and the zero limit switch is hit, turn off motor sound and leave backglass gi on, but with tilt displayed.
 
@@ -998,10 +974,9 @@ class MulticardBingo(procgame.game.Mode):
         # also needs to show a plain 'off' backglass.
         self.eb = False
         self.tilt_actions()
-#        self.delay(name="blink_title", delay=1, handler=self.blink_title)
 
 class Venus(procgame.game.BasicGame):
-    """ Bright Lights was the first bingo produced by Bally """
+    """ Venus was the last Keeney bingo """
     def __init__(self, machine_type):
         super(Venus, self).__init__(machine_type)
         pygame.mixer.pre_init(44100,-16,2,512)
@@ -1035,7 +1010,7 @@ class Venus(procgame.game.BasicGame):
 
         #Initialize stepper units used to keep track of features or timing.
         self.selector = units.Stepper("selector", 6)
-        self.timer = units.Stepper("timer", 40)
+        self.timer = units.Stepper("timer", 8)
         self.ball_count = units.Stepper("ball_count", 5)
 
         #Check for status of the replay register zero switch.  If positive
