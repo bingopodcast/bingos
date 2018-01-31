@@ -1104,14 +1104,25 @@ class SinglecardBingo(procgame.game.Mode):
             if self.game.coin.position < 40:
                 if self.game.reflex.connected_rivet() >= 3:
                     self.game.mystery_yellow.engage(self.game)
+<<<<<<< HEAD
+=======
+                    self.game.coils.bell.pulse()
+>>>>>>> ded66232141b96c393e04382fbdcb23fd54ce0c2
                 else:
                     self.game.spot.step()
             else:
                 if ext in [37,56]:
                     if self.game.cu:
                         self.game.mystery_red.engage(self.game)
+<<<<<<< HEAD
                     else:
                         self.game.mystery_yellow.engage(self.game)
+=======
+                        self.game.coils.bell.pulse()
+                    else:
+                        self.game.mystery_yellow.engage(self.game)
+                        self.game.coils.bell.pulse()
+>>>>>>> ded66232141b96c393e04382fbdcb23fd54ce0c2
         if sd in [14,20,35,12,21,23]:
             if self.game.reflex.connected_rivet() >= 2:
                 self.game.mystery_red.engage(self.game)
@@ -1121,14 +1132,28 @@ class SinglecardBingo(procgame.game.Mode):
             if self.game.coin.position < 40:
                 if self.game.reflex.connected_rivet() >= 2:
                     self.game.corners384.engage(self.game)
+<<<<<<< HEAD
                 else:
                     self.game.corners192.engage(self.game)
+=======
+                    self.game.coils.bell.pulse()
+                else:
+                    self.game.corners192.engage(self.game)
+                    self.game.coils.bell.pulse()
+>>>>>>> ded66232141b96c393e04382fbdcb23fd54ce0c2
             else:
                 if ext == 19:
                     if self.game.reflex.connected_rivet() >= 2:
                         self.game.corners384.engage(self.game)
+<<<<<<< HEAD
                     else:
                         self.game.corners192.engage(self.game)
+=======
+                        self.game.coils.bell.pulse()
+                    else:
+                        self.game.corners192.engage(self.game)
+                        self.game.coils.bell.pulse()
+>>>>>>> ded66232141b96c393e04382fbdcb23fd54ce0c2
         if sd == 17:
             self.game.corners192.engage(self.game)
         if self.game.cu:
