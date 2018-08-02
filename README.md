@@ -1,7 +1,7 @@
 
 Implementation of all United, Williams, Keeney and Bally bingo pinball machines ever designed using pyprocgame and real EM hardware.
 
-10 total playfields needed, 138 games available.
+11 total playfields needed, 142 games available.
 
 Each aspect of the bingo pinball machines are lovingly recreated - the game hardware is real and allows for real play and ball control, while the backglass is an LCD monitor and will change with each button press.
 
