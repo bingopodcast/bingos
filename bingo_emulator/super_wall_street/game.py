@@ -19,7 +19,7 @@ class MulticardBingo(procgame.game.Mode):
         self.holes = []
         self.startup()
         self.game.sound.register_music('motor', "audio/six_card_motor.wav")
-        self.game.sound.register_sound('search', "audio/six_card_search_old.wav")
+        self.game.sound.register_sound('search', "audio/mystic_line_search.wav")
         self.game.sound.register_sound('add', "audio/six_card_add_card.wav")
         self.game.sound.register_sound('tilt', "audio/tilt.wav")
         self.game.sound.register_sound('step', "audio/step.wav")
@@ -42,6 +42,7 @@ class MulticardBingo(procgame.game.Mode):
     
     def timeout_actions(self):
         if (self.game.timer.position < 7):
+            self.game.sound.play_music('motor', -1)
             self.game.timer.step()
             self.delay(name="timeout", delay=5.0, handler=self.timeout_actions)
         else:
@@ -105,16 +106,22 @@ class MulticardBingo(procgame.game.Mode):
                 if self.check_corners() == True:
                     if self.game.selector.position == 1:
                         self.game.corners1.engage(self.game)
+                        self.game.sound.play('tilt')
                     elif self.game.selector.position == 2:
                         self.game.corners2.engage(self.game)
+                        self.game.sound.play('tilt')
                     elif self.game.selector.position == 3:
                         self.game.corners3.engage(self.game)
+                        self.game.sound.play('tilt')
                 if self.game.selector.position == 4:
                     self.game.super1.engage(self.game)
+                    self.game.sound.play('tilt')
                 if self.game.selector.position == 5:
                     self.game.super2.engage(self.game)
+                    self.game.sound.play('tilt')
                 if self.game.selector.position == 6:
                     self.game.super3.engage(self.game)
+                    self.game.sound.play('tilt')
                 if self.game.switches.shutter.is_inactive():
                     self.game.coils.shutter.enable()
                 self.replay_step_down()
@@ -195,6 +202,8 @@ class MulticardBingo(procgame.game.Mode):
         self.game.ball_count.step()
         if self.game.ball_count.position == 4:
             self.game.sound.stop_music()
+            self.game.sound.play('tilt')
+            self.game.sound.play('tilt')
         self.game.probability.spin()
         if self.game.ball_count.position <= 5:
             self.check_lifter_status()
@@ -640,29 +649,35 @@ class MulticardBingo(procgame.game.Mode):
                 if dp == True:
                     if i[0] == 1:
                         self.game.card1_double.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.card1_replay_step_up((i[1] * 2) - self.game.card1_replay_counter.position)
                     elif i[0] == 2:
                         self.game.card2_double.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.card2_replay_step_up((i[1] * 2) - self.game.card2_replay_counter.position)
                     elif i[0] == 3:
                         self.game.card3_double.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.card3_replay_step_up((i[1] * 2) - self.game.card3_replay_counter.position)
                     self.delay(name="display", delay=0.1, handler=graphics.super_wall_street.display, param=self)
                 else:
                     if i[0] == 1:
                         self.game.card1_missed.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.game.search_index.disengage()
                         self.cancel_delayed(name="blink_double")
                         self.delay(name="display", delay=0.1, handler=graphics.super_wall_street.display, param=self)
                         self.delay(name="research", delay=1, handler=self.search)
                     elif i[0] == 2:
                         self.game.card2_missed.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.game.search_index.disengage()
                         self.cancel_delayed(name="blink_double")
                         self.delay(name="display", delay=0.1, handler=graphics.super_wall_street.display, param=self)
                         self.delay(name="research", delay=1, handler=self.search)
                     elif i[0] == 3:
                         self.game.card3_missed.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.game.search_index.disengage()
                         self.cancel_delayed(name="blink_double")
                         self.delay(name="display", delay=0.1, handler=graphics.super_wall_street.display, param=self)
@@ -732,29 +747,35 @@ class MulticardBingo(procgame.game.Mode):
                 if dp == True:
                     if i[0] == 1:
                         self.game.card1_double.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.card1_replay_step_up((i[1] * 2) - self.game.card1_replay_counter.position)
                     elif i[0] == 2:
                         self.game.card2_double.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.card2_replay_step_up((i[1] * 2) - self.game.card2_replay_counter.position)
                     elif i[0] == 3:
                         self.game.card3_double.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.card3_replay_step_up((i[1] * 2) - self.game.card3_replay_counter.position)
                     self.delay(name="display", delay=0.1, handler=graphics.super_wall_street.display, param=self)
                 else:
                     if i[0] == 1:
                         self.game.card1_missed.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.game.search_index.disengage()
                         self.cancel_delayed(name="blink_double")
                         self.delay(name="display", delay=0.1, handler=graphics.super_wall_street.display, param=self)
                         self.delay(name="research", delay=1, handler=self.search)
                     elif i[0] == 2:
                         self.game.card2_missed.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.game.search_index.disengage()
                         self.cancel_delayed(name="blink_double")
                         self.delay(name="display", delay=0.1, handler=graphics.super_wall_street.display, param=self)
                         self.delay(name="research", delay=1, handler=self.search)
                     elif i[0] == 3:
                         self.game.card3_missed.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.game.search_index.disengage()
                         self.cancel_delayed(name="blink_double")
                         self.delay(name="display", delay=0.1, handler=graphics.super_wall_street.display, param=self)
@@ -791,6 +812,7 @@ class MulticardBingo(procgame.game.Mode):
             return 0
             
     def card1_replay_step_up(self, number):
+        self.game.sound.stop_music()
         if number >= 1:
             self.game.card1_replay_counter.step()
             number -= 1
@@ -804,6 +826,7 @@ class MulticardBingo(procgame.game.Mode):
             self.search()
 
     def card2_replay_step_up(self, number):
+        self.game.sound.stop_music()
         if number >= 1:
             self.game.card2_replay_counter.step()
             number -= 1
@@ -817,6 +840,7 @@ class MulticardBingo(procgame.game.Mode):
             self.search()
 
     def card3_replay_step_up(self, number):
+        self.game.sound.stop_music()
         if number >= 1:
             self.game.card3_replay_counter.step()
             number -= 1
@@ -991,7 +1015,7 @@ class SuperWallStreet(procgame.game.BasicGame):
         #The probability disc handles the dispersion of corners for each card
         #upon coin or button press.  It also handles the probability for
         #the double or nothing routine.
-        self.probability = units.Motor("probability", 50)
+        self.probability = units.Spotting("probability", 50)
 
         #Tilt is separate from anti-cheat in that the trip will move the shutter
         #when the game is tilted with 1st ball in the lane.  Also prevents you

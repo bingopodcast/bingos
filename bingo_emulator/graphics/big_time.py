@@ -37,9 +37,8 @@ line3 = pygame.image.load('big_time/assets/line3.png').convert_alpha()
 line4 = pygame.image.load('big_time/assets/line4.png').convert_alpha()
 line5 = pygame.image.load('big_time/assets/line5.png').convert_alpha()
 bg_menu = pygame.image.load('big_time/assets/big_time_menu.png').convert()
-bg_gi = pygame.image.load('big_time/assets/big_time_gi.png').convert()
+bg_gi = pygame.image.load('big_time/assets/big_time_gi.png').convert_alpha()
 bg_off = pygame.image.load('big_time/assets/big_time_off.png').convert()
-bg_gi.set_colorkey((255,0,252))
 bg_menu.set_colorkey((255,0,252))
 bg_off.set_colorkey((255,0,252))
 
@@ -64,47 +63,47 @@ def display(s, replays=0, menu=False):
     screen.blit(reel100.image, reel100.position)
     screen.blit(meter, meter_position)
 
-    if s.game.line1.position == 0:
+    if s.game.line1.position in [0,2]:
         line1_position = [233,373]
     elif s.game.line1.position == 1:
         line1_position = [233,419]
-    elif s.game.line1.position == 2:
+    elif s.game.line1.position == 3:
         line1_position = [233,328]
     
     screen.blit(line1, line1_position)
 
-    if s.game.line2.position == 0:
+    if s.game.line2.position in [0,2]:
         line2_position = [286,373]
     elif s.game.line2.position == 1:
         line2_position = [286,419]
-    elif s.game.line2.position == 2:
+    elif s.game.line2.position == 3:
         line2_position = [286,328]
     
     screen.blit(line2, line2_position)
 
-    if s.game.line3.position == 0:
+    if s.game.line3.position in [0,2]:
         line3_position = [339,373]
     elif s.game.line3.position == 1:
         line3_position = [339,419]
-    elif s.game.line3.position == 2:
+    elif s.game.line3.position == 3:
         line3_position = [339,331]
     
     screen.blit(line3, line3_position)
 
-    if s.game.line4.position == 0:
+    if s.game.line4.position in [0,2]:
         line4_position = [395,357]
     elif s.game.line4.position == 1:
         line4_position = [395,412]
-    elif s.game.line4.position == 2:
+    elif s.game.line4.position == 3:
         line4_position = [395,310]
     
     screen.blit(line4, line4_position)
 
-    if s.game.line5.position == 0:
+    if s.game.line5.position in [0,2]:
         line5_position = [447,357]
     elif s.game.line5.position == 1:
         line5_position = [447,412]
-    elif s.game.line5.position == 2:
+    elif s.game.line5.position == 3:
         line5_position = [447,310]
     
     screen.blit(line5, line5_position)
@@ -223,125 +222,125 @@ def display(s, replays=0, menu=False):
     if s.game.tilt.status == False:
         if s.holes:
             if 1 in s.holes:
-                if s.game.line1.position == 0:
+                if s.game.line1.position in [0,2]:
                     number_position = [233,570]
                     screen.blit(number, number_position)
                 elif s.game.line1.position == 1:
                     number_position = [233,618]
                     screen.blit(number, number_position)
-                elif s.game.line1.position == 2:
+                elif s.game.line1.position == 3:
                     number_position = [233,519]
                     screen.blit(number, number_position)
                 number_position = [552,649]
                 screen.blit(sc_number, number_position)
             if 2 in s.holes:
-                if s.game.line1.position == 0:
+                if s.game.line1.position in [0,2]:
                     number_position = [233,519]
                     screen.blit(number, number_position)
                 elif s.game.line1.position == 1:
                     number_position = [233,568]
                     screen.blit(number, number_position)
-                elif s.game.line1.position == 2:
+                elif s.game.line1.position == 3:
                     number_position = [233,468]
                     screen.blit(number, number_position)
             if 3 in s.holes:
-                if s.game.line5.position == 0:
+                if s.game.line5.position in [0,2]:
                     n = [444,618]
                     screen.blit(number, n)
                 elif s.game.line5.position == 1:
                     n = [444,416]
                     screen.blit(number, n)
-                elif s.game.line5.position == 2:
+                elif s.game.line5.position == 3:
                     n = [443,567]
                     screen.blit(number, n)
                 number_position = [86,606]
                 screen.blit(sc_number, number_position)
             if 4 in s.holes:
-                if s.game.line2.position == 0:
+                if s.game.line2.position in [0,2]:
                     number_position = [284,416]
                     screen.blit(number, number_position)
                 elif s.game.line2.position == 1:
                     number_position = [284,467]
                     screen.blit(number, number_position)
-                elif s.game.line2.position == 2:
+                elif s.game.line2.position == 3:
                     number_position = [284,617]
                     screen.blit(number, number_position)
                 number_position = [596,691]
                 screen.blit(sc_number, number_position)
             if 5 in s.holes:
-                if s.game.line3.position == 0:
+                if s.game.line3.position in [0,2]:
                     number_position = [338,617]
                     screen.blit(number, number_position)
                 elif s.game.line3.position == 1:
                     number_position = [338,416]
                     screen.blit(number, number_position)
-                elif s.game.line3.position == 2:
+                elif s.game.line3.position == 3:
                     number_position = [338,567]
                     screen.blit(number, number_position)
             if 6 in s.holes:
-                if s.game.line5.position == 0:
+                if s.game.line5.position in [0,2]:
                     n = [444,415]
                     screen.blit(number, n)
                 elif s.game.line5.position == 1:
                     n = [444,467]
                     screen.blit(number, n)
-                elif s.game.line5.position == 2:
+                elif s.game.line5.position == 3:
                     n = [444,617]
                     screen.blit(number, n)
             if 7 in s.holes:
-                if s.game.line2.position == 0:
+                if s.game.line2.position in [0,2]:
                     number_position = [284,618]
                     screen.blit(number, number_position)
                 elif s.game.line2.position == 1:
                     number_position = [284,416]
                     screen.blit(number, number_position)
-                elif s.game.line2.position == 2:
+                elif s.game.line2.position == 3:
                     number_position = [284,568]
                     screen.blit(number, number_position)
                 number_position = [597,607]
                 screen.blit(sc_number, number_position)
             if 8 in s.holes:
-                if s.game.line5.position == 0:
+                if s.game.line5.position in [0,2]:
                     n = [444,466]
                     screen.blit(number, n)
                 elif s.game.line5.position == 1:
                     n = [444,518]
                     screen.blit(number, n)
-                elif s.game.line5.position == 2:
+                elif s.game.line5.position == 3:
                     n = [444,415]
                     screen.blit(number, n)
             if 9 in s.holes:
-                if s.game.line1.position == 0:
+                if s.game.line1.position in [0,2]:
                     number_position = [230,414]
                     screen.blit(number, number_position)
                 elif s.game.line1.position == 1:
                     number_position = [230,468]
                     screen.blit(number, number_position)
-                elif s.game.line1.position == 2:
+                elif s.game.line1.position == 3:
                     number_position = [230,617]
                     screen.blit(number, number_position)
                 number_position = [39,651]
                 screen.blit(sc_number, number_position)
             if 10 in s.holes:
-                if s.game.line1.position == 0:
+                if s.game.line1.position in [0,2]:
                     number_position = [230,466]
                     screen.blit(number, number_position)
                 elif s.game.line1.position == 1:
                     number_position = [230,518]
                     screen.blit(number, number_position)
-                elif s.game.line1.position == 2:
+                elif s.game.line1.position == 3:
                     number_position = [230,415]
                     screen.blit(number, number_position)
                 number_position = [596,650]
                 screen.blit(sc_number, number_position)
             if 11 in s.holes:
-                if s.game.line1.position == 0:
+                if s.game.line1.position in [0,2]:
                     number_position = [230,618]
                     screen.blit(number, number_position)
                 elif s.game.line1.position == 1:
                     number_position = [230,416]
                     screen.blit(number, number_position)
-                elif s.game.line1.position == 2:
+                elif s.game.line1.position == 3:
                     number_position = [230,567]
                     screen.blit(number, number_position)
                 number_position = [133,651]
@@ -349,83 +348,83 @@ def display(s, replays=0, menu=False):
                 number_position = [642,606]
                 screen.blit(sc_number, number_position)
             if 12 in s.holes:
-                if s.game.line4.position == 0:
+                if s.game.line4.position in [0,2]:
                     n = [390,518]
                     screen.blit(number, n)
                 elif s.game.line4.position == 1:
                     n = [390,568]
                     screen.blit(number, n)
-                elif s.game.line4.position == 2:
+                elif s.game.line4.position == 3:
                     n = [390,468]
                     screen.blit(number, n)
                 number_position = [40,694]
                 screen.blit(sc_number, number_position)
             if 13 in s.holes:
-                if s.game.line3.position == 0:
+                if s.game.line3.position in [0,2]:
                     number_position = [337,568]
                     screen.blit(number, number_position)
                 elif s.game.line3.position == 1:
                     number_position = [337,617]
                     screen.blit(number, number_position)
-                elif s.game.line3.position == 2:
+                elif s.game.line3.position == 3:
                     number_position = [337,517]
                     screen.blit(number, number_position)
                 number_position = [643,649]
                 screen.blit(sc_number, number_position)
             if 14 in s.holes:
-                if s.game.line3.position == 0:
+                if s.game.line3.position in [0,2]:
                     number_position = [337,467]
                     screen.blit(number, number_position)
                 elif s.game.line3.position == 1:
                     number_position = [337,518]
                     screen.blit(number, number_position)
-                elif s.game.line3.position == 2:
+                elif s.game.line3.position == 3:
                     number_position = [337,415]
                     screen.blit(number, number_position)
                 number_position = [133,693]
                 screen.blit(sc_number, number_position)
             if 15 in s.holes:
-                if s.game.line3.position == 0:
+                if s.game.line3.position in [0,2]:
                     number_position = [337,415]
                     screen.blit(number, number_position)
                 elif s.game.line3.position == 1:
                     number_position = [337,467]
                     screen.blit(number, number_position)
-                elif s.game.line3.position == 2:
+                elif s.game.line3.position == 3:
                     number_position = [337,617]
                     screen.blit(number, number_position)
                 number_position = [552,607]
                 screen.blit(sc_number, number_position)
             if 16 in s.holes:
-                if s.game.line3.position == 0:
+                if s.game.line3.position in [0,2]:
                     number_position = [337,516]
                     screen.blit(number, number_position)
                 elif s.game.line3.position == 1:
                     number_position = [337,566]
                     screen.blit(number, number_position)
-                elif s.game.line3.position == 2:
+                elif s.game.line3.position == 3:
                     number_position = [337,465]
                     screen.blit(number, number_position)
             if 17 in s.holes:
-                if s.game.line5.position == 0:
+                if s.game.line5.position in [0,2]:
                     n = [442,566]
                     screen.blit(number, n)
                 elif s.game.line5.position == 1:
                     n = [442,618]
                     screen.blit(number, n)
-                elif s.game.line5.position == 2:
+                elif s.game.line5.position == 3:
                     n = [443,516]
                     screen.blit(number, n)
                 number_position = [552,690]
                 screen.blit(sc_number, number_position)
             if 18 in s.holes:
-                if s.game.line2.position == 0:
+                if s.game.line2.position in [0,2]:
                     number_position = [284,517]
                     screen.blit(number, number_position)
                 elif s.game.line2.position == 1:
                     number_position = [284,568]
                     screen.blit(number, number_position)
-                elif s.game.line2.position == 2:
+                elif s.game.line2.position == 3:
                     number_position = [284,466]
                     screen.blit(number, number_position)
                 number_position = [132,608]
@@ -433,77 +432,77 @@ def display(s, replays=0, menu=False):
                 number_position = [642,690]
                 screen.blit(sc_number, number_position)
             if 19 in s.holes:
-                if s.game.line2.position == 0:
+                if s.game.line2.position in [0,2]:
                     number_position = [284,466]
                     screen.blit(number, number_position)
                 elif s.game.line2.position == 1:
                     number_position = [284,517]
                     screen.blit(number, number_position)
-                elif s.game.line2.position == 2:
+                elif s.game.line2.position == 3:
                     number_position = [284,416]
                     screen.blit(number, number_position)
             if 20 in s.holes:
-                if s.game.line4.position == 0:
+                if s.game.line4.position in [0,2]:
                     n = [390,467]
                     screen.blit(number, n)
                 elif s.game.line4.position == 1:
                     n = [390,517]
                     screen.blit(number, n)
-                elif s.game.line4.position == 2:
+                elif s.game.line4.position == 3:
                     n = [390,416]
                     screen.blit(number, n)
             if 21 in s.holes:
-                if s.game.line4.position == 0:
+                if s.game.line4.position in [0,2]:
                     n = [390,568]
                     screen.blit(number, n)
                 elif s.game.line4.position == 1:
                     n = [390,616]
                     screen.blit(number, n)
-                elif s.game.line4.position == 2:
+                elif s.game.line4.position == 3:
                     n = [390,517]
                     screen.blit(number, n)
             if 22 in s.holes:
-                if s.game.line2.position == 0:
+                if s.game.line2.position in [0,2]:
                     number_position = [285,568]
                     screen.blit(number, number_position)
                 elif s.game.line2.position == 1:
                     number_position = [285,617]
                     screen.blit(number, number_position)
-                elif s.game.line2.position == 2:
+                elif s.game.line2.position == 3:
                     number_position = [285,518]
                     screen.blit(number, number_position)
             if 23 in s.holes:
-                if s.game.line4.position == 0:
+                if s.game.line4.position in [0,2]:
                     n = [390,617]
                     screen.blit(number, n)
                 elif s.game.line4.position == 1:
                     n = [390,416]
                     screen.blit(number, n)
-                elif s.game.line4.position == 2:
+                elif s.game.line4.position == 3:
                     n = [390,567]
                     screen.blit(number, n)
                 number_position = [39,608]
                 screen.blit(sc_number, number_position)
             if 24 in s.holes:
-                if s.game.line4.position == 0:
+                if s.game.line4.position in [0,2]:
                     n = [390,416]
                     screen.blit(number, n)
                 elif s.game.line4.position == 1:
                     n = [390,468]
                     screen.blit(number, n)
-                elif s.game.line4.position == 2:
+                elif s.game.line4.position == 3:
                     n = [390,617]
                     screen.blit(number, n)
                 number_position = [88,694]
                 screen.blit(sc_number, number_position)
             if 25 in s.holes:
-                if s.game.line5.position == 0:
+                if s.game.line5.position in [0,2]:
                     n = [444,517]
                     screen.blit(number, n)
                 elif s.game.line5.position == 1:
                     n = [444,567]
                     screen.blit(number, n)
-                elif s.game.line5.position == 2:
+                elif s.game.line5.position == 3:
                     n = [444,466]
                     screen.blit(number, n)
                 number_position = [88,650]
@@ -578,6 +577,183 @@ def blink(args):
     args = [s,b,sn]
 
     s.delay(name="blink", delay=0.1, handler=blink, param=args)
+
+def line1_animation(args):
+    dirty_rects = []
+    s = args[0]
+    num = args[1]
+    line = args[2]
+
+    if line == 1:
+        if num % 45 == 0:
+            if s.game.line1.position == 0:
+                dirty_rects.append(screen.blit(line1, (233,328 - num - 5)))
+            elif s.game.line1.position == 1:
+                dirty_rects.append(screen.blit(line1, (233,373 - num - 5)))
+            elif s.game.line1.position == 2:
+                dirty_rects.append(screen.blit(line1, (233,419 + num - 5)))
+            elif s.game.line1.position == 3:
+                dirty_rects.append(screen.blit(line1, (233,373 + num - 5)))
+
+        if (s.game.anti_cheat.status == True):
+            dirty_rects.append(screen.blit(bg_gi, (233,318), pygame.Rect(233,318,53,506)))
+        else:
+            dirty_rects.append(screen.blit(bg_off, (233,318), pygame.Rect(233,318,53,506)))
+     
+        if s.game.magic_lines_feature.position == 4:
+            dirty_rects.append(screen.blit(bg_gi, (182,793), pygame.Rect(182,793,32,31)))
+            dirty_rects.append(screen.blit(arrow, (182,793)))
+            dirty_rects.append(screen.blit(bg_gi, (206,792), pygame.Rect(206,792,146,40)))
+            dirty_rects.append(screen.blit(magic_lines4, (206,792)))
+        if s.game.magic_lines_feature.position == 5:
+            dirty_rects.append(screen.blit(bg_gi, (314,792), pygame.Rect(314,792,103,29)))
+            dirty_rects.append(screen.blit(magic_lines4, (314,792)))
+        if s.game.magic_lines_feature.position == 6:
+            dirty_rects.append(screen.blit(bg_gi, (420,792), pygame.Rect(420,792,103,29)))
+            dirty_rects.append(screen.blit(magic_lines4, (420,792)))
+   
+    pygame.display.update(dirty_rects)
+
+def line2_animation(args):
+    dirty_rects = []
+    s = args[0]
+    num = args[1]
+    line = args[2]
+
+    if line == 2:
+        if num % 45 == 0:
+            if s.game.line2.position == 0:
+                dirty_rects.append(screen.blit(line2, (286,328 - num - 5)))
+            elif s.game.line2.position == 1:
+                dirty_rects.append(screen.blit(line2, (286,373 - num - 5)))
+            elif s.game.line2.position == 2:
+                dirty_rects.append(screen.blit(line2, (286,419 + num - 5)))
+            elif s.game.line2.position == 3:
+                dirty_rects.append(screen.blit(line2, (286,373 + num - 5)))
+
+        if (s.game.anti_cheat.status == True):
+            dirty_rects.append(screen.blit(bg_gi, (286,318), pygame.Rect(286,318,53,506)))
+        else:
+            dirty_rects.append(screen.blit(bg_off, (286,318), pygame.Rect(286,318,53,506)))
+        
+        if s.game.magic_lines_feature.position == 4:
+            dirty_rects.append(screen.blit(bg_gi, (182,793), pygame.Rect(182,793,32,31)))
+            dirty_rects.append(screen.blit(arrow, (182,793)))
+            dirty_rects.append(screen.blit(bg_gi, (206,792), pygame.Rect(206,792,146,40)))
+            dirty_rects.append(screen.blit(magic_lines4, (206,792)))
+        if s.game.magic_lines_feature.position == 5:
+            dirty_rects.append(screen.blit(bg_gi, (314,792), pygame.Rect(314,792,103,29)))
+            dirty_rects.append(screen.blit(magic_lines4, (314,792)))
+        if s.game.magic_lines_feature.position == 6:
+            dirty_rects.append(screen.blit(bg_gi, (420,792), pygame.Rect(420,792,103,29)))
+            dirty_rects.append(screen.blit(magic_lines4, (420,792)))
+    pygame.display.update(dirty_rects)
+
+def line3_animation(args):
+    dirty_rects = []
+    s = args[0]
+    num = args[1]
+    line = args[2]
+ 
+    if line == 3:
+        if num % 45 == 0:
+            if s.game.line3.position == 0:
+                dirty_rects.append(screen.blit(line3, (339,331 - num - 5)))
+            elif s.game.line3.position == 1:
+                dirty_rects.append(screen.blit(line3, (339,373 - num - 5)))
+            elif s.game.line3.position == 2:
+                dirty_rects.append(screen.blit(line3, (339,419 + num - 5)))
+            elif s.game.line3.position == 3:
+                dirty_rects.append(screen.blit(line3, (339,373 + num - 5)))
+
+        if (s.game.anti_cheat.status == True):
+            dirty_rects.append(screen.blit(bg_gi, (339,321), pygame.Rect(339,321,53,506)))
+        else:
+            dirty_rects.append(screen.blit(bg_off, (339,321), pygame.Rect(339,321,53,506)))
+        
+        if s.game.magic_lines_feature.position == 4:
+            dirty_rects.append(screen.blit(bg_gi, (182,793), pygame.Rect(182,793,32,31)))
+            dirty_rects.append(screen.blit(arrow, (182,793)))
+            dirty_rects.append(screen.blit(bg_gi, (206,792), pygame.Rect(206,792,146,40)))
+            dirty_rects.append(screen.blit(magic_lines4, (206,792)))
+        if s.game.magic_lines_feature.position == 5:
+            dirty_rects.append(screen.blit(bg_gi, (314,792), pygame.Rect(314,792,103,29)))
+            dirty_rects.append(screen.blit(magic_lines4, (314,792)))
+        if s.game.magic_lines_feature.position == 6:
+            dirty_rects.append(screen.blit(bg_gi, (420,792), pygame.Rect(420,792,103,29)))
+            dirty_rects.append(screen.blit(magic_lines4, (420,792)))
+    pygame.display.update(dirty_rects)
+
+def line4_animation(args):
+    dirty_rects = []
+    s = args[0]
+    num = args[1]
+    line = args[2]
+
+    if line == 4:
+        if num % 45 == 0:
+            if s.game.line4.position == 0:
+                dirty_rects.append(screen.blit(line4, (395,310 - num - 5)))
+            elif s.game.line4.position == 1:
+                dirty_rects.append(screen.blit(line4, (395,357 - num - 5)))
+            elif s.game.line4.position == 2:
+                dirty_rects.append(screen.blit(line4, (395,412 + num - 5)))
+            elif s.game.line4.position == 3:
+                dirty_rects.append(screen.blit(line4, (395,357 + num - 5)))
+
+        if (s.game.anti_cheat.status == True):
+            dirty_rects.append(screen.blit(bg_gi, (395,300), pygame.Rect(395,300,53,456)))
+        else:
+            dirty_rects.append(screen.blit(bg_off, (395,300), pygame.Rect(395,300,53,456)))
+        
+        if s.game.magic_lines_feature.position == 4:
+            dirty_rects.append(screen.blit(bg_gi, (182,793), pygame.Rect(182,793,32,31)))
+            dirty_rects.append(screen.blit(arrow, (182,793)))
+            dirty_rects.append(screen.blit(bg_gi, (206,792), pygame.Rect(206,792,146,40)))
+            dirty_rects.append(screen.blit(magic_lines4, (206,792)))
+        if s.game.magic_lines_feature.position == 5:
+            dirty_rects.append(screen.blit(bg_gi, (314,792), pygame.Rect(314,792,103,29)))
+            dirty_rects.append(screen.blit(magic_lines4, (314,792)))
+        if s.game.magic_lines_feature.position == 6:
+            dirty_rects.append(screen.blit(bg_gi, (420,792), pygame.Rect(420,792,103,29)))
+            dirty_rects.append(screen.blit(magic_lines4, (420,792)))
+    pygame.display.update(dirty_rects)
+
+def line5_animation(args):
+    dirty_rects = []
+    s = args[0]
+    num = args[1]
+    line = args[2]
+
+    if line == 5:
+        if num % 45 == 0:
+            if s.game.line5.position == 0:
+                dirty_rects.append(screen.blit(line5, (447,310 - num - 5)))
+            elif s.game.line5.position == 1:
+                dirty_rects.append(screen.blit(line5, (447,357 - num - 5)))
+            elif s.game.line5.position == 2:
+                dirty_rects.append(screen.blit(line5, (447,412 + num - 5)))
+            elif s.game.line5.position == 3:
+                dirty_rects.append(screen.blit(line5, (447,357 + num - 5)))
+
+        if (s.game.anti_cheat.status == True):
+            dirty_rects.append(screen.blit(bg_gi, (447,300), pygame.Rect(447,300,53,456)))
+        else:
+            dirty_rects.append(screen.blit(bg_off, (447,300), pygame.Rect(447,300,53,456)))
+        
+        if s.game.magic_lines_feature.position == 4:
+            dirty_rects.append(screen.blit(bg_gi, (182,793), pygame.Rect(182,793,32,31)))
+            dirty_rects.append(screen.blit(arrow, (182,793)))
+            dirty_rects.append(screen.blit(bg_gi, (206,792), pygame.Rect(206,792,146,40)))
+            dirty_rects.append(screen.blit(magic_lines4, (206,792)))
+        if s.game.magic_lines_feature.position == 5:
+            dirty_rects.append(screen.blit(bg_gi, (314,792), pygame.Rect(314,792,103,29)))
+            dirty_rects.append(screen.blit(magic_lines4, (314,792)))
+        if s.game.magic_lines_feature.position == 6:
+            dirty_rects.append(screen.blit(bg_gi, (420,792), pygame.Rect(420,792,103,29)))
+            dirty_rects.append(screen.blit(magic_lines4, (420,792)))
+    pygame.display.update(dirty_rects)
+
 
 def eb_animation(args):
     global screen

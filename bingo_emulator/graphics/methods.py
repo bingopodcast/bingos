@@ -20,7 +20,7 @@ import shoot_a_line, shoot_a_line_63, abc, bolero, u345, serenade, ice_frolics, 
 import crosswords, spelling_bee, hi_fi, gayety, gay_time, border_beauty, beauty_beach
 import folies_bergeres, bahama_beach, zodiac, orient, venice, london, safari, super_7
 import bonus_7, double_up, hawaii_2, mystic_gate, tahiti_2, big_wheel, magic_ring, miss_universe
-import continental_18, galaxy
+import continental_18, galaxy, hi_hand, joker_wild, twin_joker, yukon
 
 def digital_replay_step_up(pos, reel1, reel10, reel100, reel1000):
     delta_y = 38
@@ -42,24 +42,32 @@ def digital_replay_step_up(pos, reel1, reel10, reel100, reel1000):
     r1000x = reel1000.position[0]
 
     p = map(int,str(pos).zfill(4))
-    print p
 
     if p[3] != 0:
-        reel1.position = [r1x,reel1.position[1] - delta[p[3]]]
+        if reel1.position != [r1x, delta[p[3]]]:
+            reel1.position = [r1x,reel1.default_y - delta[p[3]]]
     else:
         reel1.position = [r1x,reel1.default_y]
+
     if p[2] != 0:
-        reel10.position = [r10x,reel10.position[1] - delta[p[2]]]
+        if reel10.position != [r10x, delta[p[2]]]:
+            reel10.position = [r10x,reel10.default_y - delta[p[2]]]
     else:
         reel10.position = [r10x,reel10.default_y]
+    
     if p[1] != 0:
-        reel100.position = [r100x,reel100.position[1] - delta[p[1]]]
+        if reel100.position != [r100x, delta[p[1]]]:
+            reel100.position = [r100x,reel100.default_y - delta[p[1]]]
     else:
         reel100.position = [r100x,reel100.default_y]
+    
     if p[0] != 0:
-        reel1000.position = [r1000x,reel1000.position[1] - delta[p[0]]]
+        if reel1000.position != [r1000x, delta[p[0]]]:
+            reel1000.position = [r1000x,reel1000.default_y - delta[p[0]]]
     else:
         reel1000.position = [r1000x,reel1000.default_y]
+
+    return
 
 def replay_step_up(pos, reel1, reel10, reel100, reel1000=False):
     delta_y = 38

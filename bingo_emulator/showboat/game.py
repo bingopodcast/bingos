@@ -18,18 +18,25 @@ class MulticardBingo(procgame.game.Mode):
         super(MulticardBingo, self).__init__(game=game, priority=5)
         self.holes = []
         self.startup()
-        self.game.sound.register_music('motor', "audio/six_card_motor.wav")
-        self.game.sound.register_music('search', "audio/six_card_search_old.wav")
-        self.game.sound.register_sound('add', "audio/six_card_add_card.wav")
+        self.game.sound.register_music('motor', "audio/woodrail_motor.wav")
+        self.game.sound.register_music('search1', "audio/automatic_search_one_ball.wav")
+        self.game.sound.register_music('search2', "audio/automatic_search_two_ball.wav")
+        self.game.sound.register_music('search3', "audio/automatic_search_three_ball.wav")
+        self.game.sound.register_music('search4', "audio/automatic_search_four_ball.wav")
+        self.game.sound.register_music('search5', "audio/automatic_search_five_ball.wav")
+        self.game.sound.register_music('search6', "audio/automatic_search_six_ball.wav")
+        self.game.sound.register_music('search7', "audio/automatic_search_seven_ball.wav")
+        self.game.sound.register_music('search8', "audio/automatic_search_eight_ball.wav")
+        self.game.sound.register_sound('coin1', "audio/united_coin1.wav")
+        self.game.sound.register_sound('coin2', "audio/united_coin2.wav")
+        self.game.sound.register_sound('coin3', "audio/united_coin3.wav")
         self.game.sound.register_sound('tilt', "audio/tilt.wav")
         self.game.sound.register_sound('step', "audio/step.wav")
+        self.game.sound.register_sound('eb_search', "audio/EB_Search.wav")
 
     def sw_coin_active(self, sw):
         self.game.tilt.disengage()
-        self.game.sound.stop('add')
-        self.game.sound.play('add')
         self.regular_play()
-        self.scan_all()
 
         self.delay(name="display", delay=0.1, handler=graphics.showboat.display, param=self)
 
@@ -37,7 +44,6 @@ class MulticardBingo(procgame.game.Mode):
         if self.game.replays > 0 or self.game.switches.freeplay.is_active():
             self.game.tilt.disengage()
             self.regular_play()
-            self.scan_all()
 
             self.delay(name="display", delay=0.1, handler=graphics.showboat.display, param=self)
 
@@ -86,11 +92,17 @@ class MulticardBingo(procgame.game.Mode):
         self.cancel_delayed(name="card5_replay_step_up")
         self.cancel_delayed(name="card6_replay_step_up")
         self.cancel_delayed(name="timeout")
+        self.cancel_delayed(name="both_animation")
         self.game.search_index.disengage()
         self.game.coils.counter.pulse()
         self.game.returned = False
-        self.game.sound.stop('add')
-        self.game.sound.play('add')
+        r = random.randint(1,3)
+        if r == 1:
+            self.game.sound.play('coin1')
+        elif r == 2:
+            self.game.sound.play('coin2')
+        elif r == 3:
+            self.game.sound.play('coin3')
         if self.game.start.status == True:
             if self.game.selector.position < 6:
                 self.game.selector.step()
@@ -103,24 +115,9 @@ class MulticardBingo(procgame.game.Mode):
             current = self.game.flash.connected_rivet()
             self.game.flash.spin()
             new = self.game.flash.connected_rivet()
-            f = [1,3,12,14,17,21,24,26,29,32,34,37,41,44,47,49]
-            g = [2,6,10,11,20,23,27,31,35,36,45,48,50]
-            if new > current:
-                difference = new - current
-                for j in range(current,difference):
-                    if j in f:
-                        self.game.mixer1.step()
-                    if j in g:
-                        self.game.mixer2.step()
-            else:
-                difference = current - new
-                for j in range(0,difference):
-                    if j in f:
-                        self.game.mixer1.step()
-                    if j in g:
-                        self.game.mixer2.step()
-
+            self.animate_both([current,self.game.flash.movement_amount,1])
             self.replay_step_down()
+            graphics.showboat.display(self)
             self.check_lifter_status()
         else:
             self.holes = []
@@ -151,7 +148,7 @@ class MulticardBingo(procgame.game.Mode):
             self.game.start.engage(self.game)
             self.game.selector.reset()
             self.game.ball_count.reset()
-            self.game.sound.play_music('motor', -1)
+            self.game.sound.stop_music()
             self.regular_play()
         self.delay(name="display", delay=0.1, handler=graphics.showboat.display, param=self)
         self.game.tilt.disengage()
@@ -219,6 +216,9 @@ class MulticardBingo(procgame.game.Mode):
         self.game.ball_count.step()
         if self.game.switches.shutter.is_active():
             self.game.coils.shutter.enable()
+        if self.game.ball_count.position == 4:
+            self.game.sound.play('tilt')
+            self.game.sound.play('tilt')
         if self.game.ball_count.position >= 4:
             if self.game.search_index.status == False:
                 self.search()
@@ -235,6 +235,7 @@ class MulticardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.showboat.display, param=self)
 
     def sw_hole2_active_for_40ms(self, sw):
@@ -243,6 +244,7 @@ class MulticardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.showboat.display, param=self)
 
     def sw_hole3_active_for_40ms(self, sw):
@@ -251,6 +253,7 @@ class MulticardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.showboat.display, param=self)
 
     def sw_hole4_active_for_40ms(self, sw):
@@ -259,6 +262,7 @@ class MulticardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.showboat.display, param=self)
 
     def sw_hole5_active_for_40ms(self, sw):
@@ -267,6 +271,7 @@ class MulticardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.showboat.display, param=self)
 
     def sw_hole6_active_for_40ms(self, sw):
@@ -275,6 +280,7 @@ class MulticardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.showboat.display, param=self)
 
     def sw_hole7_active_for_40ms(self, sw):
@@ -283,6 +289,7 @@ class MulticardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.showboat.display, param=self)
 
     def sw_hole8_active_for_40ms(self, sw):
@@ -291,6 +298,7 @@ class MulticardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.showboat.display, param=self)
 
     def sw_hole9_active_for_40ms(self, sw):
@@ -299,6 +307,7 @@ class MulticardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.showboat.display, param=self)
 
     def sw_hole10_active_for_40ms(self, sw):
@@ -307,6 +316,7 @@ class MulticardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.showboat.display, param=self)
 
     def sw_hole11_active_for_40ms(self, sw):
@@ -315,6 +325,7 @@ class MulticardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.showboat.display, param=self)
 
     def sw_hole12_active_for_40ms(self, sw):
@@ -323,6 +334,7 @@ class MulticardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.showboat.display, param=self)
 
     def sw_hole13_active_for_40ms(self, sw):
@@ -331,6 +343,7 @@ class MulticardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.showboat.display, param=self)
 
     def sw_hole14_active_for_40ms(self, sw):
@@ -343,6 +356,7 @@ class MulticardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.showboat.display, param=self)
 
     def sw_hole15_active_for_40ms(self, sw):
@@ -355,6 +369,7 @@ class MulticardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.showboat.display, param=self)
 
     def sw_hole16_active_for_40ms(self, sw):
@@ -366,6 +381,7 @@ class MulticardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.showboat.display, param=self)
 
     def sw_hole17_active_for_40ms(self, sw):
@@ -378,6 +394,7 @@ class MulticardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.showboat.display, param=self)
 
     def sw_hole18_active_for_40ms(self, sw):
@@ -390,6 +407,7 @@ class MulticardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.showboat.display, param=self)
 
     def sw_hole19_active_for_40ms(self, sw):
@@ -398,6 +416,7 @@ class MulticardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.showboat.display, param=self)
 
     def sw_hole20_active_for_40ms(self, sw):
@@ -406,6 +425,7 @@ class MulticardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.showboat.display, param=self)
 
     def sw_hole21_active_for_40ms(self, sw):
@@ -414,6 +434,7 @@ class MulticardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.showboat.display, param=self)
 
     def sw_hole22_active_for_40ms(self, sw):
@@ -422,6 +443,7 @@ class MulticardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.showboat.display, param=self)
 
     def sw_hole23_active_for_40ms(self, sw):
@@ -430,6 +452,7 @@ class MulticardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.showboat.display, param=self)
 
     def sw_hole24_active_for_40ms(self, sw):
@@ -438,6 +461,7 @@ class MulticardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.showboat.display, param=self)
 
     def sw_hole25_active_for_40ms(self, sw):
@@ -446,6 +470,7 @@ class MulticardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.showboat.display, param=self)
     
     def sw_replayReset_active(self, sw):
@@ -465,6 +490,7 @@ class MulticardBingo(procgame.game.Mode):
         self.cancel_delayed(name="card5_replay_step_up")
         self.cancel_delayed(name="card6_replay_step_up")
         self.cancel_delayed(name="timeout")
+        self.cancel_delayed(name="both_animation")
         self.game.search_index.disengage()
         if self.game.switches.shutter.is_active() and self.game.ball_count.position == 0:
             self.game.coils.shutter.enable()
@@ -494,6 +520,25 @@ class MulticardBingo(procgame.game.Mode):
         self.game.sound.play('tilt')
         # displays "Tilt" on the backglass, you have to recoin.
         self.delay(name="display", delay=0.1, handler=graphics.showboat.display, param=self)
+
+    def search_sounds(self):
+        self.game.sound.stop_music()
+        if self.game.ball_count.position == 1:
+            self.game.sound.play_music('search1', -1)
+        if self.game.ball_count.position == 2:
+            self.game.sound.play_music('search2', -1)
+        if self.game.ball_count.position == 3:
+            self.game.sound.play_music('search3', -1)
+        if self.game.ball_count.position == 4:
+            self.game.sound.play_music('search4', -1)
+        if self.game.ball_count.position == 5:
+            self.game.sound.play_music('search5', -1)
+        if self.game.ball_count.position == 6:
+            self.game.sound.play_music('search6', -1)
+        if self.game.ball_count.position == 7:
+            self.game.sound.play_music('search7', -1)
+        if self.game.ball_count.position == 8:
+            self.game.sound.play_music('search8', -1)
 
     def sw_tilt_active(self, sw):
         if self.game.tilt.status == False:
@@ -531,44 +576,6 @@ class MulticardBingo(procgame.game.Mode):
         self.game.reflex1.stepdown()
         graphics.showboat.display(self)
 
-    def sw_yellow_active(self, sw):
-        if self.game.ball_count.position >= 4:
-            if self.game.eb_play.status == False:
-                self.game.eb_play.engage(self.game)
-                self.delay(name="display", delay=0.1, handler=graphics.showboat.display, param=self)
-            if self.game.eb_play.status == True and (self.game.replays > 0 or self.game.switches.freeplay.is_active()):
-                self.replay_step_down()
-                self.game.sound.stop('add')
-                self.game.sound.play('add')
-                self.game.cu = not self.game.cu
-                self.game.reflex1.step()
-                self.game.reflex2.step()
-                
-                current = self.game.flash.connected_rivet()
-                self.game.flash.spin()
-                new = self.game.flash.connected_rivet()
-                f = [1,3,12,14,17,21,24,26,29,32,34,37,41,44,47,49]
-                g = [2,6,10,11,20,23,27,31,35,36,45,48,50]
-                if new > current:
-                    difference = new - current
-                    for j in range(current,difference):
-                        if j in f:
-                            self.game.mixer1.step()
-                        if j in g:
-                            self.game.mixer2.step()
-                else:
-                    difference = current - new
-                    for j in range(0,difference):
-                        if j in f:
-                            self.game.mixer1.step()
-                        if j in g:
-                            self.game.mixer2.step()
-                
-                self.scan_eb()
-                self.delay(name="display", delay=0.1, handler=graphics.showboat.display, param=self)
-                self.game.eb_play.disengage()
-                self.delay(name="display", delay=0.1, handler=graphics.showboat.display, param=self)
-
     def search(self):
         # The search workflow/logic will determine if you actually have a winner, but it is a bit tricky.
         # if the ball is in a particular hole, the search relays need to click and/or clack, and 
@@ -581,8 +588,6 @@ class MulticardBingo(procgame.game.Mode):
         # game will activate() each search relay for each 'hot' rivet on the search disc.  This can be on a different
         # wiper finger for each set of rivets on the search disc.
         # Replay counters also need to be implemented to prevent the supplemental searches from scoring.
-        self.game.sound.stop_music()
-        self.game.sound.play_music('search', -1)
 
         if self.game.search_index.status == False:
             for i in range(0, 100):
@@ -619,29 +624,29 @@ class MulticardBingo(procgame.game.Mode):
                 if card == 1:
                     if relays == 3:
                         if self.game.c1_double.status == True:
-                            if self.game.card1_replay_counter.position < 8:
-                                self.game.search_index.engage(self.game)
-                                self.card1_replay_step_up(8 - self.game.card1_replay_counter.position)
-                        elif self.game.c1_triple.status == True:
-                            if self.game.card1_replay_counter.position < 12:
-                                self.game.search_index.engage(self.game)
-                                self.card1_replay_step_up(12 - self.game.card1_replay_counter.position)
-                        else:
                             if self.game.card1_replay_counter.position < 4:
                                 self.game.search_index.engage(self.game)
                                 self.card1_replay_step_up(4 - self.game.card1_replay_counter.position)
+                        elif self.game.c1_triple.status == True:
+                            if self.game.card1_replay_counter.position < 6:
+                                self.game.search_index.engage(self.game)
+                                self.card1_replay_step_up(6 - self.game.card1_replay_counter.position)
+                        else:
+                            if self.game.card1_replay_counter.position < 2:
+                                self.game.search_index.engage(self.game)
+                                self.card1_replay_step_up(2 - self.game.card1_replay_counter.position)
                     if relays == 4:
                         if self.game.c1_double.status == True:
-                            if self.game.card1_replay_counter.position < 40:
+                            if self.game.card1_replay_counter.position < 20:
                                 self.game.search_index.engage(self.game)
-                                self.card1_replay_step_up(40 - self.game.card1_replay_counter.position)
+                                self.card1_replay_step_up(20 - self.game.card1_replay_counter.position)
                         elif self.game.c1_triple.status == True:
-                            if self.game.card1_replay_counter.position < 60:
+                            if self.game.card1_replay_counter.position < 30:
                                 self.game.search_index.engage(self.game)
-                                self.card1_replay_step_up(60 - self.game.card1_replay_counter.position)
-                        elif self.game.card1_replay_counter.position < 20:
+                                self.card1_replay_step_up(30 - self.game.card1_replay_counter.position)
+                        elif self.game.card1_replay_counter.position < 10:
                             self.game.search_index.engage(self.game)
-                            self.card1_replay_step_up(20 - self.game.card1_replay_counter.position)
+                            self.card1_replay_step_up(10 - self.game.card1_replay_counter.position)
                     if relays == 5:
                         if self.game.c1_double.status == True:
                             if self.game.card1_replay_counter.position < 200:
@@ -658,29 +663,29 @@ class MulticardBingo(procgame.game.Mode):
                 if card == 2:
                     if relays == 3:
                         if self.game.c2_double.status == True:
-                            if self.game.card2_replay_counter.position < 8:
-                                self.game.search_index.engage(self.game)
-                                self.card2_replay_step_up(8 - self.game.card2_replay_counter.position)
-                        elif self.game.c2_triple.status == True:
-                            if self.game.card2_replay_counter.position < 12:
-                                self.game.search_index.engage(self.game)
-                                self.card2_replay_step_up(12 - self.game.card2_replay_counter.position)
-                        else:
                             if self.game.card2_replay_counter.position < 4:
                                 self.game.search_index.engage(self.game)
                                 self.card2_replay_step_up(4 - self.game.card2_replay_counter.position)
+                        elif self.game.c2_triple.status == True:
+                            if self.game.card2_replay_counter.position < 6:
+                                self.game.search_index.engage(self.game)
+                                self.card2_replay_step_up(6 - self.game.card2_replay_counter.position)
+                        else:
+                            if self.game.card2_replay_counter.position < 2:
+                                self.game.search_index.engage(self.game)
+                                self.card2_replay_step_up(2 - self.game.card2_replay_counter.position)
                     if relays == 4:
                         if self.game.c2_double.status == True:
-                            if self.game.card2_replay_counter.position < 40:
+                            if self.game.card2_replay_counter.position < 20:
                                 self.game.search_index.engage(self.game)
-                                self.card2_replay_step_up(40 - self.game.card2_replay_counter.position)
+                                self.card2_replay_step_up(20 - self.game.card2_replay_counter.position)
                         elif self.game.c2_triple.status == True:
-                            if self.game.card2_replay_counter.position < 60:
+                            if self.game.card2_replay_counter.position < 30:
                                 self.game.search_index.engage(self.game)
-                                self.card2_replay_step_up(60 - self.game.card2_replay_counter.position)
-                        elif self.game.card2_replay_counter.position < 20:
+                                self.card2_replay_step_up(30 - self.game.card2_replay_counter.position)
+                        elif self.game.card2_replay_counter.position < 10:
                             self.game.search_index.engage(self.game)
-                            self.card2_replay_step_up(20 - self.game.card2_replay_counter.position)
+                            self.card2_replay_step_up(10 - self.game.card2_replay_counter.position)
                     if relays == 5:
                         if self.game.c2_double.status == True:
                             if self.game.card2_replay_counter.position < 200:
@@ -697,29 +702,29 @@ class MulticardBingo(procgame.game.Mode):
                 if card == 3:
                     if relays == 3:
                         if self.game.c3_double.status == True:
-                            if self.game.card3_replay_counter.position < 8:
-                                self.game.search_index.engage(self.game)
-                                self.card3_replay_step_up(8 - self.game.card3_replay_counter.position)
-                        elif self.game.c3_triple.status == True:
-                            if self.game.card3_replay_counter.position < 12:
-                                self.game.search_index.engage(self.game)
-                                self.card3_replay_step_up(12 - self.game.card3_replay_counter.position)
-                        else:
                             if self.game.card3_replay_counter.position < 4:
                                 self.game.search_index.engage(self.game)
                                 self.card3_replay_step_up(4 - self.game.card3_replay_counter.position)
+                        elif self.game.c3_triple.status == True:
+                            if self.game.card3_replay_counter.position < 6:
+                                self.game.search_index.engage(self.game)
+                                self.card3_replay_step_up(6 - self.game.card3_replay_counter.position)
+                        else:
+                            if self.game.card3_replay_counter.position < 2:
+                                self.game.search_index.engage(self.game)
+                                self.card3_replay_step_up(2 - self.game.card3_replay_counter.position)
                     if relays == 4:
                         if self.game.c3_double.status == True:
-                            if self.game.card3_replay_counter.position < 40:
+                            if self.game.card3_replay_counter.position < 20:
                                 self.game.search_index.engage(self.game)
-                                self.card3_replay_step_up(40 - self.game.card3_replay_counter.position)
+                                self.card3_replay_step_up(20 - self.game.card3_replay_counter.position)
                         elif self.game.c3_triple.status == True:
-                            if self.game.card3_replay_counter.position < 60:
+                            if self.game.card3_replay_counter.position < 30:
                                 self.game.search_index.engage(self.game)
-                                self.card3_replay_step_up(60 - self.game.card3_replay_counter.position)
-                        elif self.game.card3_replay_counter.position < 20:
+                                self.card3_replay_step_up(30 - self.game.card3_replay_counter.position)
+                        elif self.game.card3_replay_counter.position < 10:
                             self.game.search_index.engage(self.game)
-                            self.card3_replay_step_up(20 - self.game.card3_replay_counter.position)
+                            self.card3_replay_step_up(10 - self.game.card3_replay_counter.position)
                     if relays == 5:
                         if self.game.c3_double.status == True:
                             if self.game.card3_replay_counter.position < 200:
@@ -736,29 +741,29 @@ class MulticardBingo(procgame.game.Mode):
                 if card == 4:
                     if relays == 3:
                         if self.game.c4_double.status == True:
-                            if self.game.card4_replay_counter.position < 8:
-                                self.game.search_index.engage(self.game)
-                                self.card4_replay_step_up(8 - self.game.card4_replay_counter.position)
-                        elif self.game.c4_triple.status == True:
-                            if self.game.card4_replay_counter.position < 12:
-                                self.game.search_index.engage(self.game)
-                                self.card4_replay_step_up(12 - self.game.card4_replay_counter.position)
-                        else:
                             if self.game.card4_replay_counter.position < 4:
                                 self.game.search_index.engage(self.game)
                                 self.card4_replay_step_up(4 - self.game.card4_replay_counter.position)
+                        elif self.game.c4_triple.status == True:
+                            if self.game.card4_replay_counter.position < 6:
+                                self.game.search_index.engage(self.game)
+                                self.card4_replay_step_up(6 - self.game.card4_replay_counter.position)
+                        else:
+                            if self.game.card4_replay_counter.position < 2:
+                                self.game.search_index.engage(self.game)
+                                self.card4_replay_step_up(2 - self.game.card4_replay_counter.position)
                     if relays == 4:
                         if self.game.c4_double.status == True:
-                            if self.game.card4_replay_counter.position < 40:
+                            if self.game.card4_replay_counter.position < 20:
                                 self.game.search_index.engage(self.game)
-                                self.card4_replay_step_up(40 - self.game.card4_replay_counter.position)
+                                self.card4_replay_step_up(20 - self.game.card4_replay_counter.position)
                         elif self.game.c4_triple.status == True:
-                            if self.game.card4_replay_counter.position < 60:
+                            if self.game.card4_replay_counter.position < 30:
                                 self.game.search_index.engage(self.game)
-                                self.card4_replay_step_up(60 - self.game.card4_replay_counter.position)
-                        elif self.game.card4_replay_counter.position < 20:
+                                self.card4_replay_step_up(30 - self.game.card4_replay_counter.position)
+                        elif self.game.card4_replay_counter.position < 10:
                             self.game.search_index.engage(self.game)
-                            self.card4_replay_step_up(20 - self.game.card4_replay_counter.position)
+                            self.card4_replay_step_up(10 - self.game.card4_replay_counter.position)
                     if relays == 5:
                         if self.game.c4_double.status == True:
                             if self.game.card4_replay_counter.position < 200:
@@ -775,29 +780,29 @@ class MulticardBingo(procgame.game.Mode):
                 if card == 5:
                     if relays == 3:
                         if self.game.c5_double.status == True:
-                            if self.game.card5_replay_counter.position < 8:
-                                self.game.search_index.engage(self.game)
-                                self.card5_replay_step_up(8 - self.game.card5_replay_counter.position)
-                        elif self.game.c5_triple.status == True:
-                            if self.game.card5_replay_counter.position < 12:
-                                self.game.search_index.engage(self.game)
-                                self.card5_replay_step_up(12 - self.game.card5_replay_counter.position)
-                        else:
                             if self.game.card5_replay_counter.position < 4:
                                 self.game.search_index.engage(self.game)
                                 self.card5_replay_step_up(4 - self.game.card5_replay_counter.position)
+                        elif self.game.c5_triple.status == True:
+                            if self.game.card5_replay_counter.position < 6:
+                                self.game.search_index.engage(self.game)
+                                self.card5_replay_step_up(6 - self.game.card5_replay_counter.position)
+                        else:
+                            if self.game.card5_replay_counter.position < 2:
+                                self.game.search_index.engage(self.game)
+                                self.card5_replay_step_up(2 - self.game.card5_replay_counter.position)
                     if relays == 4:
                         if self.game.c5_double.status == True:
-                            if self.game.card5_replay_counter.position < 40:
+                            if self.game.card5_replay_counter.position < 20:
                                 self.game.search_index.engage(self.game)
-                                self.card5_replay_step_up(40 - self.game.card5_replay_counter.position)
+                                self.card5_replay_step_up(20 - self.game.card5_replay_counter.position)
                         elif self.game.c5_triple.status == True:
-                            if self.game.card5_replay_counter.position < 60:
+                            if self.game.card5_replay_counter.position < 30:
                                 self.game.search_index.engage(self.game)
-                                self.card5_replay_step_up(60 - self.game.card5_replay_counter.position)
-                        elif self.game.card5_replay_counter.position < 20:
+                                self.card5_replay_step_up(30 - self.game.card5_replay_counter.position)
+                        elif self.game.card5_replay_counter.position < 10:
                             self.game.search_index.engage(self.game)
-                            self.card5_replay_step_up(20 - self.game.card5_replay_counter.position)
+                            self.card5_replay_step_up(10 - self.game.card5_replay_counter.position)
                     if relays == 5:
                         if self.game.c5_double.status == True:
                             if self.game.card5_replay_counter.position < 200:
@@ -814,29 +819,29 @@ class MulticardBingo(procgame.game.Mode):
                 if card == 6:
                     if relays == 3:
                         if self.game.c6_double.status == True:
-                            if self.game.card6_replay_counter.position < 8:
-                                self.game.search_index.engage(self.game)
-                                self.card6_replay_step_up(8 - self.game.card6_replay_counter.position)
-                        elif self.game.c6_triple.status == True:
-                            if self.game.card6_replay_counter.position < 12:
-                                self.game.search_index.engage(self.game)
-                                self.card6_replay_step_up(12 - self.game.card6_replay_counter.position)
-                        else:
                             if self.game.card6_replay_counter.position < 4:
                                 self.game.search_index.engage(self.game)
                                 self.card6_replay_step_up(4 - self.game.card6_replay_counter.position)
+                        elif self.game.c6_triple.status == True:
+                            if self.game.card6_replay_counter.position < 6:
+                                self.game.search_index.engage(self.game)
+                                self.card6_replay_step_up(6 - self.game.card6_replay_counter.position)
+                        else:
+                            if self.game.card6_replay_counter.position < 2:
+                                self.game.search_index.engage(self.game)
+                                self.card6_replay_step_up(2 - self.game.card6_replay_counter.position)
                     if relays == 4:
                         if self.game.c6_double.status == True:
-                            if self.game.card6_replay_counter.position < 40:
+                            if self.game.card6_replay_counter.position < 20:
                                 self.game.search_index.engage(self.game)
-                                self.card6_replay_step_up(40 - self.game.card6_replay_counter.position)
+                                self.card6_replay_step_up(20 - self.game.card6_replay_counter.position)
                         elif self.game.c6_triple.status == True:
-                            if self.game.card6_replay_counter.position < 60:
+                            if self.game.card6_replay_counter.position < 30:
                                 self.game.search_index.engage(self.game)
-                                self.card6_replay_step_up(60 - self.game.card6_replay_counter.position)
-                        elif self.game.card6_replay_counter.position < 20:
+                                self.card6_replay_step_up(30 - self.game.card6_replay_counter.position)
+                        elif self.game.card6_replay_counter.position < 10:
                             self.game.search_index.engage(self.game)
-                            self.card6_replay_step_up(20 - self.game.card6_replay_counter.position)
+                            self.card6_replay_step_up(10 - self.game.card6_replay_counter.position)
                     if relays == 5:
                         if self.game.c6_double.status == True:
                             if self.game.card6_replay_counter.position < 200:
@@ -851,81 +856,93 @@ class MulticardBingo(procgame.game.Mode):
                             self.card6_replay_step_up(100 - self.game.card6_replay_counter.position)
 
     def card1_replay_step_up(self, number):
+        self.game.sound.stop_music()
         if number >= 1:
             self.game.card1_replay_counter.step()
             number -= 1
             self.replay_step_up()
             if self.game.replays == 899:
                 number = 0
-            self.delay(name="card1_replay_step_up", delay=0.1, handler=self.card1_replay_step_up, param=number)
+            self.delay(name="card1_replay_step_up", delay=0.25, handler=self.card1_replay_step_up, param=number)
         else:
             self.game.search_index.disengage()
             self.cancel_delayed(name="card1_replay_step_up")
+            self.search_sounds()
             self.search()
 
     def card2_replay_step_up(self, number):
+        self.game.sound.stop_music()
         if number >= 1:
             self.game.card2_replay_counter.step()
             number -= 1
             self.replay_step_up()
             if self.game.replays == 899:
                 number = 0
-            self.delay(name="card2_replay_step_up", delay=0.1, handler=self.card2_replay_step_up, param=number)
+            self.delay(name="card2_replay_step_up", delay=0.25, handler=self.card2_replay_step_up, param=number)
         else:
             self.game.search_index.disengage()
             self.cancel_delayed(name="card2_replay_step_up")
+            self.search_sounds()
             self.search()
 
     def card3_replay_step_up(self, number):
+        self.game.sound.stop_music()
         if number >= 1:
             self.game.card3_replay_counter.step()
             number -= 1
             self.replay_step_up()
             if self.game.replays == 899:
                 number = 0
-            self.delay(name="card3_replay_step_up", delay=0.1, handler=self.card3_replay_step_up, param=number)
+            self.delay(name="card3_replay_step_up", delay=0.25, handler=self.card3_replay_step_up, param=number)
         else:
             self.game.search_index.disengage()
             self.cancel_delayed(name="card3_replay_step_up")
+            self.search_sounds()
             self.search()
 
     def card4_replay_step_up(self, number):
+        self.game.sound.stop_music()
         if number >= 1:
             self.game.card4_replay_counter.step()
             number -= 1
             self.replay_step_up()
             if self.game.replays == 899:
                 number = 0
-            self.delay(name="card4_replay_step_up", delay=0.1, handler=self.card4_replay_step_up, param=number)
+            self.delay(name="card4_replay_step_up", delay=0.25, handler=self.card4_replay_step_up, param=number)
         else:
             self.game.search_index.disengage()
             self.cancel_delayed(name="card4_replay_step_up")
+            self.search_sounds()
             self.search()
 
     def card5_replay_step_up(self, number):
+        self.game.sound.stop_music()
         if number >= 1:
             self.game.card5_replay_counter.step()
             number -= 1
             self.replay_step_up()
             if self.game.replays == 899:
                 number = 0
-            self.delay(name="card5_replay_step_up", delay=0.1, handler=self.card5_replay_step_up, param=number)
+            self.delay(name="card5_replay_step_up", delay=0.25, handler=self.card5_replay_step_up, param=number)
         else:
             self.game.search_index.disengage()
             self.cancel_delayed(name="card5_replay_step_up")
+            self.search_sounds()
             self.search()
 
     def card6_replay_step_up(self, number):
+        self.game.sound.stop_music()
         if number >= 1:
             self.game.card6_replay_counter.step()
             number -= 1
             self.replay_step_up()
             if self.game.replays == 899:
                 number = 0
-            self.delay(name="card6_replay_step_up", delay=0.1, handler=self.card6_replay_step_up, param=number)
+            self.delay(name="card6_replay_step_up", delay=0.25, handler=self.card6_replay_step_up, param=number)
         else:
             self.game.search_index.disengage()
             self.cancel_delayed(name="card6_replay_step_up")
+            self.search_sounds()
             self.search()
 
 
@@ -1077,8 +1094,6 @@ class MulticardBingo(procgame.game.Mode):
     def scan_all(self):
         #Animate scanning of everything - this happens through the flash disc
         self.all_probability()
-        s = random.randint(1,5)
-        self.animate_feature_scan(s)
 
     def check_reflex2(self):
         r2 = self.game.reflex2.position
@@ -1156,89 +1171,143 @@ class MulticardBingo(procgame.game.Mode):
                 # Check for double/triple scoring per card
                 if sd in [12,15,18,24,38,42,44]:
                     if self.game.c1_triple.status == False:
-                        self.game.c1_double.engage(self.game)
+                        if self.game.c1_double.status == False:
+                            self.game.c1_double.engage(self.game)
+                            self.game.sound.play('tilt')
                 if sd in [0,8,30,31,33,45,47]:
                     if self.game.c2_triple.status == False:
-                        self.game.c2_double.engage(self.game)
+                        if self.game.c2_double.status == False:
+                            self.game.c2_double.engage(self.game)
+                            self.game.sound.play('tilt')
                 if sd in [2,10,11,13,25,27,49]:
                     if self.game.c3_triple.status == False:
-                        self.game.c3_double.engage(self.game)
+                        if self.game.c3_double.status == False:
+                            self.game.c3_double.engage(self.game)
+                            self.game.sound.play('tilt')
                 if sd in [3,5,6,7,9,22,28,32,40]:
                     if self.game.c4_triple.status == False:
-                        self.game.c4_double.engage(self.game)
+                        if self.game.c4_double.status == False:
+                            self.game.c4_double.engage(self.game)
+                            self.game.sound.play('tilt')
                     if self.game.c6_triple.status == False:
-                        self.game.c6_double.engage(self.game)
+                        if self.game.c6_double.status == False:
+                            self.game.c6_double.engage(self.game)
+                            self.game.sound.play('tilt')
                 if sd in [1,14,20,26,29,37,43]:
                     if self.game.c5_triple.status == False:
-                        self.game.c5_double.engage(self.game)
+                        if self.game.c5_double.status == False:
+                            self.game.c5_double.engage(self.game)
+                            self.game.sound.play('tilt')
 
                 # Now we need to check Mixer1 if we're at card #6
                 if self.game.selector.position == 6:
                     mix1 = self.game.mixer1.connected_rivet()
                     if mix1 in [0,11]:
-                        self.game.c1_double.disengage()
-                        self.game.c1_triple.engage(self.game)
+                        if self.game.c1_triple.status == False:
+                            self.game.c1_double.disengage()
+                            self.game.c1_triple.engage(self.game)
+                            self.game.sound.play('tilt')
                     if mix1 in [1,12]:
-                        self.game.c2_double.disengage()
-                        self.game.c2_triple.engage(self.game)
+                        if self.game.c2_triple.status == False:
+                            self.game.c2_double.disengage()
+                            self.game.c2_triple.engage(self.game)
+                            self.game.sound.play('tilt')
                     if mix1 in [3,10,14]:
-                        self.game.c3_double.disengage()
-                        self.game.c3_triple.engage(self.game)
+                        if self.game.c3_triple.status == False:
+                            self.game.c3_double.disengage()
+                            self.game.c3_triple.engage(self.game)
+                            self.game.sound.play('tilt')
                     if mix1 in [2,17,19]:
-                        self.game.c4_double.disengage()
-                        self.game.c4_triple.engage(self.game)
+                        if self.game.c4_triple.status == False:
+                            self.game.c4_double.disengage()
+                            self.game.c4_triple.engage(self.game)
+                            self.game.sound.play('tilt')
                     if mix1 in [5,6,16,18]:
-                        self.game.c5_double.disengage()
-                        self.game.c5_triple.engage(self.game)
+                        if self.game.c5_triple.status == False:
+                            self.game.c5_double.disengage()
+                            self.game.c5_triple.engage(self.game)
+                            self.game.sound.play('tilt')
                     if mix1 in [4,7,8,15]:
-                        self.game.c6_double.disengage()
-                        self.game.c6_triple.engage(self.game)
+                        if self.game.c6_triple.status == False:
+                            self.game.c6_double.disengage()
+                            self.game.c6_triple.engage(self.game)
+                            self.game.sound.play('tilt')
                 else:
                     if sd in [16,48]:
-                        self.game.c1_double.disengage()
-                        self.game.c1_triple.engage(self.game)
+                        if self.game.c1_triple.status == False:
+                            self.game.c1_double.disengage()
+                            self.game.c1_triple.engage(self.game)
+                            self.game.sound.play('tilt')
                     if sd in [4,41]:
-                        self.game.c2_double.disengage()
-                        self.game.c2_triple.engage(self.game)
+                        if self.game.c2_triple.status == False:
+                            self.game.c2_double.disengage()
+                            self.game.c2_triple.engage(self.game)
+                            self.game.sound.play('tilt')
                     if sd in [17,19]:
-                        self.game.c3_double.disengage()
-                        self.game.c3_triple.engage(self.game)
+                        if self.game.c3_triple.status == False:
+                            self.game.c3_double.disengage()
+                            self.game.c3_triple.engage(self.game)
+                            self.game.sound.play('tilt')
                     if sd in [23,34]:
-                        self.game.c4_double.disengage()
-                        self.game.c4_triple.engage(self.game)
+                        if self.game.c4_triple.status == False:
+                            self.game.c4_double.disengage()
+                            self.game.c4_triple.engage(self.game)
+                            self.game.sound.play('tilt')
                     if sd in [35,46]:
-                        self.game.c5_double.disengage()
-                        self.game.c5_triple.engage(self.game)
+                        if self.game.c5_triple.status == False:
+                            self.game.c5_double.disengage()
+                            self.game.c5_triple.engage(self.game)
+                            self.game.sound.play('tilt')
                     if sd in [21,36,39]:
-                        self.game.c6_double.disengage()
-                        self.game.c6_triple.engage(self.game)
+                        if self.game.c6_triple.status == False:
+                            self.game.c6_double.disengage()
+                            self.game.c6_triple.engage(self.game)
+                            self.game.sound.play('tilt')
 
 
                 # Check for multi-steps on the cards
                 if sd in [0,17,22]:
-                    self.game.fourteen_eighteen.engage(self.game)
+                    if self.game.fourteen_eighteen.status == False:
+                        self.game.fourteen_eighteen.engage(self.game)
+                        self.game.sound.play('tilt')
                 if self.game.c5_triple.status == False:
                     if sd == 2:
-                        self.game.fourteen_eighteen.engage(self.game)
+                        if self.game.fourteen_eighteen.status == False:
+                            self.game.fourteen_eighteen.engage(self.game)
+                            self.game.sound.play('tilt')
                 if self.game.c2_triple.status == False:
                     if sd == 5:
-                        self.game.fourteen_eighteen.engage(self.game)
+                        if self.game.fourteen_eighteen.status == False:
+                            self.game.fourteen_eighteen.engage(self.game)
+                            self.game.sound.play('tilt')
                 if sd in [15,1,24,12,7]:
-                    self.game.fifteen_seventeen.engage(self.game)
+                    if self.game.fifteen_seventeen.status == False:
+                        self.game.fifteen_seventeen.engage(self.game)
+                        self.game.sound.play('tilt')
                 if self.game.c3_triple.status == False:
                     if sd == 6:
-                        self.game.fifteen_seventeen.engage(self.game)
+                        if self.game.fifteen_seventeen.status == False:
+                            self.game.fifteen_seventeen.engage(self.game)
+                            self.game.sound.play('tilt')
                 if sd in [3,10,13,14]:
-                    self.game.sixteen.engage(self.game)
+                    if self.game.sixteen.status == False:
+                        self.game.sixteen.engage(self.game)
+                        self.game.sound.play('tilt')
                 if self.game.c4_triple.status == False:
                     if sd == 8:
-                        self.game.sixteen.engage(self.game)
+                        if self.game.sixteen.status == False:
+                            self.game.sixteen.engage(self.game)
+                            self.game.sound.play('tilt')
                 if self.game.c1_triple.status == False:
                     if sd == 20:
-                        self.game.sixteen.engage(self.game)
+                        if self.game.sixteen.status == False:
+                            self.game.sixteen.engage(self.game)
+                            self.game.sound.play('tilt')
                 if self.game.c6_triple.status == False:
                     if sd == 18:
-                        self.game.sixteen.engage(self.game)
+                        if self.game.sixteen.status == False:
+                            self.game.sixteen.engage(self.game)
+                            self.game.sound.play('tilt')
                 if sd in [11,9,21,4,16,19,23]:
                     # Check Mixer 1 to determine if we can step multiple cards
                     mix1 = self.game.mixer1.position
@@ -1288,14 +1357,30 @@ class MulticardBingo(procgame.game.Mode):
         else:
             return 0
 
-    def animate_feature_scan(self, s):
-        if s > 1:
-            self.delay(name="feature_animation", delay=0.1, handler=graphics.showboat.feature_animation, param=s)
-            self.delay(name="display", delay=0.1, handler=graphics.showboat.display, param=self)
-            s -= 1
-            #self.delay(name="animate_feature", delay=0.1, handler=self.animate_feature_scan, param=s)
+    def animate_both(self, args):
+        start = args[0]
+        diff = args[1]
+        num = args[2]
+        if start + num >= 25:
+            start = 0
+        if diff >= 0:
+            num = num + 1
+            rivet = start + num
+            if rivet in [1,3,12,14,17,21,24,26,29,32,34,37,41,44,47,49]:
+                self.game.mixer1.step()
+                graphics.showboat.animate_mixer1(self)
+            if rivet in [2,6,10,11,20,23,27,31,35,36,45,48,50]:
+                self.game.mixer2.step()
+                graphics.showboat.animate_mixer2(self)
+            graphics.showboat.both_animation([self, start + num])
+            self.cancel_delayed(name="display")
+            diff = diff - 1
+            args = [start,diff,num]
+            self.delay(name="both_animation", delay=0.08, handler=self.animate_both, param=args)
         else:
+            self.cancel_delayed(name="both_animation")
             self.delay(name="display", delay=0.1, handler=graphics.showboat.display, param=self)
+            self.scan_all()
 
     # Define reset as the knock-off, anti-cheat relay disabled, and replay reset enabled.  Motors turn while credits are knocked off.
     # When meter reaches zero and the zero limit switch is hit, turn off motor sound and leave backglass gi on, but with tilt displayed.

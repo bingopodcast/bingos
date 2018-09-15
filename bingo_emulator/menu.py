@@ -309,6 +309,7 @@ class MainMenu(procgame.game.Mode):
         self.game.green_regular = units.Relay("green_regular")
         self.game.white_regular = units.Relay("white_regular")
 
+        self.game.cam4 = units.Stepper("cam4", 3, "menu", "continuous")
         self.game.square_a = units.Stepper("square_a", 3, "menu", "continuous")
         self.game.square_b = units.Stepper("square_b", 3, "menu", "continuous")
         self.game.square_c = units.Stepper("square_c", 3, "menu", "continuous")
@@ -332,6 +333,33 @@ class MainMenu(procgame.game.Mode):
         self.game.score_feature = units.Stepper("score_feature", 8)
         self.game.magic_line = units.Relay("magic_line")
         self.game.select_a_score = units.Relay("select_a_score")
+        self.game.kod = units.Relay("kod")
+        self.game.koh = units.Relay("koh")
+        self.game.koc = units.Relay("koc")
+        self.game.kos = units.Relay("kos")
+        self.game.qod = units.Relay("qod")
+        self.game.qoh = units.Relay("qoh")
+        self.game.qoc = units.Relay("qoc")
+        self.game.qos = units.Relay("qos")
+        self.game.tod = units.Relay("tod")
+        self.game.toh = units.Relay("toh")
+        self.game.toc = units.Relay("toc")
+        self.game.tos = units.Relay("tos")
+        self.game.nod = units.Relay("nod")
+        self.game.noh = units.Relay("noh")
+        self.game.noc = units.Relay("noc")
+        self.game.nos = units.Relay("nos")
+        self.game.aos = units.Relay("aos")
+        self.game.aod = units.Relay("aod")
+        self.game.aoh = units.Relay("aoh")
+        self.game.aoc = units.Relay("aoc")
+        self.game.joh = units.Relay("joh")
+        self.game.jod = units.Relay("jod")
+        self.game.jos = units.Relay("jos")
+        self.game.joc = units.Relay("joc")
+        self.game.joker = units.Relay("joker")
+        self.game.player2 = units.Relay("player2")
+        self.game.tilt2 = units.Relay("tilt2")
 
         self.game.odds1 = units.Stepper("odds1", 5)
         self.game.odds2 = units.Stepper("odds2", 5)
@@ -352,6 +380,7 @@ class MainMenu(procgame.game.Mode):
         self.game.skill_shot_scores = units.Stepper("skill_shot_scores",  20)
         self.game.skill_shot_replay_counter  = units.Stepper("skill_shot_replay_counter", 120)
         self.game.skill_shot_reflex = units.Reflex("skill_shot_reflex", 200)
+        self.game.skill_shot_missed = units.Relay("skill_shot_missed")
         self.game.skill_shot_selection = []
 
         self.game.card1_replay_counter = units.Stepper("card1_replay_counter", 300)
@@ -445,7 +474,7 @@ class MainMenu(procgame.game.Mode):
     def sw_enter_active(self, sw):
         try:
             s = self.game.select
-            if s in [2,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,30,32,34,35,36,37,38,39,40,41,43,45,46,47,48,49,50,51,53,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,91,92,93,95,96,97,98,99,100,114,115,117,119,120,121,122,126,127,128,129,130,131,133,134,136,137,138]:
+            if s in [2,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,30,32,34,35,36,37,38,39,40,41,43,45,46,47,48,49,50,51,53,55,56,57,58,59,60,61,62,63,64,65,67,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,93,94,95,97,98,99,100,101,102,117,118,120,121,124,125,126,129,130,131,132,133,134,137,138,140,141,142]:
                 if self.game.switches.bally25ro.is_inactive():
                     self.display_error(self.game.selection, self.game.select, "25 hole with rollovers")
                     return
@@ -461,29 +490,33 @@ class MainMenu(procgame.game.Mode):
                 if self.game.switches.bally25pockets.is_inactive():
                     self.display_error(self.game.selection, self.game.select, "25 hole with pockets")
                     return
-            if s in [52,54,124,125]:
+            if s in [52,54,128,135]:
                 if self.game.switches.bally18.is_inactive():
                     self.display_error(self.game.selection, self.game.select, "18 hole")
                     return
-            if s in [90,94]:
+            if s in [92,96]:
                 if self.game.switches.bally28.is_inactive():
                     self.display_error(self.game.selection, self.game.select, "28 hole")
                     return
-            if s in [101,102,103,104,105,106,107,108,109,110,111,112,113,116,118]:
+            if s in [103,104,105,106,107,108,109,110,111,112,113,115,116,119,123]:
                 if self.game.switches.bally20ro.is_inactive():
                     self.display_error(self.game.selection, self.game.select, "20 hole with rollovers")
                     return
-            if s in [123]:
+            if s in [127]:
                 if self.game.switches.bally20gate.is_inactive():
                     self.display_error(self.game.selection, self.game.select, "20 hole with gate")
                     return
-            if s in [132]:
+            if s in [136]:
                 if self.game.switches.bally24.is_inactive():
                     self.display_error(self.game.selection, self.game.select, "24 hole")
                     return
-            if s in [135]:
+            if s in [139]:
                 if self.game.switches.bally20hold.is_inactive():
                     self.display_error(self.game.selection, self.game.select, "20 hole with hold")
+                    return
+            if s in [66,68,114,122]:
+                if self.game.switches.bally25hole.is_inactive():
+                    self.display_error(self.game.selection, self.game.select, "Card 25 hole")
                     return
 
             t = thread.start_new(__import__("bingo_emulator.%s.game" % (self.game.selection[self.game.select])))
@@ -491,7 +524,7 @@ class MainMenu(procgame.game.Mode):
                 t.join()
 
         except:
-            if s in [2,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,30,32,34,35,36,37,38,39,40,41,43,45,46,47,48,49,50,51,53,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,91,92,93,95,96,97,98,99,100,114,115,117,119,120,121,122,126,127,128,129,130,131,133,134,136,137,138]:
+            if s in [2,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,30,32,34,35,36,37,38,39,40,41,43,45,46,47,48,49,50,51,53,55,56,57,58,59,60,61,62,63,64,65,67,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,93,94,95,97,98,99,100,101,102,117,118,120,121,124,125,126,129,130,131,132,133,134,137,138,140,141,142]:
                 if self.game.switches.bally25ro.is_inactive():
                     self.display_error(self.game.selection, self.game.select, "25 hole with rollovers")
                     return
@@ -507,29 +540,33 @@ class MainMenu(procgame.game.Mode):
                 if self.game.switches.bally25pockets.is_inactive():
                     self.display_error(self.game.selection, self.game.select, "25 hole with pockets")
                     return
-            if s in [52,54,124,125]:
+            if s in [52,54,128,135]:
                 if self.game.switches.bally18.is_inactive():
                     self.display_error(self.game.selection, self.game.select, "18 hole")
                     return
-            if s in [90,94]:
+            if s in [92,96]:
                 if self.game.switches.bally28.is_inactive():
                     self.display_error(self.game.selection, self.game.select, "28 hole")
                     return
-            if s in [101,102,103,104,105,106,107,108,109,110,111,112,113,116,118]:
+            if s in [103,104,105,106,107,108,109,110,111,112,113,115,116,119,123]:
                 if self.game.switches.bally20ro.is_inactive():
                     self.display_error(self.game.selection, self.game.select, "20 hole with rollovers")
                     return
-            if s in [123]:
+            if s in [127]:
                 if self.game.switches.bally20gate.is_inactive():
                     self.display_error(self.game.selection, self.game.select, "20 hole with gate")
                     return
-            if s in [132]:
+            if s in [136]:
                 if self.game.switches.bally24.is_inactive():
                     self.display_error(self.game.selection, self.game.select, "24 hole")
                     return
-            if s in [135]:
+            if s in [139]:
                 if self.game.switches.bally20hold.is_inactive():
                     self.display_error(self.game.selection, self.game.select, "20 hole with hold")
+                    return
+            if s in [66,68,114,122]:
+                if self.game.switches.bally25hole.is_inactive():
+                    self.display_error(self.game.selection, self.game.select, "Card 25 hole")
                     return
 
             g = (__import__("bingo_emulator.%s.game" % (self.game.selection[self.game.select])))
@@ -544,6 +581,8 @@ class MainMenu(procgame.game.Mode):
         if self.game.select != 1:
             self.game.select -= 1
             self.game.selection[self.game.select]
+            if self.game.selection[self.game.select] == "bway":
+                self.game.selection[self.game.select] = "broadway"
             __import__("bingo_emulator.graphics.%s" % (self.game.selection[self.game.select]))
             g = "graphics.%s.display(self,0,True)" % (self.game.selection[self.game.select])
             eval(g)
@@ -553,6 +592,8 @@ class MainMenu(procgame.game.Mode):
         if self.game.select != len(self.game.selection):
             self.game.select += 1
             self.game.selection[self.game.select]
+            if self.game.selection[self.game.select] == "bway":
+                self.game.selection[self.game.select] = "broadway"
             __import__("bingo_emulator.graphics.%s" % (self.game.selection[self.game.select]))
             g = "graphics.%s.display(self,0,True)" % (self.game.selection[self.game.select])
             eval(g)
@@ -611,7 +652,7 @@ def main(sel):
     selection[47] = "triple_play"
     selection[48] = "beach_beauty"
     selection[49] = "pixies"
-    selection[50] = "broadway"
+    selection[50] = "bway"
     selection[51] = "starlet"
     selection[52] = "crosswords"
     selection[53] = "caravan"
@@ -627,84 +668,91 @@ def main(sel):
     selection[63] = "brazil"
     selection[64] = "showtime"
     selection[65] = "sun_valley"
-    selection[66] = "playtime"
-    selection[67] = "fun_way"
-    selection[68] = "miss_america"
-    selection[69] = "cypress_gardens"
-    selection[70] = "beach_time"
-    selection[71] = "carnival_queen"
-    selection[72] = "sea_island"
-    selection[73] = "ballerina"
-    selection[74] = "lotta_fun"
-    selection[75] = "county_fair"
-    selection[76] = "laguna_beach"
-    selection[77] = "single_coin_pittsburgh"
-    selection[78] = "roller_derby"
-    selection[79] = "fun_spot"
-    selection[80] = "barrel_o_fun"
-    selection[81] = "touchdown"
-    selection[82] = "circus_queen"
-    selection[83] = "lite_a_line"
-    selection[84] = "acapulco"
-    selection[85] = "bikini"
-    selection[86] = "barrel_o_fun_61"
-    selection[87] = "fun_spot_61"
-    selection[88] = "can_can"
-    selection[89] = "lido"
-    selection[90] = "shoot_a_line"
-    selection[91] = "barrel_o_fun_62"
-    selection[92] = "fun_spot_62"
-    selection[93] = "fun_spot_63"
-    selection[94] = "shoot_a_line_63"
-    selection[95] = "golden_gate"
-    selection[96] = "rainbow"
-    selection[97] = "the_twist"
-    selection[98] = "silver_sails"
-    selection[99] = "bounty"
-    selection[100] = "venus"
-    selection[101] = "border_beauty"
-    selection[102] = "beauty_beach"
-    selection[103] = "folies_bergeres"
-    selection[104] = "bahama_beach"
-    selection[105] = "zodiac"
-    selection[106] = "orient"
-    selection[107] = "big_wheel"
-    selection[108] = "venice"
-    selection[109] = "magic_ring"
-    selection[110] = "london"
-    selection[111] = "safari"
-    selection[112] = "super_7"
-    selection[113] = "bonus_7"
-    selection[114] = "hole_in_one"
-    selection[115] = "stock_market"
-    selection[116] = "double_up"
-    selection[117] = "wall_street"
-    selection[118] = "ticker_tape"
-    selection[119] = "hawaii_2"
-    selection[120] = "bali"
-    selection[121] = "super_wall_street"
-    selection[122] = "miss_america_75"
-    selection[123] = "mystic_gate"
-    selection[124] = "miss_universe"
-    selection[125] = "blue_chip"
-    selection[126] = "bull_market"
-    selection[127] = "bonanza"
-    selection[128] = "miss_america_supreme"
-    selection[129] = "high_flyer"
-    selection[130] = "miss_america_deluxe"
-    selection[131] = "continental_18"
-    selection[132] = "galaxy"
-    selection[133] = "nashville"
-    selection[134] = "dixieland"
-    selection[135] = "tahiti_2"
-    selection[136] = "malibu_beach"
-    selection[137] = "continental"
-    selection[138] = "mississippi_showboat"
+    selection[66] = "yukon"
+    selection[67] = "playtime"
+    selection[68] = "hi_hand"
+    selection[69] = "fun_way"
+    selection[70] = "miss_america"
+    selection[71] = "cypress_gardens"
+    selection[72] = "beach_time"
+    selection[73] = "carnival_queen"
+    selection[74] = "sea_island"
+    selection[75] = "ballerina"
+    selection[76] = "lotta_fun"
+    selection[77] = "county_fair"
+    selection[78] = "laguna_beach"
+    selection[79] = "single_coin_pittsburgh"
+    selection[80] = "roller_derby"
+    selection[81] = "fun_spot"
+    selection[82] = "barrel_o_fun"
+    selection[83] = "touchdown"
+    selection[84] = "circus_queen"
+    selection[85] = "lite_a_line"
+    selection[86] = "acapulco"
+    selection[87] = "bikini"
+    selection[88] = "barrel_o_fun_61"
+    selection[89] = "fun_spot_61"
+    selection[90] = "can_can"
+    selection[91] = "lido"
+    selection[92] = "shoot_a_line"
+    selection[93] = "barrel_o_fun_62"
+    selection[94] = "fun_spot_62"
+    selection[95] = "fun_spot_63"
+    selection[96] = "shoot_a_line_63"
+    selection[97] = "golden_gate"
+    selection[98] = "rainbow"
+    selection[99] = "the_twist"
+    selection[100] = "silver_sails"
+    selection[101] = "bounty"
+    selection[102] = "venus"
+    selection[103] = "border_beauty"
+    selection[104] = "beauty_beach"
+    selection[105] = "folies_bergeres"
+    selection[106] = "bahama_beach"
+    selection[107] = "zodiac"
+    selection[108] = "orient"
+    selection[109] = "big_wheel"
+    selection[110] = "venice"
+    selection[111] = "magic_ring"
+    selection[112] = "london"
+    selection[113] = "safari"
+    selection[114] = "joker_wild"
+    selection[115] = "super_7"
+    selection[116] = "bonus_7"
+    selection[117] = "hole_in_one"
+    selection[118] = "stock_market"
+    selection[119] = "double_up"
+    selection[120] = "wall_street"
+    selection[121] = "ticker_tape"
+    selection[122] = "twin_joker"
+    selection[123] = "hawaii_2"
+    selection[124] = "bali"
+    selection[125] = "super_wall_street"
+    selection[126] = "miss_america_75"
+    selection[127] = "mystic_gate"
+    selection[128] = "miss_universe"
+    selection[129] = "blue_chip"
+    selection[130] = "bull_market"
+    selection[131] = "bonanza"
+    selection[132] = "miss_america_supreme"
+    selection[133] = "high_flyer"
+    selection[134] = "miss_america_deluxe"
+    selection[135] = "continental_18"
+    selection[136] = "galaxy"
+    selection[137] = "nashville"
+    selection[138] = "dixieland"
+    selection[139] = "tahiti_2"
+    selection[140] = "malibu_beach"
+    selection[141] = "continental"
+    selection[142] = "mississippi_showboat"
 
-    for i in range(1,139):
+    for i in range(1,142):
         if sel in selection[i]:
             select = i
             break
+
+    if selection[select] == "bway":
+        selection[select] = "broadway"
 
     os.system("ssh pi@10.0.0.51 /home/pi/ic.sh %s &" % (selection[select]))
     os.system("ssh pi@10.0.0.52 /home/pi/sd.sh %s &" % (selection[select]))

@@ -18,9 +18,12 @@ class SinglecardBingo(procgame.game.Mode):
         super(SinglecardBingo, self).__init__(game=game, priority=5)
         self.holes = []
         self.startup()
-        self.game.sound.register_music('motor', "audio/other_motor.wav")
-        self.game.sound.register_sound('search', "audio/six_card_search_old.wav")
-        self.game.sound.register_sound('add', "audio/six_card_add_card.wav")
+        self.game.sound.register_music('motor', "audio/magic_screen_control_unit.wav")
+        self.game.sound.register_sound('search', "audio/mystic_line_search.wav")
+        self.game.sound.register_sound('coin1', "audio/magic_screen_coin1.wav")
+        self.game.sound.register_sound('coin2', "audio/magic_screen_coin2.wav")
+        self.game.sound.register_sound('coin3', "audio/magic_screen_coin3.wav")
+        self.game.sound.register_sound('square', "audio/magic_square.wav")
         self.game.sound.register_sound('tilt', "audio/tilt.wav")
         self.game.sound.register_sound('step', "audio/step.wav")
         self.game.sound.register_sound('eb_search', "audio/EB_Search.wav")
@@ -28,89 +31,46 @@ class SinglecardBingo(procgame.game.Mode):
     def sw_coin_active(self, sw):
         if self.game.start.status == True:
             if self.game.all_advantages.status == True:
-                self.game.sound.stop('add')
-                self.game.sound.play('add')
-                self.game.cu = not self.game.cu
-                self.game.spotting.spin()
-                self.game.mixer1.spin()
-                self.game.mixer2.spin()
-                self.game.mixer3.spin()
-                self.regular_play()
                 self.game.odds_only.disengage()
                 self.game.features.disengage()
-                self.scan_all()
+                self.regular_play()
             elif self.game.features.status == True:
-                self.game.sound.stop('add')
-                self.game.sound.play('add')
-                self.game.cu = not self.game.cu
-                self.game.spotting.spin()
-                self.game.mixer1.spin()
-                self.game.mixer2.spin()
-                self.game.mixer3.spin()
-                self.regular_play()
                 self.game.odds_only.disengage()
                 self.game.all_advantages.disengage()
-                self.scan_features()
+                self.regular_play()
             elif self.game.odds_only.status == True:
-                self.game.sound.stop('add')
-                self.game.sound.play('add')
-                self.game.cu = not self.game.cu
-                self.game.spotting.spin()
-                self.game.mixer1.spin()
-                self.game.mixer2.spin()
-                self.game.mixer3.spin()
-                self.regular_play()
                 self.game.features.disengage()
                 self.game.all_advantages.disengage()
-                self.scan_odds()
-            elif self.game.special.status == True:
-                self.game.sound.stop('add')
-                self.game.sound.play('add')
-                self.game.cu = not self.game.cu
-                self.game.spotting.spin()
-                self.game.mixer1.spin()
-                self.game.mixer2.spin()
-                self.game.mixer3.spin()
                 self.regular_play()
-                self.scan_special()
+            elif self.game.special.status == True:
                 self.game.features.disengage()
                 self.game.all_advantages.disengage()
                 self.game.odds_only.disengage()
+                self.regular_play()
         else:
-            self.game.sound.stop('add')
-            self.game.sound.play('add')
-            self.game.cu = not self.game.cu
-            begin = self.game.spotting.position
-            self.game.spotting.spin()
-            self.game.mixer1.spin()
-            self.game.mixer2.spin()
-            self.game.mixer3.spin()
-            self.regular_play()
             self.game.all_advantages.engage(self.game)
             self.game.odds_only.disengage()
             self.game.features.disengage()
             self.game.special.disengage()
-            self.scan_all()
+            self.regular_play()
         self.delay(name="display", delay=0.1, handler=graphics.big_wheel.display, param=self)
 
     
 
     def sw_startButton_active(self, sw):
+        self.cancel_delayed(name="both_animation")
+        self.cancel_delayed(name="odds_animation")
+        self.cancel_delayed(name="feature_animation")
+        self.cancel_delayed(name="double_animation")
+        self.cancel_delayed(name="blink")
         self.game.odds_only.disengage()
         self.game.special.disengage()
         self.game.features.disengage()
         self.game.all_advantages.engage(self.game)
+        self.delay(name="display", delay=0.1, handler=graphics.big_wheel.display, param=self)
         if self.game.replays > 0 or self.game.switches.freeplay.is_active():
-            self.game.sound.stop('add')
-            self.game.sound.play('add')
-            self.game.cu = not self.game.cu
-            self.game.spotting.spin()
-            self.game.mixer1.spin()
-            self.game.mixer2.spin()
-            self.game.mixer3.spin()
             self.game.tilt.disengage()
             self.regular_play()
-            self.scan_all()
         self.delay(name="display", delay=0.1, handler=graphics.big_wheel.display, param=self)
 
     def sw_blue_active(self, sw):
@@ -119,35 +79,33 @@ class SinglecardBingo(procgame.game.Mode):
             self.game.special.disengage()
             self.game.all_advantages.disengage()
             self.game.odds_only.engage(self.game)
+            self.delay(name="display", delay=0.1, handler=graphics.big_wheel.display, param=self)
         if self.game.replays > 0 or self.game.switches.freeplay.is_active():
-            self.game.sound.stop('add')
-            self.game.sound.play('add')
-            self.game.odds_only.engage(self.game)
-            self.delay(name="display", delay=0.1, handler=graphics.big_wheel.display, param=self)
-            self.regular_play()
-            self.scan_odds()
-            self.delay(name="display", delay=0.1, handler=graphics.big_wheel.display, param=self)
-        self.delay(name="display", delay=0.1, handler=graphics.big_wheel.display, param=self)
+            if self.game.start.status == False:
+                self.delay(name="startup", delay=0.1, handler=self.sw_startButton_active, param=sw)
+            if self.game.odds_only.status == True:
+                self.delay(name="display", delay=0.1, handler=graphics.big_wheel.display, param=self)
+                self.regular_play()
+                self.delay(name="display", delay=0.1, handler=graphics.big_wheel.display, param=self)
+
 
     def sw_green_active(self, sw):
+        self.cancel_delayed(name="both_animation")
+        self.cancel_delayed(name="odds_animation")
+        self.cancel_delayed(name="feature_animation")
         if self.game.start.status == True:
             self.game.features.engage(self.game)
             self.game.special.disengage()
             self.game.all_advantages.disengage()
             self.game.odds_only.disengage()
-
+            self.delay(name="display", delay=0.1, handler=graphics.big_wheel.display, param=self)
         if self.game.replays > 0 or self.game.switches.freeplay.is_active():
             if self.game.start.status == False:
                 self.delay(name="startup", delay=0.1, handler=self.sw_startButton_active, param=sw)
-            else:
-                self.game.sound.stop('add')
-                self.game.sound.play('add')
-                self.game.features.engage(self.game)
+            if self.game.features.status == True:
                 self.delay(name="display", delay=0.1, handler=graphics.big_wheel.display, param=self)
                 self.regular_play()
-                self.scan_features()
                 self.delay(name="display", delay=0.1, handler=graphics.big_wheel.display, param=self)
-        self.delay(name="display", delay=0.1, handler=graphics.big_wheel.display, param=self)
 
 
     def sw_enter_active(self, sw):
@@ -201,24 +159,100 @@ class SinglecardBingo(procgame.game.Mode):
                 rp = self.game.ring.position + 1
                 if self.game.wheel.position in [1,2]:
                     if rp < 4:
+                        self.game.sound.play('square')
                         self.game.ring.step()
+                        self.cancel_delayed("left_animation")
+                        self.cancel_delayed("right_animation")
+                        self.animate_wheel_right([self.game,30])
                 #B
                 elif self.game.wheel.position in [3,4]:
                     if rp < 8:
+                        self.game.sound.play('square')
                         self.game.ring.step()
+                        self.cancel_delayed("left_animation")
+                        self.cancel_delayed("right_animation")
+                        self.animate_wheel_right([self.game,30])
                 #C
                 elif self.game.wheel.position in [5,6]:
                     if rp < 13:
+                        self.game.sound.play('square')
                         self.game.ring.step()
+                        self.cancel_delayed("left_animation")
+                        self.cancel_delayed("right_animation")
+                        self.animate_wheel_right([self.game,30])
                 #D
                 elif self.game.wheel.position in [7,8]:
                     if rp < 17:
+                        self.game.sound.play('square')
                         self.game.ring.step()
+                        self.cancel_delayed("left_animation")
+                        self.cancel_delayed("right_animation")
+                        self.animate_wheel_right([self.game,30])
                 #E
-                else:
+                elif self.game.wheel.position == 9:
+                    self.game.sound.play('square')
                     self.game.ring.step()
+                    self.cancel_delayed("left_animation")
+                    self.cancel_delayed("right_animation")
+                    self.animate_wheel_right([self.game,30])
                             
             self.delay(name="display", delay=0.1, handler=graphics.big_wheel.display, param=self)
+
+    def sw_right_active_for_400ms(self,sw):
+        if self.game.ball_count.position > 0:
+            max_ball = 0
+            if self.game.selection_feature.position < 5:
+                max_ball = 4
+            elif self.game.selection_feature.position < 9:
+                max_ball = 5
+            else:
+                if self.game.selection_feature.position == 9:
+                    max_ball = 6
+
+            if self.game.ball_count.position < max_ball:
+                #Limit to A
+                rp = self.game.ring.position + 1
+                if self.game.wheel.position in [1,2]:
+                    if rp < 4:
+                        self.game.sound.play('square')
+                        self.game.ring.step()
+                        self.cancel_delayed("left_animation")
+                        self.cancel_delayed("right_animation")
+                        self.animate_wheel_right([self.game,30])
+                #B
+                elif self.game.wheel.position in [3,4]:
+                    if rp < 8:
+                        self.game.sound.play('square')
+                        self.game.ring.step()
+                        self.cancel_delayed("left_animation")
+                        self.cancel_delayed("right_animation")
+                        self.animate_wheel_right([self.game,30])
+                #C
+                elif self.game.wheel.position in [5,6]:
+                    if rp < 13:
+                        self.game.sound.play('square')
+                        self.game.ring.step()
+                        self.cancel_delayed("left_animation")
+                        self.cancel_delayed("right_animation")
+                        self.animate_wheel_right([self.game,30])
+                #D
+                elif self.game.wheel.position in [7,8]:
+                    if rp < 17:
+                        self.game.sound.play('square')
+                        self.game.ring.step()
+                        self.cancel_delayed("left_animation")
+                        self.cancel_delayed("right_animation")
+                        self.animate_wheel_right([self.game,30])
+                #E
+                elif self.game.wheel.position == 9:
+                    self.game.sound.play('square')
+                    self.game.ring.step()
+                    self.cancel_delayed("left_animation")
+                    self.cancel_delayed("right_animation")
+                    self.animate_wheel_right([self.game,30])
+                            
+            self.delay(name="display", delay=0.1, handler=graphics.big_wheel.display, param=self)
+            self.delay(name="right", delay=0.1, handler=self.sw_right_active_for_400ms, param=sw)
 
     def sw_left_active(self, sw):
         if self.game.ball_count.position > 0:
@@ -236,11 +270,50 @@ class SinglecardBingo(procgame.game.Mode):
                 rp = self.game.ring.position - 1
                 if self.game.wheel.position in [1,2,3,4,5,6,7,8]:
                     if rp > -1:
+                        self.game.sound.play('square')
                         self.game.ring.stepdown()
-                else:
+                        self.cancel_delayed("left_animation")
+                        self.cancel_delayed("right_animation")
+                        self.animate_wheel_left([self.game,30])
+                elif self.game.wheel.position == 9:
+                    self.game.sound.play('square')
                     self.game.ring.stepdown()
+                    self.cancel_delayed("left_animation")
+                    self.cancel_delayed("right_animation")
+                    self.animate_wheel_left([self.game,30])
                             
             self.delay(name="display", delay=0.1, handler=graphics.big_wheel.display, param=self)
+
+    def sw_left_active_for_400ms(self,sw):
+        if self.game.ball_count.position > 0:
+            max_ball = 0
+            if self.game.selection_feature.position < 5:
+                max_ball = 4
+            elif self.game.selection_feature.position < 9:
+                max_ball = 5
+            else:
+                if self.game.selection_feature.position == 9:
+                    max_ball = 6
+
+            if self.game.ball_count.position < max_ball:
+                #Limit to A
+                rp = self.game.ring.position - 1
+                if self.game.wheel.position in [1,2,3,4,5,6,7,8]:
+                    if rp > -1:
+                        self.game.sound.play('square')
+                        self.game.ring.stepdown()
+                        self.cancel_delayed("left_animation")
+                        self.cancel_delayed("right_animation")
+                        self.animate_wheel_left([self.game,30])
+                elif self.game.wheel.position == 9:
+                    self.game.sound.play('square')
+                    self.game.ring.stepdown()
+                    self.cancel_delayed("left_animation")
+                    self.cancel_delayed("right_animation")
+                    self.animate_wheel_left([self.game,30])
+                            
+            self.delay(name="display", delay=0.1, handler=graphics.big_wheel.display, param=self)
+            self.delay(name="left", delay=0.1, handler=self.sw_left_active_for_400ms, param=sw)
 
     def check_selection(self):
         if self.game.selection_feature.position == 9:
@@ -262,16 +335,22 @@ class SinglecardBingo(procgame.game.Mode):
 
 
     def regular_play(self, red_letter=0):
-        # Need to add a method to handle double or nothing game.  Treat it like a Red Letter win, as guaranteed odds will appear on the BG.  Otherwise, acts like a regular game, but only 3 balls.
-
         self.cancel_delayed(name="search")
         self.cancel_delayed(name="double_animation")
         self.cancel_delayed(name="feature_animation")
         self.cancel_delayed(name="both_animation")
         self.cancel_delayed(name="odds_animation")
+        self.cancel_delayed(name="special_animation")
         self.cancel_delayed(name="blink")
         self.cancel_delayed(name="blink_double")
         self.cancel_delayed(name="timeout")
+        r = random.randint(1,3)
+        if r == 1:
+            self.game.sound.play('coin1')
+        elif r == 2:
+            self.game.sound.play('coin2')
+        elif r == 3:
+            self.game.sound.play('coin3')
         self.game.search_index.disengage()
         self.game.coils.counter.pulse()
         self.game.sound.play_music('motor', -1)
@@ -279,6 +358,10 @@ class SinglecardBingo(procgame.game.Mode):
         self.game.cu = not self.game.cu
         begin = self.game.spotting.position
         self.game.spotting.spin()
+        self.game.mixer1.spin()
+        self.game.mixer2.spin()
+        self.game.mixer3.spin()
+        self.game.reflex.decrease()
         if self.game.features.status == True:
             self.animate_features_scan([begin,self.game.spotting.movement_amount,1])
         if self.game.all_advantages.status == True:
@@ -288,11 +371,6 @@ class SinglecardBingo(procgame.game.Mode):
         if self.game.special.status == True:    
             self.animate_double_scan([begin,self.game.spotting.movement_amount,1])
 
-        self.game.mixer1.spin()
-        self.game.mixer2.spin()
-        self.game.mixer3.spin()
-        self.game.reflex.decrease()
-
         self.game.returned = False
         if self.game.start.status == True:
             if self.game.selector.position < 1:
@@ -300,6 +378,7 @@ class SinglecardBingo(procgame.game.Mode):
             if self.game.switches.shutter.is_inactive():
                 self.game.coils.shutter.enable()
             self.replay_step_down()
+            graphics.big_wheel.display(self)
             self.check_lifter_status()
         elif red_letter == 1:
             self.holes = []
@@ -350,7 +429,11 @@ class SinglecardBingo(procgame.game.Mode):
 
     def reset_ring(self):
         if self.game.ring.position != 0:
+            self.game.sound.play('square')
             self.game.ring.step()
+            self.cancel_delayed("left_animation")
+            self.cancel_delayed("right_animation")
+            self.animate_wheel_right([self.game,30])
             self.delay(name="ring_step", delay=0.1, handler=self.reset_ring)
             self.delay(name="display", delay=0.1, handler=graphics.big_wheel.display, param=self)
 
@@ -401,10 +484,14 @@ class SinglecardBingo(procgame.game.Mode):
         self.game.ball_count.step()
         if self.game.switches.shutter.is_active():
             self.game.coils.shutter.enable()
+        if self.game.ball_count.position == 4:
+            self.game.sound.play('tilt')
+            self.game.sound.play('tilt')
         if self.game.ball_count.position >= 5:
             self.game.coils.yellowROLamp.disable()
             self.game.coils.redROLamp.disable()
             self.search()
+            self.game.sound.stop('search')
         if self.game.double.status == False and self.game.ball_count.position < 5:
             self.check_lifter_status()
         elif self.game.double.status == True and self.game.ball_count.position < 3:
@@ -528,16 +615,18 @@ class SinglecardBingo(procgame.game.Mode):
     def sw_redstar_active(self, sw):
         if self.game.red_star.status == True:
             if self.game.selection_feature.position < 9:
+                self.game.sound.play('tilt')
                 self.game.selection_feature.step()
-                self.game.coils.yellowROLamp.disable()
+                self.game.coils.redROLamp.disable()
             self.delay(name="display", delay=0.1, handler=graphics.big_wheel.display, param=self)
 
     def sw_yellowstar_active(self, sw):
         if self.game.yellow_star.status == True:
             if self.game.selection_feature.position < 9:
+                self.game.sound.play('tilt')
                 self.game.selection_feature.step()
                 self.game.yellow_star.disengage()
-                self.game.coils.redROLamp.disable()
+                self.game.coils.yellowROLamp.disable()
             self.delay(name="display", delay=0.1, handler=graphics.big_wheel.display, param=self)
 
     def tilt_actions(self):
@@ -574,6 +663,10 @@ class SinglecardBingo(procgame.game.Mode):
         self.game.ball_count.reset()
         self.game.selection_feature.reset()
         self.game.anti_cheat.engage(game)
+        self.game.all_advantages.engage(self.game)
+        self.game.odds_only.disengage()
+        self.game.features.disengage()
+        self.game.special.disengage()
         self.game.tilt.engage(self.game)
         self.game.wheel.reset()
         self.game.sound.stop_music()
@@ -650,18 +743,10 @@ class SinglecardBingo(procgame.game.Mode):
             if self.game.double_colors.position >= 1 and self.game.ball_count.position == 0 and self.game.start.status == True:
                 self.game.special.engage(self.game)
                 if self.game.replays > 0 or self.game.switches.freeplay.is_active():
-                    self.game.sound.stop('add')
-                    self.game.sound.play('add')
-                    self.game.cu = not self.game.cu
-                    self.game.spotting.spin()
-                    self.game.mixer1.spin()
-                    self.game.mixer2.spin()
-                    self.game.mixer3.spin()
-                    self.regular_play()
-                    self.scan_special()
                     self.game.features.disengage()
                     self.game.all_advantages.disengage()
                     self.game.odds_only.disengage()
+                    self.regular_play()
             self.delay(name="display", delay=0.1, handler=graphics.big_wheel.display, param=self)
 
 
@@ -673,10 +758,6 @@ class SinglecardBingo(procgame.game.Mode):
                         if self.game.replay_counter.position == 0:
                             if self.game.winner > 0:
                                 if self.game.double.status == True and self.game.ball_count.position == 3:
-                                    self.game.spotting.spin()
-                                    self.game.mixer1.spin()
-                                    self.game.mixer2.spin()
-                                    self.game.mixer3.spin()
                                     self.game.special.engage(self.game)
                                     self.game.all_advantages.disengage()
                                     self.game.odds_only.disengage()
@@ -684,13 +765,8 @@ class SinglecardBingo(procgame.game.Mode):
                                     self.game.double_double.engage(self.game)
                                     self.regular_play(red_letter=1)
                                     self.game.double_colors.step()
-                                    self.game.reflex.decrease()
                                     self.delay(name="display", delay=0.1, handler=graphics.big_wheel.display, param=self)
                                 elif self.game.double.status == False:
-                                    self.game.spotting.spin()
-                                    self.game.mixer1.spin()
-                                    self.game.mixer2.spin()
-                                    self.game.mixer3.spin()
                                     self.game.special.engage(self.game)
                                     self.game.all_advantages.disengage()
                                     self.game.odds_only.disengage()
@@ -703,18 +779,10 @@ class SinglecardBingo(procgame.game.Mode):
                                 if self.game.double_colors.position >= 1 and self.game.ball_count.position == 0 and self.game.start.status == True:
                                     self.game.special.engage(self.game)
                                     if self.game.replays > 0 or self.game.switches.freeplay.is_active():
-                                        self.game.sound.stop('add')
-                                        self.game.sound.play('add')
-                                        self.game.cu = not self.game.cu
-                                        self.game.spotting.spin()
-                                        self.game.mixer1.spin()
-                                        self.game.mixer2.spin()
-                                        self.game.mixer3.spin()
-                                        self.regular_play()
-                                        self.scan_special()
                                         self.game.features.disengage()
                                         self.game.all_advantages.disengage()
                                         self.game.odds_only.disengage()
+                                        self.regular_play()
                     self.delay(name="display", delay=0.1, handler=graphics.big_wheel.display, param=self)
 
     def search(self, score=0):
@@ -943,13 +1011,14 @@ class SinglecardBingo(procgame.game.Mode):
                                 self.all_replay_step_up(greenfiveodds - self.game.replay_counter.position)
 
     def all_replay_step_up(self, number):
+        self.game.sound.stop('search')
         if number >= 1:
             self.game.replay_counter.step()
             number -= 1
             self.replay_step_up()
             if self.game.replays == 899:
                 number = 0
-            self.delay(name="replay_step_up", delay=0.1, handler=self.all_replay_step_up, param=number)
+            self.delay(name="replay_step_up", delay=0.25, handler=self.all_replay_step_up, param=number)
         else:
             self.game.search_index.disengage()
             self.game.double.disengage()
@@ -1109,22 +1178,32 @@ class SinglecardBingo(procgame.game.Mode):
                 self.scan_odds()
                 if self.game.odds.position > 0:
                     self.scan_features()
+                else:
+                    self.game.odds.step()
         if self.game.reflex.connected_rivet() == 1 and (mix1 in [2,21,17,4,23]):
             self.scan_odds()
             if self.game.odds.position > 0:
                 self.scan_features()
+            else:
+                self.game.odds.step()
         elif self.game.reflex.connected_rivet() == 2 and (mix1 in [2,21,17,4,23,12]):
             self.scan_odds()
             if self.game.odds.position > 0:
                 self.scan_features()
+            else:
+                self.game.odds.step()
         elif self.game.reflex.connected_rivet() == 3 and (mix1 in [2,21,17,4,23,12,1,10,19]):
             self.scan_odds()
             if self.game.odds.position > 0:
                 self.scan_features()
+            else:
+                self.game.odds.step()
         elif self.game.reflex.connected_rivet() == 4 and (mix1 in [2,21,17,4,23,12,1,10,19,18]):
             self.scan_odds()
             if self.game.odds.position > 0:
                 self.scan_features()
+            else:
+                self.game.odds.step()
         else:
             self.game.odds.step()
             self.delay(name="display", delay=0.1, handler=graphics.big_wheel.display, param=self)
@@ -1338,9 +1417,36 @@ class SinglecardBingo(procgame.game.Mode):
             self.cancel_delayed(name="display")
             diff = diff - 1
             args = [start,diff,num]
-            self.delay(name="odds_animation", delay=0.06, handler=self.animate_odds_scan, param=args)
+            self.delay(name="odds_animation", delay=0.08, handler=self.animate_odds_scan, param=args)
         else:
             self.cancel_delayed(name="odds_animation")
+            self.delay(name="display", delay=0.1, handler=graphics.big_wheel.display, param=self)
+            self.scan_odds()
+
+    def animate_wheel_right(self, args):
+        self.game = args[0]
+        num = args[1]
+        if num >= 0:
+            graphics.big_wheel.wheel_animation([self, num, "right"])
+            self.cancel_delayed(name="display")
+            num = num - 1
+            args = [self.game,num,"right"]
+            self.delay(name="right_animation", delay=0.005, handler=self.animate_wheel_right, param=args)
+        else:
+            self.cancel_delayed(name="right_animation")
+            self.delay(name="display", delay=0.1, handler=graphics.big_wheel.display, param=self)
+
+    def animate_wheel_left(self, args):
+        self.game = args[0]
+        num = args[1]
+        if num >= 0:
+            graphics.big_wheel.wheel_animation([self, num, "left"])
+            self.cancel_delayed(name="display")
+            num = num - 1
+            args = [self.game,num,"left"]
+            self.delay(name="left_animation", delay=0.005, handler=self.animate_wheel_left, param=args)
+        else:
+            self.cancel_delayed(name="left_animation")
             self.delay(name="display", delay=0.1, handler=graphics.big_wheel.display, param=self)
 
     def animate_features_scan(self, args):
@@ -1355,10 +1461,11 @@ class SinglecardBingo(procgame.game.Mode):
             self.cancel_delayed(name="display")
             diff = diff - 1
             args = [start,diff,num]
-            self.delay(name="feature_animation", delay=0.06, handler=self.animate_features_scan, param=args)
+            self.delay(name="feature_animation", delay=0.08, handler=self.animate_features_scan, param=args)
         else:
             self.cancel_delayed(name="feature_animation")
             self.delay(name="display", delay=0.1, handler=graphics.big_wheel.display, param=self)
+            self.scan_features()
 
     def animate_double_scan(self, args):
         start = args[0]
@@ -1372,10 +1479,12 @@ class SinglecardBingo(procgame.game.Mode):
             self.cancel_delayed(name="display")
             diff = diff - 1
             args = [start,diff,num]
-            self.delay(name="double_animation", delay=0.06, handler=self.animate_double_scan, param=args)
+            self.delay(name="double_animation", delay=0.08, handler=self.animate_double_scan, param=args)
         else:
             self.cancel_delayed(name="double_animation")
             self.delay(name="display", delay=0.1, handler=graphics.big_wheel.display, param=self)
+            self.scan_special()
+
 
     def animate_both(self, args):
         start = args[0]
@@ -1389,10 +1498,11 @@ class SinglecardBingo(procgame.game.Mode):
             self.cancel_delayed(name="display")
             diff = diff - 1
             args = [start,diff,num]
-            self.delay(name="both_animation", delay=0.06, handler=self.animate_both, param=args)
+            self.delay(name="both_animation", delay=0.08, handler=self.animate_both, param=args)
         else:
             self.cancel_delayed(name="both_animation")
             self.delay(name="display", delay=0.1, handler=graphics.big_wheel.display, param=self)
+            self.scan_all()
 
     # Define reset as the knock-off, anti-cheat relay disabled, and replay reset enabled.  Motors turn while credits are knocked off.
     # When meter reaches zero and the zero limit switch is hit, turn off motor sound and leave backglass gi on, but with tilt displayed.

@@ -238,7 +238,7 @@ def display(s, replays=0, menu=False):
 
 
     if (s.game.eb_play.status == True):
-        extra_ball_position = [306,848]
+        extra_ball_position = [302,845]
         screen.blit(extra_ball, extra_ball_position)
 
     if s.game.extra_ball.position >= 1:
@@ -259,17 +259,37 @@ def display(s, replays=0, menu=False):
 
     pygame.display.update()
 
-def eb_animation(s):
+def eb_animation(args):
     global screen
-    if s == 0:
-        position = [259,882]
-        screen.blit(eb, position)
-        pygame.display.update()
-    if s == 1:
-        position = [336,881]
-        screen.blit(eb, position)
-        pygame.display.update()
-    if s == 2:
-        position = [409,882]
-        screen.blit(eb, position)
-        pygame.display.update()
+
+    dirty_rects = []
+    s = args[0]
+    num = args[1]
+
+    if s.game.extra_ball.position < 1:
+        dirty_rects.append(screen.blit(bg_gi, (259,882), pygame.Rect(259,882,61,65)))
+    if s.game.extra_ball.position < 2:
+        dirty_rects.append(screen.blit(bg_gi, (336,881), pygame.Rect(336,881,61,65)))
+    if s.game.extra_ball.position < 3:
+        dirty_rects.append(screen.blit(bg_gi, (409,882), pygame.Rect(409,882,61,65)))
+    pygame.display.update(dirty_rects)
+
+    if num in [0,1,6,7,12,13,18,19,26,27,32,33,38,39,44,45]:
+        if s.game.extra_ball.position < 1:
+            p = [259,882]
+            dirty_rects.append(screen.blit(eb, p))
+            pygame.display.update(dirty_rects) 
+            return
+    elif num in [2,3,8,9,14,15,20,21,28,29,34,35,40,41,46,47]:
+        if s.game.extra_ball.position < 2:
+            p = [336,881]
+            dirty_rects.append(screen.blit(eb, p))
+            pygame.display.update(dirty_rects) 
+            return
+    elif num in [4,5,10,11,16,17,22,23,24,30,31,36,37,42,43,48,49,50]:
+        if s.game.extra_ball.position < 3:
+            p = [409,882]
+            dirty_rects.append(screen.blit(eb, p))
+            pygame.display.update(dirty_rects)
+            return
+

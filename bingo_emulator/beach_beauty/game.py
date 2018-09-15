@@ -18,9 +18,16 @@ class SinglecardBingo(procgame.game.Mode):
         super(SinglecardBingo, self).__init__(game=game, priority=5)
         self.holes = []
         self.startup()
-        self.game.sound.register_music('motor', "audio/other_motor.wav")
-        self.game.sound.register_music('search', "audio/six_card_search_old.wav")
-        self.game.sound.register_sound('add', "audio/six_card_add_card.wav")
+        self.game.sound.register_music('motor', "audio/woodrail_motor.wav")
+        self.game.sound.register_music('search1', "audio/automatic_search_one_ball.wav")
+        self.game.sound.register_music('search2', "audio/automatic_search_two_ball.wav")
+        self.game.sound.register_music('search3', "audio/automatic_search_three_ball.wav")
+        self.game.sound.register_music('search4', "audio/automatic_search_four_ball.wav")
+        self.game.sound.register_music('search5', "audio/automatic_search_five_ball.wav")
+        self.game.sound.register_music('search6', "audio/automatic_search_six_ball.wav")
+        self.game.sound.register_music('search7', "audio/automatic_search_seven_ball.wav")
+        self.game.sound.register_music('search8', "audio/automatic_search_eight_ball.wav")
+        self.game.sound.register_sound('add', "audio/woodrail_coin.wav")
         self.game.sound.register_sound('tilt', "audio/tilt.wav")
         self.game.sound.register_sound('step', "audio/step.wav")
         self.game.sound.register_sound('eb_search', "audio/EB_Search.wav")
@@ -29,7 +36,6 @@ class SinglecardBingo(procgame.game.Mode):
         if self.game.eb_play.status == False:
             self.game.tilt.disengage()
             self.regular_play()
-            self.scan_all()
         else:
             self.game.sound.stop('add')
             self.game.sound.play('add')
@@ -40,22 +46,23 @@ class SinglecardBingo(procgame.game.Mode):
             self.game.mixer2.spin()
             self.game.mixer3.spin()
             self.game.mixer4.spin()
+            graphics.beach_beauty.display(self)
+            self.game.reflex.decrease()
+            self.game.coils.counter.pulse()
             self.cancel_delayed("eb_animation")
             self.animate_eb_scan([begin,self.game.spotting.movement_amount,self.game.spotting.movement_amount])
-            self.scan_eb()
-            self.replay_step_down()
-            self.game.reflex.decrease()
 
         self.delay(name="display", delay=0.1, handler=graphics.beach_beauty.display, param=self)
 
     def sw_startButton_active(self, sw):
+        self.cancel_delayed(name="both_animation")
+        self.cancel_delayed(name="blink")
         self.game.eb_play.disengage()
         if self.game.replays > 0 or self.game.switches.freeplay.is_active():
             self.game.sound.stop('add')
             self.game.sound.play('add')
             self.game.tilt.disengage()
             self.regular_play()
-            self.scan_all()
             self.delay(name="display", delay=0.1, handler=graphics.beach_beauty.display, param=self)
 
     def sw_enter_active(self, sw):
@@ -376,18 +383,21 @@ class SinglecardBingo(procgame.game.Mode):
         self.cancel_delayed(name="both_animation")
         self.cancel_delayed(name="blink")
         self.cancel_delayed(name="timeout")
+        self.game.sound.play('add')
         self.game.search_index.disengage()
         self.game.coils.counter.pulse()
+        
         self.game.cu = not self.game.cu
         begin = self.game.spotting.position
         self.game.spotting.spin()
-        if self.game.eb_play.status == False:
-            self.animate_both([begin,self.game.spotting.movement_amount,1])
         self.game.mixer1.spin()
         self.game.mixer2.spin()
         self.game.mixer3.spin()
         self.game.mixer4.spin()
         self.game.reflex.decrease()
+        
+        if self.game.eb_play.status == False:
+            self.animate_both([begin,self.game.spotting.movement_amount,1])
         self.game.sound.play_music('motor', -1)
 
         self.game.returned = False
@@ -397,6 +407,7 @@ class SinglecardBingo(procgame.game.Mode):
             if self.game.switches.shutter.is_inactive():
                 self.game.coils.shutter.enable()
             self.replay_step_down()
+            graphics.beach_beauty.display(self)
             self.check_lifter_status()
         else:
             self.holes = []
@@ -482,10 +493,12 @@ class SinglecardBingo(procgame.game.Mode):
         self.game.ball_count.step()
         if self.game.switches.shutter.is_active():
             self.game.coils.shutter.enable()
+        if self.game.ball_count.position == 4:
+            self.game.sound.play('tilt')
+            self.game.sound.play('tilt')
         if self.game.ball_count.position >= 4:
             if self.game.search_index.status == False:
                 self.search()
-
         if self.game.pocket.status == True:
             if self.game.ball_count.position >= 4:
                 self.game.pocket.disengage()
@@ -509,6 +522,7 @@ class SinglecardBingo(procgame.game.Mode):
                     self.game.pocket.engage(self.game)
                     self.game.pocket_won.engage(self.game)
                     self.game.pocket_number = 1
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.beach_beauty.display, param=self)
 
     def sw_hole2_active_for_40ms(self, sw):
@@ -522,6 +536,7 @@ class SinglecardBingo(procgame.game.Mode):
                     self.game.pocket.engage(self.game)
                     self.game.pocket_won.engage(self.game)
                     self.game.pocket_number = 2
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.beach_beauty.display, param=self)
 
     def sw_hole3_active_for_40ms(self, sw):
@@ -535,6 +550,7 @@ class SinglecardBingo(procgame.game.Mode):
                     self.game.pocket.engage(self.game)
                     self.game.pocket_won.engage(self.game)
                     self.game.pocket_number = 3
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.beach_beauty.display, param=self)
 
     def sw_hole4_active_for_40ms(self, sw):
@@ -548,6 +564,7 @@ class SinglecardBingo(procgame.game.Mode):
                     self.game.pocket.engage(self.game)
                     self.game.pocket_won.engage(self.game)
                     self.game.pocket_number = 4
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.beach_beauty.display, param=self)
 
     def sw_hole5_active_for_40ms(self, sw):
@@ -561,6 +578,7 @@ class SinglecardBingo(procgame.game.Mode):
                     self.game.pocket.engage(self.game)
                     self.game.pocket_won.engage(self.game)
                     self.game.pocket_number = 5
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.beach_beauty.display, param=self)
 
     def sw_hole6_active_for_40ms(self, sw):
@@ -574,6 +592,7 @@ class SinglecardBingo(procgame.game.Mode):
                     self.game.pocket.engage(self.game)
                     self.game.pocket_won.engage(self.game)
                     self.game.pocket_number = 6
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.beach_beauty.display, param=self)
 
     def sw_hole7_active_for_40ms(self, sw):
@@ -587,6 +606,7 @@ class SinglecardBingo(procgame.game.Mode):
                     self.game.pocket.engage(self.game)
                     self.game.pocket_won.engage(self.game)
                     self.game.pocket_number = 7
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.beach_beauty.display, param=self)
 
     def sw_hole8_active_for_40ms(self, sw):
@@ -595,6 +615,7 @@ class SinglecardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.beach_beauty.display, param=self)
 
     def sw_hole9_active_for_40ms(self, sw):
@@ -603,6 +624,7 @@ class SinglecardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.beach_beauty.display, param=self)
 
     def sw_hole10_active_for_40ms(self, sw):
@@ -611,6 +633,7 @@ class SinglecardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.beach_beauty.display, param=self)
 
     def sw_hole11_active_for_40ms(self, sw):
@@ -619,6 +642,7 @@ class SinglecardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.beach_beauty.display, param=self)
 
     def sw_hole12_active_for_40ms(self, sw):
@@ -627,6 +651,7 @@ class SinglecardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.beach_beauty.display, param=self)
 
     def sw_hole13_active_for_40ms(self, sw):
@@ -635,6 +660,7 @@ class SinglecardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.beach_beauty.display, param=self)
 
     def sw_hole14_active_for_40ms(self, sw):
@@ -643,6 +669,7 @@ class SinglecardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.beach_beauty.display, param=self)
 
     def sw_hole15_active_for_40ms(self, sw):
@@ -651,6 +678,7 @@ class SinglecardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.beach_beauty.display, param=self)
 
     def sw_hole16_active_for_40ms(self, sw):
@@ -659,6 +687,7 @@ class SinglecardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.beach_beauty.display, param=self)
 
     def sw_hole17_active_for_40ms(self, sw):
@@ -667,6 +696,7 @@ class SinglecardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.beach_beauty.display, param=self)
 
     def sw_hole18_active_for_40ms(self, sw):
@@ -675,6 +705,7 @@ class SinglecardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.beach_beauty.display, param=self)
 
     def sw_hole19_active_for_40ms(self, sw):
@@ -683,6 +714,7 @@ class SinglecardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.beach_beauty.display, param=self)
 
     def sw_hole20_active_for_40ms(self, sw):
@@ -691,6 +723,7 @@ class SinglecardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.beach_beauty.display, param=self)
 
     def sw_hole21_active_for_40ms(self, sw):
@@ -699,6 +732,7 @@ class SinglecardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.beach_beauty.display, param=self)
 
     def sw_hole22_active_for_40ms(self, sw):
@@ -707,6 +741,7 @@ class SinglecardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.beach_beauty.display, param=self)
 
     def sw_hole23_active_for_40ms(self, sw):
@@ -715,6 +750,7 @@ class SinglecardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.beach_beauty.display, param=self)
 
     def sw_hole24_active_for_40ms(self, sw):
@@ -723,6 +759,7 @@ class SinglecardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.beach_beauty.display, param=self)
 
     def sw_hole25_active_for_40ms(self, sw):
@@ -731,6 +768,7 @@ class SinglecardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 if self.game.search_index.status == False:
                     self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.beach_beauty.display, param=self)
 
     def sw_replayReset_active(self, sw):
@@ -750,7 +788,6 @@ class SinglecardBingo(procgame.game.Mode):
         self.game.card1_replay_counter.reset()
         self.game.corners.disengage()
         self.game.corners_replay_counter.reset()
-        self.game.start.engage(self.game)
         self.game.selector.reset()
         self.game.ball_count.reset()
         self.game.extra_ball.reset()
@@ -771,6 +808,25 @@ class SinglecardBingo(procgame.game.Mode):
         self.game.sound.play('tilt')
         # displays "Tilt" on the backglass, you have to recoin.
         self.delay(name="display", delay=0.1, handler=graphics.beach_beauty.display, param=self)
+
+    def search_sounds(self):
+        self.game.sound.stop_music()
+        if self.game.ball_count.position == 1:
+            self.game.sound.play_music('search1', -1)
+        if self.game.ball_count.position == 2:
+            self.game.sound.play_music('search2', -1)
+        if self.game.ball_count.position == 3:
+            self.game.sound.play_music('search3', -1)
+        if self.game.ball_count.position == 4:
+            self.game.sound.play_music('search4', -1)
+        if self.game.ball_count.position == 5:
+            self.game.sound.play_music('search5', -1)
+        if self.game.ball_count.position == 6:
+            self.game.sound.play_music('search6', -1)
+        if self.game.ball_count.position == 7:
+            self.game.sound.play_music('search7', -1)
+        if self.game.ball_count.position == 8:
+            self.game.sound.play_music('search8', -1)
 
     def sw_tilt_active(self, sw):
         if self.game.tilt.status == False:
@@ -808,16 +864,7 @@ class SinglecardBingo(procgame.game.Mode):
         graphics.beach_beauty.display(self)
 
     def sw_yellow_active(self, sw):
-        if self.game.ball_count.position >= 5:
-            if self.game.eb_play.status == False:
-                self.game.spotting.spin()
-                self.game.mixer1.spin()
-                self.game.mixer2.spin()
-                self.game.mixer3.spin()
-                self.game.mixer4.spin()
-                self.game.eb_play.engage(self.game)
-                self.delay(name="display", delay=0.1, handler=graphics.beach_beauty.display, param=self)
-                self.sw_yellow_active(sw)
+        if self.game.ball_count.position >= 4:
             if self.game.eb_play.status == True and (self.game.replays > 0 or self.game.switches.freeplay.is_active()):
                 self.cancel_delayed("eb_animation")
                 self.game.sound.stop('add')
@@ -829,11 +876,19 @@ class SinglecardBingo(procgame.game.Mode):
                 self.game.mixer2.spin()
                 self.game.mixer3.spin()
                 self.game.mixer4.spin()
-                self.animate_eb_scan([begin,self.game.spotting.movement_amount,self.game.spotting.movement_amount])
-                self.scan_eb()
                 self.replay_step_down()
                 self.game.reflex.decrease()
+                self.game.coils.counter.pulse()
+                graphics.beach_beauty.display(self)
+                self.animate_eb_scan([begin,self.game.spotting.movement_amount,self.game.spotting.movement_amount])
+                self.game.eb_play.disengage()
                 self.delay(name="display", delay=0.1, handler=graphics.beach_beauty.display, param=self)
+                return
+            if self.game.eb_play.status == False:
+                self.game.eb_play.engage(self.game)
+                self.delay(name="display", delay=0.1, handler=graphics.beach_beauty.display, param=self)
+                self.delay(name="yellow", delay=0.1, handler=self.sw_yellow_active, param=sw)
+
             
     def search(self):
         # The search workflow/logic will determine if you actually have a winner, but it is a bit tricky.
@@ -846,8 +901,6 @@ class SinglecardBingo(procgame.game.Mode):
         # search activity.  For each revolution of the search disc (which happens about every 5-7 seconds), the
         # game will activate() each search relay for each 'hot' rivet on the search disc.  This can be on a different
         # wiper finger for each set of rivets on the search disc.
-        self.game.sound.stop_music()
-        self.game.sound.play_music('search', -1)
         
         for i in range(0, 50):
             self.r = self.closed_search_relays(self.game.searchdisc.position, self.game.corners.status)
@@ -945,29 +998,33 @@ class SinglecardBingo(procgame.game.Mode):
 
 
     def card1_replay_step_up(self, number):
+        self.game.sound.stop_music()
         if number >= 1:
             self.game.card1_replay_counter.step()
             number -= 1
             self.replay_step_up()
             if self.game.replays == 899:
                 number = 0
-            self.delay(name="card1_replay_step_up", delay=0.1, handler=self.card1_replay_step_up, param=number)
+            self.delay(name="card1_replay_step_up", delay=0.25, handler=self.card1_replay_step_up, param=number)
         else:
             self.game.search_index.disengage()
             self.cancel_delayed(name="card1_replay_step_up")
+            self.search_sounds()
             self.search()
 
     def corners_replay_step_up(self, number):
+        self.game.sound.stop_music()
         if number >= 1:
             self.game.corners_replay_counter.step()
             number -= 1
             self.replay_step_up()
             if self.game.replays == 899:
                 number = 0
-            self.delay(name="corners_replay_step_up", delay=0.1, handler=self.corners_replay_step_up, param=number)
+            self.delay(name="corners_replay_step_up", delay=0.25, handler=self.corners_replay_step_up, param=number)
         else:
             self.game.search_index.disengage()
             self.cancel_delayed(name="corners_replay_step_up")
+            self.search_sounds()
             self.search()
 
     def closed_search_relays(self, rivets, c):
@@ -1050,27 +1107,35 @@ class SinglecardBingo(procgame.game.Mode):
         self.all_probability()
 
     def all_probability(self):
-        if self.game.odds.position < 3:
-            self.game.odds.step()
+        initial = False
+        if self.game.odds.position <= 1:
+            initial = True
+            self.scan_odds()
         mix1 = self.game.mixer1.connected_rivet()
         if self.game.reflex.connected_rivet() == 0 and (mix1 in [1,9,15]):
-            self.scan_odds()
+            if initial != True:
+                self.scan_odds()
             self.scan_features()
         elif self.game.reflex.connected_rivet() == 1 and (mix1 in [2,14,24,1,9,15]):
-            self.scan_odds()
+            if initial != True:
+                self.scan_odds()
             self.scan_features()
         elif self.game.reflex.connected_rivet() == 2 and (mix1 in [6,13,22,2,14,24,1,9,15]):
-            self.scan_odds()
+            if initial != True:
+                self.scan_odds()
             self.scan_features()
         elif self.game.reflex.connected_rivet() == 3:
-            self.scan_odds()
+            if initial != True:
+                self.scan_odds()
             self.scan_features()
         elif self.game.reflex.connected_rivet() == 4:
-            self.scan_odds()
+            if initial != True:
+                self.scan_odds()
             self.scan_features()
 
     def scan_odds(self):
-        if self.game.odds.position < 3:
+        if self.game.odds.position <= 1:
+            self.game.odds.step()
             return
         p = self.odds_probability()
         if p == 1:
@@ -1084,7 +1149,6 @@ class SinglecardBingo(procgame.game.Mode):
     def extra_step(self, number):
         if number > 0:
             self.game.odds.step()
-            self.game.coils.counter.pulse()
             self.delay(name="display", delay=0, handler=graphics.beach_beauty.display, param=self)
             number -= 1
             self.delay(name="extra_step", delay=0.1, handler=self.extra_step, param=number)
@@ -1106,37 +1170,37 @@ class SinglecardBingo(procgame.game.Mode):
         else:
             sd = self.game.spotting.position
             if self.game.odds.position == 2:
-                if sd == 1:
+                if sd in [2,4,9,12,13,14,15,19,21,22,23,29,33,34,36,37,40,41,43,45,48]:
                     return 1
                 else:
                     return 0
             elif self.game.odds.position == 3:
-                if sd == 2:
+                if sd in [0,2,5,7,9,10,13,14,16,17,21,28,31,36,38,46]:
                     return 1
                 else:
                     return 0
             elif self.game.odds.position == 4:
-                if sd == 28:
+                if sd in [0,2,5,13,14,16,17,21,28,31,36,38,46]:
                     return 1
                 else:
                     return 0
             elif self.game.odds.position == 5:
-                if sd == 58:
+                if sd in [0,2,5,13,14,16,17,21,28,31,36,38,46]:
                     return 1
                 else:
                     return 0
             elif self.game.odds.position == 6:
-                if sd == 9:
+                if sd in [0,5,9,13,17,21,28,31,36,38]:
                     return 1
                 else:
                     return 0
             elif self.game.odds.position == 7:
-                if sd == 8:
+                if sd in [41]:
                     return 1
                 else:
                     return 0
             elif self.game.odds.position == 8:
-                if sd == 7:
+                if sd in [7,14,16,35,41,46]:
                     return 1
                 else:
                     return 0
@@ -1154,9 +1218,7 @@ class SinglecardBingo(procgame.game.Mode):
             if m3 == True:
                 m2 = self.check_mixer2()
                 if m2 == True:
-                    m4 = self.check_mixer4()
-                    if m4 == True:
-                        self.features_spotting()
+                    self.features_spotting()
 
     def check_mixer4(self):
         mix4 = self.game.mixer4.position
@@ -1239,7 +1301,9 @@ class SinglecardBingo(procgame.game.Mode):
         if sd == 41:
             if self.game.one_two_three.status == False:
                 if self.game.four_five_six_seven.status == False:
-                    self.game.corners.engage(self.game)
+                    if self.game.corners.status == False:
+                        self.game.corners.engage(self.game)
+                        self.game.sound.play('tilt')
 
     def step_sc(self, number):
         if number >= 1:
@@ -1254,8 +1318,10 @@ class SinglecardBingo(procgame.game.Mode):
             if self.game.wild_pockets.position == 5:
                 if self.game.cu:
                     self.game.one_two_three.engage(self.game)
+                    self.game.sound.play('tilt')
                 else:
                     self.game.four_five_six_seven.engage(self.game)
+                    self.game.sound.play('tilt')
             number -= 1
             self.delay(name="display", delay=0.1, handler=graphics.beach_beauty.display, param=self)
             self.delay(name="step_wild_pockets", delay=0.1, handler=self.step_wild_pockets, param=number)
@@ -1273,6 +1339,7 @@ class SinglecardBingo(procgame.game.Mode):
         # the task at hand.
         # TODO: implement thunk noises into the units.py to automatically play the noises.
         self.game.timer.reset()
+        self.game.eb_play.disengage()
         self.delay(name="display", delay=0.1, handler=graphics.beach_beauty.display, param=self)
 
     def animate_both(self, args):
@@ -1287,10 +1354,11 @@ class SinglecardBingo(procgame.game.Mode):
             self.cancel_delayed(name="display")
             diff = diff - 1
             args = [start,diff,num]
-            self.delay(name="both_animation", delay=0.06, handler=self.animate_both, param=args)
+            self.delay(name="both_animation", delay=0.08, handler=self.animate_both, param=args)
         else:
             self.cancel_delayed(name="both_animation")
             self.delay(name="display", delay=0.1, handler=graphics.beach_beauty.display, param=self)
+            self.scan_all()
 
     def animate_eb_scan(self, args):
         start = args[0]
@@ -1304,10 +1372,11 @@ class SinglecardBingo(procgame.game.Mode):
             self.cancel_delayed(name="display")
             diff = diff - 1
             args = [start,diff,num]
-            self.delay(name="eb_animation", delay=0.06, handler=self.animate_eb_scan, param=args)
+            self.delay(name="eb_animation", delay=0.08, handler=self.animate_eb_scan, param=args)
         else:
             self.cancel_delayed(name="eb_animation")
             self.delay(name="display", delay=0.1, handler=graphics.beach_beauty.display, param=self)
+            self.scan_eb()
 
 
     def check_eb_spotting(self):

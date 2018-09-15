@@ -454,54 +454,147 @@ def display(s, replays=0, menu=False):
 
     pygame.display.update()
 
-def feature_animation(num):
+def clear_mixers(s):
     global screen
-    if num == 12:
-        c1d_position = [24,660]
-        screen.blit(double_triple, c1d_position)
-        pygame.display.update()
-    if num == 11:
-        p = [261,573]
-        screen.blit(double_triple, p)
-        pygame.display.update()
-    if num == 10:
-        p = [492,662]
-        screen.blit(double_triple, p)
-        pygame.display.update()
-    if num == 9:
-        p = [27,918]
-        screen.blit(double_triple, p)
-        pygame.display.update()
-    if num == 8:
-        p = [258,916]
-        screen.blit(double_triple, p)
-        pygame.display.update()
-    if num == 7:
-        p = [490,916]
-        screen.blit(double_triple, p)
-        pygame.display.update()
+    dirty_rects = []
 
-    if num == 6:
-        p = [124,662]
-        screen.blit(double_triple, p)
-        pygame.display.update()
-    if num == 5:
-        p = [363,573]
-        screen.blit(double_triple, p)
-        pygame.display.update()
-    if num == 4:
-        p = [592,664]
-        screen.blit(double_triple, p)
-        pygame.display.update()
-    if num == 3:
-        p = [124,916]
-        screen.blit(double_triple, p)
-        pygame.display.update()
-    if num == 2:
-        p = [360,916]
-        screen.blit(double_triple, p)
-        pygame.display.update()
-    if num == 1:
-        p = [590,918]
-        screen.blit(double_triple, p)
-        pygame.display.update()
+    if s.game.fourteen_eighteen.status == False:
+        dirty_rects.append(screen.blit(bg_gi, (21,965), pygame.Rect(21,965,209,59)))
+    if s.game.fifteen_seventeen.status == False:
+        dirty_rects.append(screen.blit(bg_gi, (487,965), pygame.Rect(487,965,209,59)))
+    pygame.display.update(dirty_rects)
+    return
+
+def animate_mixer1(s):
+    global screen
+    dirty_rects = []
+    if s.game.fourteen_eighteen.status == False:
+        p = [21,965]
+        dirty_rects.append(screen.blit(eb, p))
+        pygame.display.update(dirty_rects)
+        return
+
+def animate_mixer2(s):
+    global screen
+    dirty_rects = []
+    if s.game.fifteen_seventeen.status == False:
+        p = [487,965]
+        dirty_rects.append(screen.blit(eb, p))
+    pygame.display.update(dirty_rects)
+    return
+
+
+def clear_features(s, num):
+    global screen
+    dirty_rects = []
+    if s.game.c1_double.status == False:
+        dirty_rects.append(screen.blit(bg_gi, (24,660), pygame.Rect(24,660,104,43)))
+    if s.game.c2_double.status == False:
+        dirty_rects.append(screen.blit(bg_gi, (261,573), pygame.Rect(261,573,104,43)))
+    if s.game.c3_double.status == False:
+        dirty_rects.append(screen.blit(bg_gi, (492,662), pygame.Rect(492,662,104,43)))
+    if s.game.c4_double.status == False:
+        dirty_rects.append(screen.blit(bg_gi, (27,918), pygame.Rect(27,918,104,43)))
+    if s.game.c5_double.status == False:
+        dirty_rects.append(screen.blit(bg_gi, (258,916), pygame.Rect(258,916,104,43)))
+    if s.game.c6_double.status == False:
+        dirty_rects.append(screen.blit(bg_gi, (490,916), pygame.Rect(490,916,104,43)))
+    if s.game.c1_triple.status == False:
+        dirty_rects.append(screen.blit(bg_gi, (124,662), pygame.Rect(124,662,104,43)))
+    if s.game.c2_triple.status == False:
+        dirty_rects.append(screen.blit(bg_gi, (363,573), pygame.Rect(363,573,104,43)))
+    if s.game.c3_triple.status == False:
+        dirty_rects.append(screen.blit(bg_gi, (592,664), pygame.Rect(592,664,104,43)))
+    if s.game.c4_triple.status == False:
+        dirty_rects.append(screen.blit(bg_gi, (124,916), pygame.Rect(124,916,104,43)))
+    if s.game.c5_triple.status == False:
+        dirty_rects.append(screen.blit(bg_gi, (360,916), pygame.Rect(360,916,104,43)))
+    if s.game.c6_triple.status == False:
+        dirty_rects.append(screen.blit(bg_gi, (590,918), pygame.Rect(590,918,104,43)))
+    if s.game.sixteen.status == False:
+        dirty_rects.append(screen.blit(bg_gi, (256,965), pygame.Rect(256,965,209,59)))
+    pygame.display.update(dirty_rects)
+
+def draw_feature_animation(s, num):
+    global screen
+    dirty_rects = []
+
+    if num in [4,10]:
+        if s.game.c1_double.status == False:
+            p = [24,660]
+            dirty_rects.append(screen.blit(double_triple, p))
+            pygame.display.update(dirty_rects)
+    if num in [0,11,22]:
+        if s.game.c2_double.status == False:
+            p = [261,573]
+            dirty_rects.append(screen.blit(double_triple, p))
+            pygame.display.update(dirty_rects)
+    if num in [9,20,23]:
+        if s.game.c3_double.status == False:
+            p = [492,662]
+            dirty_rects.append(screen.blit(double_triple, p))
+            pygame.display.update(dirty_rects)
+    if num in [1,12,24]:
+        if s.game.c4_double.status == False:
+            p = [27,918]
+            dirty_rects.append(screen.blit(double_triple, p))
+            pygame.display.update(dirty_rects)
+    if num in [2,13]:
+        if s.game.c5_double.status == False:
+            p = [258,916]
+            dirty_rects.append(screen.blit(double_triple, p))
+            pygame.display.update(dirty_rects)
+    if num in [3,14]:
+        if s.game.c6_double.status == False:
+            p = [490,916]
+            dirty_rects.append(screen.blit(double_triple, p))
+            pygame.display.update(dirty_rects)
+    if num in [5,16]:
+        if s.game.c1_triple.status == False:
+            p = [124,662]
+            dirty_rects.append(screen.blit(double_triple, p))
+            pygame.display.update(dirty_rects)
+    if num in [6,17]:
+        if s.game.c2_triple.status == False:
+            p = [363,573]
+            dirty_rects.append(screen.blit(double_triple, p))
+            pygame.display.update(dirty_rects)
+    if num in [7,18]:
+        if s.game.c3_triple.status == False:
+            p = [592,664]
+            dirty_rects.append(screen.blit(double_triple, p))
+            pygame.display.update(dirty_rects)
+    if num in [8,19]:
+        if s.game.c4_triple.status == False:
+            p = [124,916]
+            dirty_rects.append(screen.blit(double_triple, p))
+            pygame.display.update(dirty_rects)
+    if num in [15,21]:
+        if s.game.c5_triple.status == False:
+            p = [360,916]
+            dirty_rects.append(screen.blit(double_triple, p))
+            pygame.display.update(dirty_rects)
+    if num in [4,15]:
+        if s.game.c6_triple.status == False:
+            p = [590,918]
+            dirty_rects.append(screen.blit(double_triple, p))
+            pygame.display.update(dirty_rects)
+    if num in [7,14,21,24]:
+        if s.game.sixteen.status == False:
+            p = [256,965]
+            dirty_rects.append(screen.blit(eb, p))
+            pygame.display.update(dirty_rects)
+
+def both_animation(args):
+    global screen
+
+    dirty_rects = []
+    s = args[0]
+    num = args[1]
+    
+    clear_features(s, num)
+    
+    if num % 2 == 0:
+        clear_mixers(s)
+
+    draw_feature_animation(s, num)

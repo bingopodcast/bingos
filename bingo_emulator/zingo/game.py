@@ -19,8 +19,8 @@ class MulticardBingo(procgame.game.Mode):
         self.holes = []
         self.game.anti_cheat.engage(self.game)
         self.startup()
-        self.game.sound.register_music('motor', "audio/other_motor.wav")
-        self.game.sound.register_music('search', "audio/six_card_search_old.wav")
+        self.game.sound.register_music('motor', "audio/six_card_motor.wav")
+        self.game.sound.register_music('search', "audio/old_search.wav")
         self.game.sound.register_sound('add', "audio/six_card_add_card.wav")
         self.game.sound.register_sound('tilt', "audio/tilt.wav")
         self.game.sound.register_sound('step', "audio/step.wav")
@@ -28,8 +28,6 @@ class MulticardBingo(procgame.game.Mode):
 
     def sw_coin_active(self, sw):
         self.game.tilt.disengage()
-        self.game.sound.stop('add')
-        self.game.sound.play('add')
         self.regular_play()
         self.delay(name="display", delay=0.1, handler=graphics.zingo.display, param=self)
 
@@ -79,6 +77,9 @@ class MulticardBingo(procgame.game.Mode):
         self.cancel_delayed(name="card2_replay_step_up")
         self.cancel_delayed(name="card3_replay_step_up")
         self.cancel_delayed(name="timeout")
+        self.game.sound.stop('add')
+        self.game.sound.play('add')
+        self.game.sound.stop_music()
         self.game.search_index.disengage()
         self.game.coils.counter.pulse()
         self.game.returned = False
@@ -98,8 +99,8 @@ class MulticardBingo(procgame.game.Mode):
             self.game.selector.reset()
             self.game.ball_count.reset()
             self.game.timer.reset()
-            self.game.sound.play_music('motor', -1)
             self.regular_play()
+            self.check_lifter_status()
         self.delay(name="display", delay=0.1, handler=graphics.zingo.display, param=self)
         self.game.tilt.disengage()
 
@@ -145,6 +146,9 @@ class MulticardBingo(procgame.game.Mode):
         self.game.ball_count.step()
         if self.game.switches.shutter.is_active():
             self.game.coils.shutter.enable()
+        if self.game.ball_count.position == 4:
+            self.game.sound.play('tilt')
+            self.game.sound.play('tilt')
         if self.game.ball_count.position >= 4:
             if self.game.search_index.status == False:
                 self.search()
@@ -495,33 +499,36 @@ class MulticardBingo(procgame.game.Mode):
                         self.card3_replay_step_up(100 - self.game.card3_replay_counter.position)
 
     def card1_replay_step_up(self, number):
+        self.game.sound.stop_music()
         if self.game.replays < 400 and number >= 1:
-                self.game.card1_replay_counter.step()
-                number -= 1
-                self.replay_step_up()
-                self.delay(name="card1_replay_step_up", delay=0.1, handler=self.card1_replay_step_up, param=number)
+            self.game.card1_replay_counter.step()
+            number -= 1
+            self.replay_step_up()
+            self.delay(name="card1_replay_step_up", delay=0.1, handler=self.card1_replay_step_up, param=number)
         else:
             self.game.search_index.disengage()
             self.cancel_delayed(name="card1_replay_step_up")
             self.search()
 
     def card2_replay_step_up(self, number):
+        self.game.sound.stop_music()
         if self.game.replays < 400 and number >= 1:
-                self.game.card2_replay_counter.step()
-                number -= 1
-                self.replay_step_up()
-                self.delay(name="card2_replay_step_up", delay=0.1, handler=self.card2_replay_step_up, param=number)
+            self.game.card2_replay_counter.step()
+            number -= 1
+            self.replay_step_up()
+            self.delay(name="card2_replay_step_up", delay=0.1, handler=self.card2_replay_step_up, param=number)
         else:
             self.game.search_index.disengage()
             self.cancel_delayed(name="card2_replay_step_up")
             self.search()
 
     def card3_replay_step_up(self, number):
+        self.game.sound.stop_music()
         if self.game.replays < 400 and number >= 1:
-                self.game.card3_replay_counter.step()
-                number -= 1
-                self.replay_step_up()
-                self.delay(name="card3_replay_step_up", delay=0.1, handler=self.card3_replay_step_up, param=number)
+            self.game.card3_replay_counter.step()
+            number -= 1
+            self.replay_step_up()
+            self.delay(name="card3_replay_step_up", delay=0.1, handler=self.card3_replay_step_up, param=number)
         else:
             self.game.search_index.disengage()
             self.cancel_delayed(name="card3_replay_step_up")

@@ -18,41 +18,49 @@ class SinglecardBingo(procgame.game.Mode):
         super(SinglecardBingo, self).__init__(game=game, priority=5)
         self.holes = []
         self.startup()
-        self.game.sound.register_music('motor', "audio/other_motor.wav")
-        self.game.sound.register_sound('search', "audio/six_card_search_old.wav")
-        self.game.sound.register_sound('add', "audio/six_card_add_card.wav")
+        self.game.sound.register_music('motor', "audio/magic_screen_control_unit.wav")
+        self.game.sound.register_sound('search', "audio/mystic_line_search.wav")
+        self.game.sound.register_sound('coin1', "audio/magic_screen_coin1.wav")
+        self.game.sound.register_sound('coin2', "audio/magic_screen_coin2.wav")
+        self.game.sound.register_sound('coin3', "audio/magic_screen_coin3.wav")
+        self.game.sound.register_sound('square', "audio/magic_square.wav")
         self.game.sound.register_sound('tilt', "audio/tilt.wav")
         self.game.sound.register_sound('step', "audio/step.wav")
         self.game.sound.register_sound('eb_search', "audio/EB_Search.wav")
 
     def sw_coin_active(self, sw):
         if self.game.eb_play.status == False:
+            self.game.sound.play_music('motor', -1)
             self.game.tilt.disengage()
             self.regular_play()
-            self.scan_all()
         else:
-            self.game.sound.stop('add')
-            self.game.sound.play('add')
+            self.cancel_delayed("eb_animation")
+            self.game.sound.play('eb_search')
+            if self.game.timer.position >= 8:
+                self.game.timer.reset()
+                self.game.sound.play_music('motor', -1)
+                self.timeout_actions()
             self.game.cu = not self.game.cu
+            begin = self.game.spotting.position
             self.game.spotting.spin()
             self.game.mixer1.spin()
             self.game.mixer2.spin()
             self.game.mixer3.spin()
             self.game.mixer4.spin()
-            self.scan_eb()
             self.replay_step_down()
             self.game.reflex.decrease()
+            self.game.coils.counter.pulse()
+            graphics.miss_america_75.display(self)
+            self.animate_eb_scan([begin,self.game.spotting.movement_amount,self.game.spotting.movement_amount])
 
         self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
 
     def sw_startButton_active(self, sw):
         self.game.eb_play.disengage()
+        self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
         if self.game.replays > 0 or self.game.switches.freeplay.is_active():
-            self.game.sound.stop('add')
-            self.game.sound.play('add')
             self.game.tilt.disengage()
             self.regular_play()
-            self.scan_all()
             self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
 
     def sw_enter_active(self, sw):
@@ -61,7 +69,10 @@ class SinglecardBingo(procgame.game.Mode):
             os.system("/home/nbaldridge/proc/bingo_emulator/start_game.sh miss_america_75")
         if self.game.switches.drawer.is_inactive():
             if self.game.selection_feature.position >= 7 and (self.game.lockout.status == False):
+                self.game.sound.play('square')
                 self.game.line3.step()
+                self.cancel_delayed("line_animation")
+                self.animate_line([self.game,1,3])
         if self.game.ball_count.position >= 4:
             self.game.sound.stop_music()
             self.game.sound.play_music('motor', -1)
@@ -71,11 +82,35 @@ class SinglecardBingo(procgame.game.Mode):
                 self.timeout_actions()
         self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
 
+    def sw_enter_active_for_500ms(self,sw):
+        if self.game.switches.drawer.is_inactive():
+            if self.game.selection_feature.position >= 7 and (self.game.lockout.status == False):
+                self.game.sound.play('square')
+                self.game.line3.step()
+                self.cancel_delayed("line_animation")
+                self.animate_line([self.game,1,3])
+        self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
+        self.delay(name="enter", delay=0.6, handler=self.sw_enter_active_for_500ms, param=sw)
+
+
     def sw_letterc_active(self, sw):
         if self.game.switches.drawer.is_active():
             if self.game.selection_feature.position >= 7 and (self.game.lockout.status == False):
+                self.game.sound.play('square')
                 self.game.line3.step()
+                self.cancel_delayed("line_animation")
+                self.animate_line([self.game,1,3])
         self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
+
+    def sw_letterc_active_for_500ms(self,sw):
+        if self.game.switches.drawer.is_active():
+            if self.game.selection_feature.position >= 7 and (self.game.lockout.status == False):
+                self.game.sound.play('square')
+                self.game.line3.step()
+                self.cancel_delayed("line_animation")
+                self.animate_line([self.game,1,3])
+        self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
+        self.delay(name="letterc", delay=0.6, handler=self.sw_letterc_active_for_500ms, param=sw)
 
     def sw_trough4_active_for_1s(self, sw):
         if self.game.ball_count.position >= 4:
@@ -101,50 +136,156 @@ class SinglecardBingo(procgame.game.Mode):
     def sw_lettera_active(self, sw):
         if self.game.switches.drawer.is_active():
             if self.game.selection_feature.position >= 5 and (self.game.lockout.status == False):
+                self.game.sound.play('square')
                 self.game.line1.step()
+                self.cancel_delayed("line_animation")
+                self.animate_line([self.game,1,1])
             self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
+
+    def sw_lettera_active_for_500ms(self,sw):
+        if self.game.switches.drawer.is_active():
+            if self.game.selection_feature.position >= 5 and (self.game.lockout.status == False):
+                self.game.sound.play('square')
+                self.game.line1.step()
+                self.cancel_delayed("line_animation")
+                self.animate_line([self.game,1,1])
+            self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
+            self.delay(name="lettera", delay=0.6, handler=self.sw_lettera_active_for_500ms, param=sw)
+
 
     def sw_left_active(self, sw):
         if self.game.switches.drawer.is_inactive():
             if self.game.selection_feature.position >= 5 and (self.game.lockout.status == False):
+                self.game.sound.play('square')
                 self.game.line1.step()
+                self.cancel_delayed("line_animation")
+                self.animate_line([self.game,1,1])
             self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
+
+    def sw_left_active_for_500ms(self,sw):
+        if self.game.switches.drawer.is_inactive():
+            if self.game.selection_feature.position >= 5 and (self.game.lockout.status == False):
+                self.game.sound.play('square')
+                self.game.line1.step()
+                self.cancel_delayed("line_animation")
+                self.animate_line([self.game,1,1])
+            self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
+            self.delay(name="left", delay=0.6, handler=self.sw_left_active_for_500ms, param=sw)
+
 
     def sw_letterb_active(self, sw):
         if self.game.switches.drawer.is_active():
             if self.game.selection_feature.position >= 6 and (self.game.lockout.status == False):
+                self.game.sound.play('square')
                 self.game.line2.step()
+                self.cancel_delayed("line_animation")
+                self.animate_line([self.game,1,2])
             self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
+
+    def sw_letterb_active_for_500ms(self,sw):
+        if self.game.switches.drawer.is_active():
+            if self.game.selection_feature.position >= 6 and (self.game.lockout.status == False):
+                self.game.sound.play('square')
+                self.game.line2.step()
+                self.cancel_delayed("line_animation")
+                self.animate_line([self.game,1,2])
+            self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
+            self.delay(name="letterb", delay=0.6, handler=self.sw_letterb_active_for_500ms, param=sw)
 
     def sw_right_active(self, sw):
         if self.game.switches.drawer.is_inactive():
             if self.game.selection_feature.position >= 6 and (self.game.lockout.status == False):
+                self.game.sound.play('square')
                 self.game.line2.step()
+                self.cancel_delayed("line_animation")
+                self.animate_line([self.game,1,2])
             self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
+
+    def sw_right_active_for_500ms(self,sw):
+        if self.game.switches.drawer.is_inactive():
+            if self.game.selection_feature.position >= 6 and (self.game.lockout.status == False):
+                self.game.sound.play('square')
+                self.game.line2.step()
+                self.cancel_delayed("line_animation")
+                self.animate_line([self.game,1,2])
+            self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
+            self.delay(name="right", delay=0.6, handler=self.sw_right_active_for_500ms, param=sw)
 
     def sw_letterd_active(self, sw):
         if self.game.switches.drawer.is_active():
             if self.game.selection_feature.position >= 8 and (self.game.lockout.status == False):
+                self.game.sound.play('square')
                 self.game.line4.step()
+                self.cancel_delayed("line_animation")
+                self.animate_line([self.game,1,4])
             self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
+
+    def sw_letterd_active_for_500ms(self,sw):
+        if self.game.switches.drawer.is_active():
+            if self.game.selection_feature.position >= 8 and (self.game.lockout.status == False):
+                self.game.sound.play('square')
+                self.game.line4.step()
+                self.cancel_delayed("line_animation")
+                self.animate_line([self.game,1,4])
+            self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
+            self.delay(name="letterd", delay=0.6, handler=self.sw_letterd_active_for_500ms, param=sw)
 
     def sw_blue_active(self, sw):
         if self.game.switches.drawer.is_inactive():
             if self.game.selection_feature.position >= 8 and (self.game.lockout.status == False):
+                self.game.sound.play('square')
                 self.game.line4.step()
+                self.cancel_delayed("line_animation")
+                self.animate_line([self.game,1,4])
             self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
+    
+    def sw_blue_active_for_500ms(self,sw):
+        if self.game.switches.drawer.is_inactive():
+            if self.game.selection_feature.position >= 8 and (self.game.lockout.status == False):
+                self.game.sound.play('square')
+                self.game.line4.step()
+                self.cancel_delayed("line_animation")
+                self.animate_line([self.game,1,4])
+            self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
+            self.delay(name="blue", delay=0.6, handler=self.sw_blue_active_for_500ms, param=sw)
     
     def sw_lettere_active(self, sw):
         if self.game.switches.drawer.is_active():
             if self.game.selection_feature.position >= 9 and (self.game.lockout.status == False):
+                self.game.sound.play('square')
                 self.game.line5.step()
+                self.cancel_delayed("line_animation")
+                self.animate_line([self.game,1,5])
             self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
+
+    def sw_lettere_active_for_500ms(self,sw):
+        if self.game.switches.drawer.is_active():
+            if self.game.selection_feature.position >= 9 and (self.game.lockout.status == False):
+                self.game.sound.play('square')
+                self.game.line5.step()
+                self.cancel_delayed("line_animation")
+                self.animate_line([self.game,1,5])
+            self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
+            self.delay(name="lettere", delay=0.6, handler=self.sw_lettere_active_for_500ms, param=sw)
 
     def sw_green_active(self, sw):
         if self.game.switches.drawer.is_inactive():
             if self.game.selection_feature.position >= 9 and (self.game.lockout.status == False):
+                self.game.sound.play('square')
                 self.game.line5.step()
+                self.cancel_delayed("line_animation")
+                self.animate_line([self.game,1,5])
             self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
+
+    def sw_green_active_for_500ms(self,sw):
+        if self.game.switches.drawer.is_inactive():
+            if self.game.selection_feature.position >= 9 and (self.game.lockout.status == False):
+                self.game.sound.play('square')
+                self.game.line5.step()
+                self.cancel_delayed("line_animation")
+                self.animate_line([self.game,1,5])
+            self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
+            self.delay(name="green", delay=0.6, handler=self.sw_green_active_for_500ms, param=sw)
 
     def check_shutter(self, start=0):
         if start == 1:
@@ -163,33 +304,46 @@ class SinglecardBingo(procgame.game.Mode):
         self.cancel_delayed(name="yellow_replay_step_up")
         self.cancel_delayed(name="green_replay_step_up")
         self.cancel_delayed(name="white_replay_step_up")
+        self.cancel_delayed(name="both_animation")
         self.cancel_delayed(name="blink")
         self.cancel_delayed(name="blink_double")
         self.cancel_delayed(name="timeout")
+        r = random.randint(1,3)
+        if r == 1:
+            self.game.sound.play('coin1')
+        elif r == 2:
+            self.game.sound.play('coin2')
+        elif r == 3:
+            self.game.sound.play('coin3')
         self.game.search_index.disengage()
         self.game.coils.counter.pulse()
+
         self.game.cu = not self.game.cu
+        begin = self.game.spotting.position
         self.game.spotting.spin()
         self.game.mixer1.spin()
         self.game.mixer2.spin()
         self.game.mixer3.spin()
         self.game.mixer4.spin()
         self.game.reflex.decrease()
+        if self.game.eb_play.status == False:
+            self.animate_both([begin,self.game.spotting.movement_amount,1])
 
         self.game.returned = False
         if self.game.start.status == True:
             if self.game.selector.position < 1:
                 self.game.selector.step()
-            if self.game.rollovers.status == True:
+            if self.game.rollovers.status == True and self.game.eb_play.status == False:
                 if self.game.cu:
-                    self.game.coils.yellowROLamp.disable()
-                    self.game.coils.redROLamp.enable()
-                else:
-                    self.game.coils.yellowROLamp.enable()
                     self.game.coils.redROLamp.disable()
+                    self.game.coils.yellowROLamp.enable()
+                else:
+                    self.game.coils.redROLamp.enable()
+                    self.game.coils.yellowROLamp.disable()
             if self.game.switches.shutter.is_inactive():
                 self.game.coils.shutter.enable()
             self.replay_step_down()
+            graphics.miss_america_75.display(self)
             self.check_lifter_status()
         else:
             self.holes = []
@@ -218,11 +372,26 @@ class SinglecardBingo(procgame.game.Mode):
             self.game.before_fifth.disengage()
             self.game.before_fourth.disengage()
             self.game.before_fourth.engage(self.game)
-            self.game.line1.reset()
-            self.game.line2.reset()
-            self.game.line3.reset()
-            self.game.line4.reset()
-            self.game.line5.reset()
+            if self.game.line1.position not in [0,2]:
+                self.game.sound.play('square')
+                self.game.line1.step()
+                self.animate_line([self.game,1,1])
+            if self.game.line2.position not in [0,2]:
+                self.game.sound.play('square')
+                self.game.line2.step()
+                self.animate_line([self.game,1,2])
+            if self.game.line3.position not in [0,2]:
+                self.game.sound.play('square')
+                self.game.line3.step()
+                self.animate_line([self.game,1,3])
+            if self.game.line4.position not in [0,2]:
+                self.game.sound.play('square')
+                self.game.line4.step()
+                self.animate_line([self.game,1,4])
+            if self.game.line5.position not in [0,2]:
+                self.game.sound.play('square')
+                self.game.line5.step()
+                self.animate_line([self.game,1,5])
             self.game.selection_feature.reset()
             self.game.ball_count.reset()
             self.game.extra_ball.reset()
@@ -300,9 +469,16 @@ class SinglecardBingo(procgame.game.Mode):
         if self.game.before_fourth.status == True:
             if self.game.ball_count.position >= 4:
                 self.game.lockout.engage(self.game)
+        if self.game.ball_count.position == 4:
+            self.game.sound.play('tilt')
+            self.game.sound.play('tilt')
+        if self.game.ball_count.position >= 5:
+            self.game.coils.yellowROLamp.disable()
+            self.game.coils.redROLamp.disable()
         elif self.game.before_fifth.status == True:
-            if self.game.ball_count.position >= 5:
+            if self.game.ball_count.position == 5:
                 self.game.lockout.engage(self.game)
+                self.game.sound.play('tilt')
         if self.game.ball_count.position <= 7:
             self.check_lifter_status()
         self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
@@ -310,19 +486,21 @@ class SinglecardBingo(procgame.game.Mode):
     def sw_redstar_active(self, sw):
         if not self.game.cu:
             if self.game.rollovers.status == True:
+                self.game.sound.play('tilt')
                 self.game.before_fifth.engage(self.game)
                 self.game.before_fourth.disengage()
                 self.game.rollovers.disengage()
-                self.game.coils.yellowROLamp.disable()
+                self.game.coils.redROLamp.disable()
         self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
 
     def sw_yellowstar_active(self, sw):
         if self.game.cu:
             if self.game.rollovers.status == True:
+                self.game.sound.play('tilt')
                 self.game.before_fifth.engage(self.game)
                 self.game.before_fourth.disengage()
                 self.game.rollovers.disengage()
-                self.game.coils.redROLamp.disable()
+                self.game.coils.yellowROLamp.disable()
         self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
 
     # This is really nasty, but it is how we render graphics for each individual hole.
@@ -495,11 +673,6 @@ class SinglecardBingo(procgame.game.Mode):
         self.game.lockout.disengage()
         self.game.before_fifth.disengage()
         self.game.before_fourth.disengage()
-        self.game.line1.reset()
-        self.game.line2.reset()
-        self.game.line3.reset()
-        self.game.line4.reset()
-        self.game.line5.reset()
         self.game.selection_feature.reset()
         self.game.selector.reset()
         self.game.ball_count.reset()
@@ -554,29 +727,32 @@ class SinglecardBingo(procgame.game.Mode):
 
     def sw_yellow_active(self, sw):
         if self.game.ball_count.position >= 5:
-            if self.game.eb_play.status == False:
-                self.game.spotting.spin()
-                self.game.mixer1.spin()
-                self.game.mixer2.spin()
-                self.game.mixer3.spin()
-                self.game.mixer4.spin()
-                self.game.eb_play.engage(self.game)
-                self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
-                self.sw_yellow_active(sw)
             if self.game.eb_play.status == True and (self.game.replays > 0 or self.game.switches.freeplay.is_active()):
-                self.game.sound.stop('add')
-                self.game.sound.play('add')
+                self.cancel_delayed("eb_animation")
+                self.game.sound.play('eb_search')
+                if self.game.timer.position >= 8:
+                    self.game.timer.reset()
+                    self.game.sound.play_music('motor', -1)
+                    self.timeout_actions()
                 self.game.cu = not self.game.cu
+                begin = self.game.spotting.position
                 self.game.spotting.spin()
                 self.game.mixer1.spin()
                 self.game.mixer2.spin()
                 self.game.mixer3.spin()
                 self.game.mixer4.spin()
-                self.scan_eb()
                 self.replay_step_down()
                 self.game.reflex.decrease()
+                self.game.coils.counter.pulse()
+                graphics.miss_america_75.display(self)
+                self.animate_eb_scan([begin,self.game.spotting.movement_amount,self.game.spotting.movement_amount])
                 self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
-            
+                return
+            if self.game.eb_play.status == False:
+                self.game.eb_play.engage(self.game)
+                self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
+                self.delay(name="yellow", delay=0.1, handler=self.sw_yellow_active, param=sw)
+           
     def search(self):
         # The search workflow/logic will determine if you actually have a winner, but it is a bit tricky.
         # if the ball is in a particular hole, the search relays need to click and/or clack, and 
@@ -622,6 +798,10 @@ class SinglecardBingo(procgame.game.Mode):
                             if self.color == "green":
                                 g = self.game.green_missed.status
                                 if g == False:
+                                    if self.game.line1.position == 1:
+                                        if self.num == 12:
+                                            if 2 in self.holes:
+                                                s += 1
                                     if s >= 3:
                                         self.find_winner(s, self.card, self.corners, self.color)
                             if self.color == "yellow":
@@ -938,38 +1118,46 @@ class SinglecardBingo(procgame.game.Mode):
                 if dp == True:
                     if i[0] == "red":
                         self.game.red_double.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.red_replay_step_up((i[1] * 2) - self.game.red_replay_counter.position)
                     elif i[0] == "green":
                         self.game.green_double.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.green_replay_step_up((i[1] * 2) - self.game.green_replay_counter.position)
                     elif i[0] == "yellow":
                         self.game.yellow_double.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.yellow_replay_step_up((i[1] * 2) - self.game.yellow_replay_counter.position)
                     elif i[0] == "white":
                         self.game.white_double.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.white_replay_step_up((i[1] * 2) - self.game.white_replay_counter.position)
                     self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
                 else:
                     if i[0] == "red":
                         self.game.red_missed.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.game.search_index.disengage()
                         self.cancel_delayed(name="blink_double")
                         self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
                         self.delay(name="research", delay=1, handler=self.search)
                     elif i[0] == "green":
                         self.game.green_missed.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.game.search_index.disengage()
                         self.cancel_delayed(name="blink_double")
                         self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
                         self.delay(name="research", delay=1, handler=self.search)
                     elif i[0] == "yellow":
                         self.game.yellow_missed.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.game.search_index.disengage()
                         self.cancel_delayed(name="blink_double")
                         self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
                         self.delay(name="research", delay=1, handler=self.search)
                     elif i[0] == "white":
                         self.game.white_missed.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.game.search_index.disengage()
                         self.cancel_delayed(name="blink_double")
                         self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
@@ -1055,38 +1243,46 @@ class SinglecardBingo(procgame.game.Mode):
                 if dp == True:
                     if i[0] == "red":
                         self.game.red_double.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.red_replay_step_up((i[1] * 2) - self.game.red_replay_counter.position)
                     elif i[0] == "green":
                         self.game.green_double.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.green_replay_step_up((i[1] * 2) - self.game.green_replay_counter.position)
                     elif i[0] == "yellow":
                         self.game.yellow_double.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.yellow_replay_step_up((i[1] * 2) - self.game.yellow_replay_counter.position)
                     elif i[0] == "white":
                         self.game.white_double.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.white_replay_step_up((i[1] * 2) - self.game.white_replay_counter.position)
                     self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
                 else:
                     if i[0] == "red":
                         self.game.red_missed.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.game.search_index.disengage()
                         self.cancel_delayed(name="blink_double")
                         self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
                         self.delay(name="research", delay=1, handler=self.search)
                     elif i[0] == "green":
                         self.game.green_missed.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.game.search_index.disengage()
                         self.cancel_delayed(name="blink_double")
                         self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
                         self.delay(name="research", delay=1, handler=self.search)
                     elif i[0] == "yellow":
                         self.game.yellow_missed.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.game.search_index.disengage()
                         self.cancel_delayed(name="blink_double")
                         self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
                         self.delay(name="research", delay=1, handler=self.search)
                     elif i[0] == "white":
                         self.game.white_missed.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.game.search_index.disengage()
                         self.cancel_delayed(name="blink_double")
                         self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
@@ -1104,52 +1300,56 @@ class SinglecardBingo(procgame.game.Mode):
             return 0
 
     def red_replay_step_up(self, number):
+        self.game.sound.stop('search')
         if number >= 1:
             self.game.red_replay_counter.step()
             number -= 1
             self.replay_step_up()
             if self.game.replays == 8999:
                 number = 0
-            self.delay(name="red_replay_step_up", delay=0.1, handler=self.red_replay_step_up, param=number)
+            self.delay(name="red_replay_step_up", delay=0.25, handler=self.red_replay_step_up, param=number)
         else:
             self.game.search_index.disengage()
             self.cancel_delayed(name="red_replay_step_up")
             self.search()
 
     def yellow_replay_step_up(self, number):
+        self.game.sound.stop('search')
         if number >= 1:
             self.game.yellow_replay_counter.step()
             number -= 1
             self.replay_step_up()
             if self.game.replays == 8999:
                 number = 0
-            self.delay(name="yellow_replay_step_up", delay=0.1, handler=self.yellow_replay_step_up, param=number)
+            self.delay(name="yellow_replay_step_up", delay=0.25, handler=self.yellow_replay_step_up, param=number)
         else:
             self.game.search_index.disengage()
             self.cancel_delayed(name="yellow_replay_step_up")
             self.search()
 
     def green_replay_step_up(self, number):
+        self.game.sound.stop('search')
         if number >= 1:
             self.game.green_replay_counter.step()
             number -= 1
             self.replay_step_up()
             if self.game.replays == 8999:
                 number = 0
-            self.delay(name="green_replay_step_up", delay=0.1, handler=self.green_replay_step_up, param=number)
+            self.delay(name="green_replay_step_up", delay=0.25, handler=self.green_replay_step_up, param=number)
         else:
             self.game.search_index.disengage()
             self.cancel_delayed(name="green_replay_step_up")
             self.search()
 
     def white_replay_step_up(self, number):
+        self.game.sound.stop('search')
         if number >= 1:
             self.game.white_replay_counter.step()
             number -= 1
             self.replay_step_up()
             if self.game.replays == 8999:
                 number = 0
-            self.delay(name="white_replay_step_up", delay=0.1, handler=self.white_replay_step_up, param=number)
+            self.delay(name="white_replay_step_up", delay=0.25, handler=self.white_replay_step_up, param=number)
         else:
             self.game.search_index.disengage()
             self.cancel_delayed(name="white_replay_step_up")
@@ -1440,39 +1640,44 @@ class SinglecardBingo(procgame.game.Mode):
         self.all_probability()
 
     def all_probability(self):
+        initial = False
         if self.game.red_odds.position < 3:
             self.game.red_odds.step()
             self.game.coils.sounder.pulse()
+            initial = True
         if self.game.white_odds.position < 3:
             self.game.white_odds.step()
             self.game.coils.sounder.pulse()
+            initial = True
         if self.game.green_odds.position < 3:
             self.game.green_odds.step()
             self.game.coils.sounder.pulse()
+            initial = True
         if self.game.yellow_odds.position < 3:
             self.game.yellow_odds.step()
             self.game.coils.sounder.pulse()
+            initial = True
         mix1 = self.game.mixer1.connected_rivet()
         if self.game.reflex.connected_rivet() == 0 and (mix1 in [1,9,15]):
-            self.scan_odds()
+            if initial != True:
+                self.scan_odds()
             self.scan_features()
         elif self.game.reflex.connected_rivet() == 1 and (mix1 in [2,14,24,1,9,15]):
-            self.scan_odds()
+            if initial != True:
+                self.scan_odds()
             self.scan_features()
         elif self.game.reflex.connected_rivet() == 2 and (mix1 in [6,13,22,2,14,24,1,9,15]):
-            self.scan_odds()
+            if initial != True:
+                self.scan_odds()
             self.scan_features()
         elif self.game.reflex.connected_rivet() == 3:
-            self.scan_odds()
+            if initial != True:
+                self.scan_odds()
             self.scan_features()
         elif self.game.reflex.connected_rivet() == 4:
-            self.scan_odds()
+            if initial != True:
+                self.scan_odds()
             self.scan_features()
-        else:
-            s = random.randint(1,5)
-            self.animate_odds_scan(s)
-            s = random.randint(1,6)
-            self.animate_feature_scan(s)
 
     def scan_odds(self):
         if self.game.red_odds.position < 3:
@@ -1483,49 +1688,51 @@ class SinglecardBingo(procgame.game.Mode):
             return
         if self.game.white_odds.position < 3:
             return
-        s = random.randint(1,5)
-        self.animate_odds_scan(s)
         p = self.odds_probability()
         if "red" in p:
             m = self.check_mixer3("red")
             if m == 1:
                 es = self.check_extra_step()
-                if es == 1:
-                    i = random.randint(1,3)
-                    self.red_extra_step(i)
-                else:
-                    self.game.red_odds.step()
-                    self.game.coils.sounder.pulse()
+                if self.game.red_odds.position < 7:
+                    if es == 1:
+                        i = random.randint(1,3)
+                        self.red_extra_step(i)
+                    else:
+                        self.game.red_odds.step()
+                        self.game.coils.sounder.pulse()
         if "green" in p:
             m = self.check_mixer3("green")
             if m == 1:
                 es = self.check_extra_step()
-                if es == 1:
-                    i = random.randint(1,3)
-                    self.green_extra_step(i)
-                else:
-                    self.game.green_odds.step()
-                    self.game.coils.sounder.pulse()
+                if self.game.green_odds.position < 7:
+                    if es == 1:
+                        i = random.randint(1,3)
+                        self.green_extra_step(i)
+                    else:
+                        self.game.green_odds.step()
+                        self.game.coils.sounder.pulse()
         if "yellow" in p:
             m = self.check_mixer3("yellow")
             if m == 1:
                 es = self.check_extra_step()
-                if es == 1:
-                    i = random.randint(1,3)
-                    self.yellow_extra_step(i)
-                else:
-                    self.game.yellow_odds.step()
-                    self.game.coils.sounder.pulse()
+                if self.game.yellow_odds.position < 7:
+                    if es == 1:
+                        i = random.randint(1,3)
+                        self.yellow_extra_step(i)
+                    else:
+                        self.game.yellow_odds.step()
+                        self.game.coils.sounder.pulse()
         if "white" in p:
             m = self.check_mixer3("white")
             if m == 1:
                 es = self.check_extra_step()
-                if es == 1:
-                    i = random.randint(1,3)
-                    self.white_extra_step(i)
-                else:
-                    self.game.white_odds.step()
-                    self.game.coils.sounder.pulse()
+                if self.game.white_odds.position < 7:
+                    if es == 1:
+                        i = random.randint(1,3)
+                        self.white_extra_step(i)
+                    else:
+                        self.game.white_odds.step()
+                        self.game.coils.sounder.pulse()
 
     def check_mixer3(self, color):
         m3 = self.game.mixer3.position
@@ -1620,8 +1827,6 @@ class SinglecardBingo(procgame.game.Mode):
         p = self.features_probability()
 
     def features_probability(self):
-        s = random.randint(1,6)
-        self.animate_feature_scan(s)
         sd = self.game.spotting.position
 
         if self.game.selection_feature.position == 0:
@@ -1648,18 +1853,24 @@ class SinglecardBingo(procgame.game.Mode):
             if self.game.before_fifth.status == False:
                 if self.game.rollovers.status == False:
                     if self.game.cu:
-                        self.game.coils.redROLamp.enable()
-                    else:
                         self.game.coils.yellowROLamp.enable()
-                self.game.rollovers.engage(self.game)
+                    else:
+                        self.game.coils.redROLamp.enable()
+                if self.game.rollovers.status == False:
+                    self.game.rollovers.engage(self.game)
+                    self.game.sound.play('tilt')
 
         if sd == 12:
             if self.game.selection_feature.position < 9 or self.game.cu:
-                self.game.corners.engage(self.game)
+                if self.game.corners.status == False:
+                    self.game.corners.engage(self.game)
+                    self.game.sound.play('tilt')
         if sd == 8:
             if self.game.rollovers.status == False:
-                self.game.before_fourth.disengage()
-                self.game.before_fifth.engage(self.game)
+                if self.game.before_fifth.status == False:
+                    self.game.before_fourth.disengage()
+                    self.game.before_fifth.engage(self.game)
+                    self.game.sound.play('tilt')
 
     def check_mixer4(self):
         mix4 = self.game.mixer4.position
@@ -1708,8 +1919,6 @@ class SinglecardBingo(procgame.game.Mode):
 
    
     def scan_eb(self):
-        s = random.randint(1,9)
-        self.animate_eb_scan(s)
         if self.game.extra_ball.position == 0:
             self.game.extra_ball.step()
             self.check_lifter_status()
@@ -1723,32 +1932,57 @@ class SinglecardBingo(procgame.game.Mode):
         self.game.timer.reset()
         self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
 
-    def animate_odds_scan(self, s):
-        if s > 1:
-            self.delay(name="odds_animation", delay=0, handler=graphics.miss_america_75.odds_animation, param=s)
-            self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
-            s -= 1
-            #self.delay(name="animate_odds", delay=0.1, handler=self.animate_odds_scan, param=s)
+    def animate_both(self, args):
+        start = args[0]
+        diff = args[1]
+        num = args[2]
+        if start + num >= 50:
+            start = 0
+        if diff >= 0:
+            num = num + 1
+            graphics.miss_america_75.both_animation([self, start + num])
+            self.cancel_delayed(name="display")
+            diff = diff - 1
+            args = [start,diff,num]
+            self.delay(name="both_animation", delay=0.08, handler=self.animate_both, param=args)
         else:
+            self.cancel_delayed(name="both_animation")
+            self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
+            self.scan_all()
+
+    def animate_line(self, args):
+        self.game = args[0]
+        num = args[1]
+        line = args[2]
+        if num < 45:
+            graphics.miss_america_75.line_animation([self, num * -1, line])
+            self.cancel_delayed(name="display")
+            num = num + 1
+            args = [self.game,num,line]
+            self.delay(name="line_animation", delay=0.007, handler=self.animate_line, param=args)
+        else:
+            self.cancel_delayed(name="line_animation")
             self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
 
-    def animate_feature_scan(self, s):
-        if s > 1:
-            self.delay(name="feature_animation", delay=0.1, handler=graphics.miss_america_75.feature_animation, param=s)
-            self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
-            s -= 1
-            #self.delay(name="animate_feature", delay=0.1, handler=self.animate_feature_scan, param=s)
-        else:
-            self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
 
-    def animate_eb_scan(self, s):
-        if s > 1:
-            self.delay(name="eb_animation", delay=0.1, handler=graphics.miss_america_75.eb_animation, param=s)
-            self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
-            s -= 1
-            #self.delay(name="animate_eb", delay=0.1, handler=self.animate_eb_scan, param=s)
+    def animate_eb_scan(self, args):
+        start = args[0]
+        diff = args[1]
+        num = args[2]
+        if start + num >= 50:
+            start = 0
+        if diff >= 0:
+            num = num + 1
+            graphics.miss_america_75.eb_animation([self, start + num])
+            self.cancel_delayed(name="display")
+            diff = diff - 1
+            args = [start,diff,num]
+            self.delay(name="eb_animation", delay=0.08, handler=self.animate_eb_scan, param=args)
         else:
+            self.cancel_delayed(name="eb_animation")
             self.delay(name="display", delay=0.1, handler=graphics.miss_america_75.display, param=self)
+            self.scan_eb()
+
 
     def eb_probability(self):
         mix1 = self.game.mixer1.connected_rivet()

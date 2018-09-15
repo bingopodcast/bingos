@@ -462,38 +462,46 @@ def display(s, replays=0, menu=False):
             screen.blit(number, p)
 
         if s.game.onetwothree.status == True:
-            p = [137,337]
-            screen.blit(all_double, p)
-            p = [379,340]
-            screen.blit(all_double, p)
-            p = [611,343]
-            screen.blit(all_double, p)
             if s.game.dd1.status == True:
                 p = [136,297]
                 screen.blit(all_dd, p)
+            else:
+                p = [137,337]
+                screen.blit(all_double, p)
             if s.game.dd2.status == True:
                 p = [380,299]
                 screen.blit(all_dd, p)
+            else:
+                p = [379,340]
+                screen.blit(all_double, p)
             if s.game.dd3.status == True:
                 p = [612,303]
                 screen.blit(all_dd, p)
-        
+            else:
+                p = [611,343]
+                screen.blit(all_double, p)
+
+
         if s.game.fourfivesix.status == True:
-            p = [149,862]
-            screen.blit(all_double, p)
-            p = [379,862]
-            screen.blit(all_double, p)
-            p = [608,861]
-            screen.blit(all_double, p)
             if s.game.dd4.status == True:
                 p = [148,823]
                 screen.blit(all_dd, p)
+            else:
+                p = [149,862]
+                screen.blit(all_double, p)
+
             if s.game.dd5.status == True:
                 p = [381,823]
                 screen.blit(all_dd, p)
+            else:
+                p = [379,862]
+                screen.blit(all_double, p)
             if s.game.dd6.status == True:
                 p = [609,823]
                 screen.blit(all_dd, p)
+            else:
+                p = [608,861]
+                screen.blit(all_double, p)
 
         if s.game.selector.position >= 11:
             p = [541,573]

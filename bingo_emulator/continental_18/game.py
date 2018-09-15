@@ -18,47 +18,27 @@ class SinglecardBingo(procgame.game.Mode):
         super(SinglecardBingo, self).__init__(game=game, priority=5)
         self.holes = []
         self.startup()
-        self.game.sound.register_music('motor', "audio/other_motor.wav")
-        self.game.sound.register_sound('search', "audio/six_card_search_old.wav")
-        self.game.sound.register_sound('add', "audio/six_card_add_card.wav")
+        self.game.sound.register_music('motor', "audio/magic_screen_control_unit.wav")
+        self.game.sound.register_sound('search', "audio/mystic_line_search.wav")
+        self.game.sound.register_sound('coin1', "audio/magic_screen_coin1.wav")
+        self.game.sound.register_sound('coin2', "audio/magic_screen_coin2.wav")
+        self.game.sound.register_sound('coin3', "audio/magic_screen_coin3.wav")
+        self.game.sound.register_sound('magic_screen', "audio/magic_screen.wav")
         self.game.sound.register_sound('tilt', "audio/tilt.wav")
         self.game.sound.register_sound('step', "audio/step.wav")
         self.game.sound.register_sound('eb_search', "audio/EB_Search.wav")
 
     def sw_coin_active(self, sw):
-        if self.game.start.status == True:
-            self.game.sound.stop('add')
-            self.game.sound.play('add')
-            self.game.cu = not self.game.cu
-            self.game.scramble.spin()
-            self.game.program.spin()
-            self.regular_play()
-            if self.game.coin.position < 40:
-                self.scan_all()
-        else:
-            self.game.sound.stop('add')
-            self.game.sound.play('add')
-            self.game.cu = not self.game.cu
-            self.game.scramble.spin()
-            self.game.program.spin()
-            self.regular_play()
-            if self.game.coin.position < 40:
-                self.scan_all()
+        self.game.tilt.disengage()
+        self.regular_play()
+
         self.delay(name="display", delay=0.1, handler=graphics.continental_18.display, param=self)
 
     def sw_startButton_active(self, sw):
         if self.game.replays > 0 or self.game.switches.freeplay.is_active():
-            self.game.sound.stop('add')
-            self.game.sound.play('add')
-            self.game.cu = not self.game.cu
-            self.game.scramble.spin()
-            self.game.program.spin()
             self.game.tilt.disengage()
             self.regular_play()
-            if self.game.start.status == True and self.game.coin.position < 40:
-                self.scan_all()
-
-        self.delay(name="display", delay=0.1, handler=graphics.continental_18.display, param=self)
+            self.delay(name="display", delay=0.1, handler=graphics.continental_18.display, param=self)
 
     def sw_blue_active(self, sw):
         if self.game.magic_spot.status == True:
@@ -116,13 +96,24 @@ class SinglecardBingo(procgame.game.Mode):
                 if self.game.line_feature.position in [3,4]:
                     if self.game.down.status == False:
                         if self.game.line.position in [0,2]:
-                            self.game.line.position = 3
+                            self.game.line.position == 3
                         else:
-                            self.game.line.position = 0
+                            self.game.line.position == 0
+                        if self.game.line.position < 3:
+                            self.game.sound.play('magic_screen')
+                            self.game.line.step()
+                            self.cancel_delayed("line_animation")
+                            self.animate_line([self.game,1,'up'])
                     else:
                         pass
-                elif self.game.line_feature.position == 5:
-                    self.game.line.step()
+                else:
+                    if self.game.line_feature.position == 5:
+                        if self.game.line.position < 3:
+                            self.game.sound.play('magic_screen')
+                            self.game.line.step()
+                            self.cancel_delayed("line_animation")
+                            self.animate_line([self.game,1,'up'])
+
             self.delay(name="display", delay=0.1, handler=graphics.continental_18.display, param=self)
 
     def sw_right_active(self, sw):
@@ -131,14 +122,20 @@ class SinglecardBingo(procgame.game.Mode):
             if self.game.ball_count.position < max_ball:
                 if self.game.line_feature.position in [3,4]:
                     if self.game.down.status == True:
-                        if self.game.line.position in [0,2]:
-                            self.game.line.position = 1
-                        else:
-                            self.game.line.position = 0
+                        if self.game.line.position != 0:
+                            self.game.sound.play('magic_screen')
+                            self.cancel_delayed("line_animation")
+                            self.animate_line([self.game,1,'down'])
+                            self.game.line.stepdown()
                     else:
                         pass
-                elif self.game.line_feature.position == 5:
-                    self.game.line.stepdown()
+                else:
+                    if self.game.line_feature.position == 5:
+                        if self.game.line.position != 0:
+                            self.game.sound.play('magic_screen')
+                            self.cancel_delayed("line_animation")
+                            self.animate_line([self.game,1,'down'])
+                            self.game.line.stepdown()
             self.delay(name="display", delay=0.1, handler=graphics.continental_18.display, param=self)
 
 
@@ -164,14 +161,24 @@ class SinglecardBingo(procgame.game.Mode):
         self.cancel_delayed(name="corners_replay_step_up")
         self.cancel_delayed(name="blink")
         self.cancel_delayed(name="blink_screen")
+        self.cancel_delayed(name="both_animation")
         self.cancel_delayed(name="timeout")
+        r = random.randint(1,3)
+        if r == 1:
+            self.game.sound.play('coin1')
+        elif r == 2:
+            self.game.sound.play('coin2')
+        elif r == 3:
+            self.game.sound.play('coin3')
         self.game.search_index.disengage()
         self.game.coils.counter.pulse()
 
+        begin = self.game.program.position
         self.game.cu = not self.game.cu
         self.game.program.spin()
         self.game.scramble.spin()
         self.game.reflex.decrease()
+        self.animate_both([begin,self.game.program.movement_amount,1])
 
         self.game.returned = False
         if self.game.start.status == True:
@@ -181,6 +188,7 @@ class SinglecardBingo(procgame.game.Mode):
             if self.game.switches.shutter.is_inactive():
                 self.game.coils.shutter.enable()
             self.replay_step_down()
+            graphics.continental_18.display(self)
             self.check_lifter_status()
         else:
             self.holes = []
@@ -192,10 +200,8 @@ class SinglecardBingo(procgame.game.Mode):
             self.game.magic_spot.disengage()
             self.game.selection_feature.reset()
             self.game.timer.reset()
-            if self.game.line.position != 0:
-                self.game.line.step()
-            if self.game.line.position != 0:
-                self.game.line.step()
+            if self.game.line.position > 0:
+                self.line_reset(self.game.line.position)
             self.game.line_feature.reset()
             self.game.red_replay_counter.reset()
             self.game.corners_replay_counter.reset()
@@ -210,6 +216,17 @@ class SinglecardBingo(procgame.game.Mode):
             self.regular_play()
         self.delay(name="display", delay=0.1, handler=graphics.continental_18.display, param=self)
         self.game.tilt.disengage()
+
+    def line_reset(self, number):
+        if number > 0:
+            self.cancel_delayed("line_animation")
+            self.animate_line([self.game,1,'down'])
+            self.game.sound.play('magic_screen')
+            self.game.line.stepdown()
+            self.delay(name="display", delay=0, handler=graphics.continental_18.display, param=self)
+            number -= 1
+            self.delay(name="line_reset", delay=0.6, handler=self.line_reset, param=number)
+
 
     def check_lifter_status(self):
         if self.game.tilt.status == False:
@@ -253,6 +270,9 @@ class SinglecardBingo(procgame.game.Mode):
     def sw_gate_inactive_for_1ms(self, sw):
         self.game.start.disengage()
         self.game.ball_count.step()
+        if self.game.ball_count.position == 4:
+            self.game.sound.play('tilt')
+            self.game.sound.play('tilt')
         if self.game.switches.shutter.is_active():
             self.game.coils.shutter.enable()
             self.check_spot()
@@ -472,10 +492,6 @@ class SinglecardBingo(procgame.game.Mode):
         self.game.magic_spot.disengage()
         self.game.selection_feature.reset()
         self.game.timer.reset()
-        if self.game.line.position != 0:
-            self.game.line.step()
-            if self.game.line.position != 0:
-                self.game.line.step()
         self.game.line_feature.reset()
         self.game.red_replay_counter.reset()
         self.game.corners_replay_counter.reset()
@@ -795,65 +811,70 @@ class SinglecardBingo(procgame.game.Mode):
 
             
     def corners_replay_step_up(self, number):
+        self.game.sound.stop('search')
         if number >= 1:
             self.game.corners_replay_counter.step()
             number -= 1
             self.replay_step_up()
             if self.game.replays == 8999:
                 number = 0
-            self.delay(name="corners_replay_step_up", delay=0.1, handler=self.corners_replay_step_up, param=number)
+            self.delay(name="corners_replay_step_up", delay=0.25, handler=self.corners_replay_step_up, param=number)
         else:
             self.game.search_index.disengage()
             self.cancel_delayed(name="corners_replay_step_up")
             self.search()
 
     def red_replay_step_up(self, number):
+        self.game.sound.stop('search')
         if number >= 1:
             self.game.red_replay_counter.step()
             number -= 1
             self.replay_step_up()
             if self.game.replays == 8999:
                 number = 0
-            self.delay(name="red_replay_step_up", delay=0.1, handler=self.red_replay_step_up, param=number)
+            self.delay(name="red_replay_step_up", delay=0.25, handler=self.red_replay_step_up, param=number)
         else:
             self.game.search_index.disengage()
             self.cancel_delayed(name="red_replay_step_up")
             self.search()
             
     def yellow_replay_step_up(self, number):
+        self.game.sound.stop('search')
         if number >= 1:
             self.game.yellow_replay_counter.step()
             number -= 1
             self.replay_step_up()
             if self.game.replays == 8999:
                 number = 0
-            self.delay(name="yellow_replay_step_up", delay=0.1, handler=self.yellow_replay_step_up, param=number)
+            self.delay(name="yellow_replay_step_up", delay=0.25, handler=self.yellow_replay_step_up, param=number)
         else:
             self.game.search_index.disengage()
             self.cancel_delayed(name="yellow_replay_step_up")
             self.search()
 
     def green_replay_step_up(self, number):
+        self.game.sound.stop('search')
         if number >= 1:
             self.game.green_replay_counter.step()
             number -= 1
             self.replay_step_up()
             if self.game.replays == 8999:
                 number = 0
-            self.delay(name="green_replay_step_up", delay=0.1, handler=self.green_replay_step_up, param=number)
+            self.delay(name="green_replay_step_up", delay=0.25, handler=self.green_replay_step_up, param=number)
         else:
             self.game.search_index.disengage()
             self.cancel_delayed(name="green_replay_step_up")
             self.search()
 
     def stars_replay_step_up(self, number):
+        self.game.sound.stop('search')
         if number >= 1:
             self.game.stars_replay_counter.step()
             number -= 1
             self.replay_step_up()
             if self.game.replays == 8999:
                 number = 0
-            self.delay(name="stars_replay_step_up", delay=0.1, handler=self.stars_replay_step_up, param=number)
+            self.delay(name="stars_replay_step_up", delay=0.25, handler=self.stars_replay_step_up, param=number)
         else:
             self.game.search_index.disengage()
             self.cancel_delayed(name="stars_replay_step_up")
@@ -945,14 +966,6 @@ class SinglecardBingo(procgame.game.Mode):
         elif self.game.reflex.connected_rivet() == 4:
             if self.game.red_odds.position > 0:
                 self.scan_features()
-        else:
-            if self.game.cu:
-                s = random.randint(1,8)
-                self.animate_odds_scan(s)
-                s = random.randint(1,4)
-                self.animate_feature_scan(s)
-                self.animate_odds_scan(s)
-
 
     def green_extra_step(self, number):
         if number > 0:
@@ -986,8 +999,6 @@ class SinglecardBingo(procgame.game.Mode):
         p = self.features_probability()
 
     def features_probability(self):
-        s = random.randint(1,4)
-        self.animate_feature_scan(s)
         self.features_spotting()
 
     def features_spotting(self):
@@ -1017,28 +1028,40 @@ class SinglecardBingo(procgame.game.Mode):
                     self.game.line_feature.step()
         if sd in [0,7,33,24,26,35]:
             if self.game.reflex.connected_rivet() >= 3:
-                self.game.magic_spot.engage(self.game)
+                if self.game.magic_spot.status == False:
+                    self.game.magic_spot.engage(self.game)
+                    self.game.sound.play('tilt')
                 if self.game.selection_feature.position == 0:
                     self.game.selection_feature.step()
             else:
                 self.game.selection_feature.step()
         if sd in [14,20,35,12,21,23]:
             if self.game.reflex.connected_rivet() >= 2:
-                self.game.magic_spot.engage(self.game)
+                if self.game.magic_spot.status == False:
+                    self.game.magic_spot.engage(self.game)
+                    self.game.sound.play('tilt')
                 if self.game.selection_feature.position == 0:
                     self.game.selection_feature.step()
             else:
                 self.game.line_feature.step()
         if sd in [15,34,38]:
             if self.game.reflex.connected_rivet() >= 2:
-                self.game.corners384.engage(self.game)
+                if self.game.corners384.status == False:
+                    self.game.corners384.engage(self.game)
+                    self.game.sound.play('tilt')
             else:
-                self.game.corners192.engage(self.game)
+                if self.game.corners192.status == False:
+                    self.game.corners192.engage(self.game)
+                    self.game.sound.play('tilt')
         if sd == 17:
-            self.game.corners192.engage(self.game)
+            if self.game.corners192.status == False:
+                self.game.corners192.engage(self.game)
+                self.game.sound.play('tilt')
         if self.game.cu:
             if self.game.coin.position == 15:
-                self.game.down.engage(self.game)
+                if self.game.down.status == False:
+                    self.game.down.engage(self.game)
+                    self.game.sound.play('tilt')
         if self.game.coin.position in [0,25]:
             self.game.red_odds.step()
             self.game.green_odds.step()
@@ -1085,24 +1108,38 @@ class SinglecardBingo(procgame.game.Mode):
             self.delay(name="display", delay=0.1, handler=graphics.continental_18.display, param=self)
             self.delay(name="step_sc", delay=0.1, handler=self.step_selection, param=number)
 
-    def animate_odds_scan(self, s):
-        if s > 1:
-            self.delay(name="odds_animation", delay=0.1, handler=graphics.continental_18.odds_animation, param=s)
-            self.delay(name="display", delay=0.1, handler=graphics.continental_18.display, param=self)
-            s -= 1
-            #self.delay(name="animate_odds", delay=0.1, handler=self.animate_odds_scan, param=s)
-        else:
-            self.cancel_delayed(name="odds_animation")
-            self.cancel_delayed(name="display")
+    def animate_line(self, args):
+        self.game = args[0]
+        num = args[1]
+        direction = args[2]
 
-    def animate_feature_scan(self, s):
-        if s > 1:
-            self.delay(name="feature_animation", delay=0.1, handler=graphics.continental_18.feature_animation, param=s)
-            self.delay(name="display", delay=0.1, handler=graphics.continental_18.display, param=self)
-            s -= 1
-            #self.delay(name="animate_feature", delay=0.1, handler=self.animate_feature_scan, param=s)
+        if num < 55:
+            graphics.continental_18.line_animation([self, num * -1,direction])
+            self.cancel_delayed(name="display")
+            num = num + 1
+            args = [self.game,num,direction]
+            self.delay(name="line_animation", delay=0.009, handler=self.animate_line, param=args)
         else:
+            self.cancel_delayed(name="line_animation")
             self.delay(name="display", delay=0.1, handler=graphics.continental_18.display, param=self)
+
+    def animate_both(self, args):
+        start = args[0]
+        diff = args[1]
+        num = args[2]
+        if start + num >= 50:
+            start = 0
+        if diff >= 0:
+            num = num + 1
+            graphics.continental_18.both_animation([self, start + num])
+            self.cancel_delayed(name="display")
+            diff = diff - 1
+            args = [start,diff,num]
+            self.delay(name="both_animation", delay=0.07, handler=self.animate_both, param=args)
+        else:
+            self.cancel_delayed(name="both_animation")
+            self.delay(name="display", delay=0.1, handler=graphics.continental_18.display, param=self)
+            self.scan_all()
 
     # Define reset as the knock-off, anti-cheat relay disabled, and replay reset enabled.  Motors turn while credits are knocked off.
     # When meter reaches zero and the zero limit switch is hit, turn off motor sound and leave backglass gi on, but with tilt displayed.

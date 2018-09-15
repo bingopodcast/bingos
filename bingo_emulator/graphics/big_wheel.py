@@ -328,7 +328,7 @@ def display(s, replays=0, menu=False):
         s.cancel_delayed("blink_double")
 
     if s.game.double_colors.position >= 1:
-        p = [94,754]
+        p = [95,756]
         screen.blit(dn_color, p)
     if s.game.double_colors.position == 2:
         p = [187,767]
@@ -343,7 +343,7 @@ def display(s, replays=0, menu=False):
         p = [332,767]
         screen.blit(dn_arrow, p)
     if s.game.double_colors.position == 6:
-        p = [360,764]
+        p = [362,760]
         screen.blit(dn_arrow, p)
     if s.game.double_colors.position >= 7:
         p = [384,752]
@@ -473,6 +473,79 @@ def blink(args):
     args = [s,b,sn]
 
     s.delay(name="blink", delay=0.1, handler=blink, param=args)
+
+def wheel_animation(args):
+    dirty_rects = []
+    s = args[0]
+    num = args[1]
+    direction = args[2]
+    
+    p = [261,418]
+    if s.game.ring.position == 0:
+        w = wheel
+    elif s.game.ring.position == 1:
+        w = wheel1
+    elif s.game.ring.position == 2:
+        w = wheel2
+    elif s.game.ring.position == 3:
+        w = wheel3
+    elif s.game.ring.position == 4:
+        w = wheel4
+    elif s.game.ring.position == 5:
+        w = wheel5
+    elif s.game.ring.position == 6:
+        w = wheel6
+    elif s.game.ring.position == 7:
+        w = wheel7
+    elif s.game.ring.position == 8:
+        w = wheel8
+    elif s.game.ring.position == 9:
+        w = wheel9
+    elif s.game.ring.position == 10:
+        w = wheel10
+    elif s.game.ring.position == 11:
+        w = wheel11
+    elif s.game.ring.position == 12:
+        w = wheel12
+    elif s.game.ring.position == 13:
+        w = wheel13
+    elif s.game.ring.position == 14:
+        w = wheel14
+    elif s.game.ring.position == 15:
+        w = wheel15
+    elif s.game.ring.position == 16:
+        w = wheel16
+    elif s.game.ring.position == 17:
+        w = wheel17
+    elif s.game.ring.position == 18:
+        w = wheel18
+    elif s.game.ring.position == 19:
+        w = wheel19
+
+    if direction == "left":
+        num = num * -1 + 4
+    else:
+        num = num - 2
+
+    old_rect = pygame.Rect(p[0],p[1],180,178)
+    old_center = old_rect.center
+    img_rotated = pygame.transform.rotate(w,num)
+    rect = img_rotated.get_rect()
+    rect.center = old_center
+
+    dirty_rects.append(screen.blit(img_rotated, rect))
+
+    if (s.game.anti_cheat.status == True):
+        dirty_rects.append(screen.blit(bg_gi, p, pygame.Rect(p[0],p[1],180,178)))
+    else:
+        dirty_rects.append(screen.blit(bg_off, p, pygame.Rect(p[0],p[1],180,178)))
+    
+    wheel_letter_pos = [297,450]
+    dirty_rects.append(screen.blit(wheel_letters, wheel_letter_pos))
+    
+    pygame.display.update(dirty_rects)
+
+
 
 def clear_odds(s, num):
     global screen

@@ -18,30 +18,43 @@ class SinglecardBingo(procgame.game.Mode):
         super(SinglecardBingo, self).__init__(game=game, priority=5)
         self.holes = []
         self.startup()
-        self.game.sound.register_music('motor', "audio/other_motor.wav")
-        self.game.sound.register_music('search', "audio/six_card_search_old.wav")
-        self.game.sound.register_sound('add', "audio/six_card_add_card.wav")
+        self.game.sound.register_music('motor', "audio/woodrail_motor.wav")
+        self.game.sound.register_music('search1', "audio/automatic_search_one_ball.wav")
+        self.game.sound.register_music('search2', "audio/automatic_search_two_ball.wav")
+        self.game.sound.register_music('search3', "audio/automatic_search_three_ball.wav")
+        self.game.sound.register_music('search4', "audio/automatic_search_four_ball.wav")
+        self.game.sound.register_music('search5', "audio/automatic_search_five_ball.wav")
+        self.game.sound.register_music('search6', "audio/automatic_search_six_ball.wav")
+        self.game.sound.register_music('search7', "audio/automatic_search_seven_ball.wav")
+        self.game.sound.register_music('search8', "audio/automatic_search_eight_ball.wav")
+        self.game.sound.register_sound('add', "audio/woodrail_coin.wav")
         self.game.sound.register_sound('tilt', "audio/tilt.wav")
         self.game.sound.register_sound('step', "audio/step.wav")
         self.game.sound.register_sound('eb_search', "audio/EB_Search.wav")
 
     def sw_coin_active(self, sw):
         if self.game.eb_play.status == False:
+            self.game.sound.play_music('motor', -1)
+            self.game.sound.stop('add')
+            self.game.sound.play('add')
             self.game.tilt.disengage()
             self.regular_play()
-            self.scan_all()
         else:
+            self.cancel_delayed("eb_animation")
             self.game.sound.stop('add')
             self.game.sound.play('add')
             self.game.cu = not self.game.cu
+            begin = self.game.spotting.position
             self.game.spotting.spin()
             self.game.mixer1.spin()
             self.game.mixer2.spin()
             self.game.mixer3.spin()
             self.game.mixer4.spin()
-            self.scan_eb()
             self.replay_step_down()
             self.game.reflex.decrease()
+            self.game.coils.counter.pulse()
+            graphics.ice_frolics.display(self)
+            self.animate_eb_scan([begin,self.game.spotting.movement_amount,self.game.spotting.movement_amount])
 
         self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
 
@@ -52,7 +65,6 @@ class SinglecardBingo(procgame.game.Mode):
             self.game.sound.play('add')
             self.game.tilt.disengage()
             self.regular_play()
-            self.scan_all()
             self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
 
     def sw_enter_active(self, sw):
@@ -140,28 +152,36 @@ class SinglecardBingo(procgame.game.Mode):
         self.cancel_delayed(name="card2_replay_step_up")
         self.cancel_delayed(name="card3_replay_step_up")
         self.cancel_delayed(name="corners_replay_step_up")
+        self.cancel_delayed(name="both_animation")
         self.cancel_delayed(name="blink")
         self.cancel_delayed(name="timeout")
+        self.game.sound.play('add')
         self.game.search_index.disengage()
         self.game.coils.counter.pulse()
+
         self.game.cu = not self.game.cu
+        begin = self.game.spotting.position
         self.game.spotting.spin()
         self.game.mixer1.spin()
         self.game.mixer2.spin()
         self.game.mixer3.spin()
         self.game.mixer4.spin()
         self.game.reflex.decrease()
-        self.game.sound.play_music('motor', -1)
+        if self.game.eb_play.status == False:
+            self.animate_both([begin,self.game.spotting.movement_amount,1])
 
         self.game.returned = False
         if self.game.start.status == True:
             if self.game.selector.position < 3:
                 self.game.selector.step()
             else:
-                self.game.super_score.engage(self.game)
+                if self.game.super_score.status == False:
+                    self.game.super_score.engage(self.game)
+                    self.game.sound.play('tilt')
             if self.game.switches.shutter.is_inactive():
                 self.game.coils.shutter.enable()
             self.replay_step_down()
+            graphics.ice_frolics.display(self)
             self.check_lifter_status()
         else:
             self.holes = []
@@ -254,12 +274,16 @@ class SinglecardBingo(procgame.game.Mode):
         self.game.ball_count.step()
         if self.game.switches.shutter.is_active():
             self.game.coils.shutter.enable()
+        if self.game.ball_count.position == 5:
+            self.game.sound.play('tilt')
+            self.game.sound.play('tilt')
         if self.game.ball_count.position >= 5:
             if self.game.search_index.status == False:
                 if self.game.hold_feature.position < 8:
                     self.search()
-        if self.game.ball_count.position > 5:
+        if self.game.ball_count.position > 4:
             self.game.coils.yellowROLamp.disable()
+        if self.game.ball_count.position > 5:
             self.game.coils.redROLamp.disable()
         if self.game.ball_count.position <= 7:
             self.check_lifter_status()
@@ -277,6 +301,7 @@ class SinglecardBingo(procgame.game.Mode):
                 if self.game.search_index.status == False:
                     if self.game.hold_feature.position < 8:
                         self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
 
     def sw_hole2_active_for_40ms(self, sw):
@@ -286,6 +311,7 @@ class SinglecardBingo(procgame.game.Mode):
                 if self.game.search_index.status == False:
                     if self.game.hold_feature.position < 8:
                         self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
 
     def sw_hole3_active_for_40ms(self, sw):
@@ -295,6 +321,7 @@ class SinglecardBingo(procgame.game.Mode):
                 if self.game.search_index.status == False:
                     if self.game.hold_feature.position < 8:
                         self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
 
     def sw_hole4_active_for_40ms(self, sw):
@@ -304,6 +331,7 @@ class SinglecardBingo(procgame.game.Mode):
                 if self.game.search_index.status == False:
                     if self.game.hold_feature.position < 8:
                         self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
 
     def sw_hole5_active_for_40ms(self, sw):
@@ -313,6 +341,7 @@ class SinglecardBingo(procgame.game.Mode):
                 if self.game.search_index.status == False:
                     if self.game.hold_feature.position < 8:
                         self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
 
     def sw_hole6_active_for_40ms(self, sw):
@@ -322,6 +351,7 @@ class SinglecardBingo(procgame.game.Mode):
                 if self.game.search_index.status == False:
                     if self.game.hold_feature.position < 8:
                         self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
 
     def sw_hole7_active_for_40ms(self, sw):
@@ -331,6 +361,7 @@ class SinglecardBingo(procgame.game.Mode):
                 if self.game.search_index.status == False:
                     if self.game.hold_feature.position < 8:
                         self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
 
     def sw_hole8_active_for_40ms(self, sw):
@@ -340,6 +371,7 @@ class SinglecardBingo(procgame.game.Mode):
                 if self.game.search_index.status == False:
                     if self.game.hold_feature.position < 8:
                         self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
 
     def sw_hole9_active_for_40ms(self, sw):
@@ -349,6 +381,7 @@ class SinglecardBingo(procgame.game.Mode):
                 if self.game.search_index.status == False:
                     if self.game.hold_feature.position < 8:
                         self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
 
     def sw_hole10_active_for_40ms(self, sw):
@@ -358,6 +391,7 @@ class SinglecardBingo(procgame.game.Mode):
                 if self.game.search_index.status == False:
                     if self.game.hold_feature.position < 8:
                         self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
 
     def sw_hole11_active_for_40ms(self, sw):
@@ -367,6 +401,7 @@ class SinglecardBingo(procgame.game.Mode):
                 if self.game.search_index.status == False:
                     if self.game.hold_feature.position < 8:
                         self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
 
     def sw_hole12_active_for_40ms(self, sw):
@@ -376,6 +411,7 @@ class SinglecardBingo(procgame.game.Mode):
                 if self.game.search_index.status == False:
                     if self.game.hold_feature.position < 8:
                         self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
 
     def sw_hole13_active_for_40ms(self, sw):
@@ -385,6 +421,7 @@ class SinglecardBingo(procgame.game.Mode):
                 if self.game.search_index.status == False:
                     if self.game.hold_feature.position < 8:
                         self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
 
     def sw_hole14_active_for_40ms(self, sw):
@@ -394,6 +431,7 @@ class SinglecardBingo(procgame.game.Mode):
                 if self.game.search_index.status == False:
                     if self.game.hold_feature.position < 8:
                         self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
 
     def sw_hole15_active_for_40ms(self, sw):
@@ -403,6 +441,7 @@ class SinglecardBingo(procgame.game.Mode):
                 if self.game.search_index.status == False:
                     if self.game.hold_feature.position < 8:
                         self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
 
     def sw_hole16_active_for_40ms(self, sw):
@@ -412,6 +451,7 @@ class SinglecardBingo(procgame.game.Mode):
                 if self.game.search_index.status == False:
                     if self.game.hold_feature.position < 8:
                         self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
 
     def sw_hole17_active_for_40ms(self, sw):
@@ -421,6 +461,7 @@ class SinglecardBingo(procgame.game.Mode):
                 if self.game.search_index.status == False:
                     if self.game.hold_feature.position < 8:
                         self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
 
     def sw_hole18_active_for_40ms(self, sw):
@@ -430,6 +471,7 @@ class SinglecardBingo(procgame.game.Mode):
                 if self.game.search_index.status == False:
                     if self.game.hold_feature.position < 8:
                         self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
 
     def sw_hole19_active_for_40ms(self, sw):
@@ -439,6 +481,7 @@ class SinglecardBingo(procgame.game.Mode):
                 if self.game.search_index.status == False:
                     if self.game.hold_feature.position < 8:
                         self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
 
     def sw_hole20_active_for_40ms(self, sw):
@@ -448,6 +491,7 @@ class SinglecardBingo(procgame.game.Mode):
                 if self.game.search_index.status == False:
                     if self.game.hold_feature.position < 8:
                         self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
 
     def sw_hole21_active_for_40ms(self, sw):
@@ -457,6 +501,7 @@ class SinglecardBingo(procgame.game.Mode):
                 if self.game.search_index.status == False:
                     if self.game.hold_feature.position < 8:
                         self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
 
     def sw_hole22_active_for_40ms(self, sw):
@@ -466,6 +511,7 @@ class SinglecardBingo(procgame.game.Mode):
                 if self.game.search_index.status == False:
                     if self.game.hold_feature.position < 8:
                         self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
 
     def sw_hole23_active_for_40ms(self, sw):
@@ -475,6 +521,7 @@ class SinglecardBingo(procgame.game.Mode):
                 if self.game.search_index.status == False:
                     if self.game.hold_feature.position < 8:
                         self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
 
     def sw_hole24_active_for_40ms(self, sw):
@@ -484,6 +531,7 @@ class SinglecardBingo(procgame.game.Mode):
                 if self.game.search_index.status == False:
                     if self.game.hold_feature.position < 8:
                         self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
 
     def sw_hole25_active_for_40ms(self, sw):
@@ -493,6 +541,7 @@ class SinglecardBingo(procgame.game.Mode):
                 if self.game.search_index.status == False:
                     if self.game.hold_feature.position < 8:
                         self.search()
+            self.search_sounds()
             self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
 
     def sw_replayReset_active(self, sw):
@@ -533,7 +582,6 @@ class SinglecardBingo(procgame.game.Mode):
         self.game.corners.disengage()
         self.game.corners_replay_counter.reset()
         self.game.three_as_four.disengage()
-        self.game.start.engage(self.game)
         self.game.selector.reset()
         self.game.ball_count.reset()
         self.game.extra_ball.reset()
@@ -546,6 +594,25 @@ class SinglecardBingo(procgame.game.Mode):
         self.game.sound.play('tilt')
         # displays "Tilt" on the backglass, you have to recoin.
         self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
+
+    def search_sounds(self):
+        self.game.sound.stop_music()
+        if self.game.ball_count.position == 1:
+            self.game.sound.play_music('search1', -1)
+        if self.game.ball_count.position == 2:
+            self.game.sound.play_music('search2', -1)
+        if self.game.ball_count.position == 3:
+            self.game.sound.play_music('search3', -1)
+        if self.game.ball_count.position == 4:
+            self.game.sound.play_music('search4', -1)
+        if self.game.ball_count.position == 5:
+            self.game.sound.play_music('search5', -1)
+        if self.game.ball_count.position == 6:
+            self.game.sound.play_music('search6', -1)
+        if self.game.ball_count.position == 7:
+            self.game.sound.play_music('search7', -1)
+        if self.game.ball_count.position == 8:
+            self.game.sound.play_music('search8', -1)
 
     def sw_tilt_active(self, sw):
         if self.game.tilt.status == False:
@@ -1048,37 +1115,41 @@ class SinglecardBingo(procgame.game.Mode):
 
     def sw_yellow_active(self, sw):
         if self.game.ball_count.position >= 5:
-            if self.game.eb_play.status == False:
-                self.game.spotting.spin()
-                self.game.mixer1.spin()
-                self.game.mixer2.spin()
-                self.game.mixer3.spin()
-                self.game.mixer4.spin()
-                self.game.eb_play.engage(self.game)
-                self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
-                self.sw_yellow_active(sw)
             if self.game.eb_play.status == True and (self.game.replays > 0 or self.game.switches.freeplay.is_active()):
+                self.cancel_delayed("eb_animation")
                 self.game.sound.stop('add')
                 self.game.sound.play('add')
                 self.game.cu = not self.game.cu
+                begin = self.game.spotting.position
                 self.game.spotting.spin()
                 self.game.mixer1.spin()
                 self.game.mixer2.spin()
                 self.game.mixer3.spin()
                 self.game.mixer4.spin()
-                self.scan_eb()
                 self.replay_step_down()
                 self.game.reflex.decrease()
+                self.game.coils.counter.pulse()
+                graphics.ice_frolics.display(self)
+                self.animate_eb_scan([begin,self.game.spotting.movement_amount,self.game.spotting.movement_amount])
                 self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
-            
+                self.game.eb_play.disengage()
+                self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
+                return
+            if self.game.eb_play.status == False:
+                self.game.eb_play.engage(self.game)
+                self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
+                self.delay(name="yellow", delay=0.1, handler=self.sw_yellow_active, param=sw)
+           
     def sw_redstar_active(self, sw):
         if self.game.red_star.status == True:
             self.game.three_as_four.engage(self.game)
+            self.game.sound.play('tilt')
             self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
 
     def sw_yellowstar_active(self, sw):
         if self.game.yellow_star.status == True:
             self.game.three_as_four.engage(self.game)
+            self.game.sound.play('tilt')
             self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
 
     def search(self):
@@ -1092,8 +1163,6 @@ class SinglecardBingo(procgame.game.Mode):
         # search activity.  For each revolution of the search disc (which happens about every 5-7 seconds), the
         # game will activate() each search relay for each 'hot' rivet on the search disc.  This can be on a different
         # wiper finger for each set of rivets on the search disc.
-        self.game.sound.stop_music()
-        self.game.sound.play_music('search', -1)
         
         for i in range(0, 50):
             self.r = self.closed_search_relays(self.game.searchdisc.position, self.game.corners.status)
@@ -1244,55 +1313,63 @@ class SinglecardBingo(procgame.game.Mode):
                         self.card3_replay_step_up(fiveodds - self.game.card3_replay_counter.position)
 
     def card1_replay_step_up(self, number):
+        self.game.sound.stop_music()
         if number >= 1:
             self.game.card1_replay_counter.step()
             number -= 1
             self.replay_step_up()
             if self.game.replays == 899:
                 number = 0
-            self.delay(name="card1_replay_step_up", delay=0.1, handler=self.card1_replay_step_up, param=number)
+            self.delay(name="card1_replay_step_up", delay=0.25, handler=self.card1_replay_step_up, param=number)
         else:
             self.game.search_index.disengage()
             self.cancel_delayed(name="card1_replay_step_up")
+            self.search_sounds()
             self.search()
 
     def card2_replay_step_up(self, number):
+        self.game.sound.stop_music()
         if number >= 1:
             self.game.card2_replay_counter.step()
             number -= 1
             self.replay_step_up()
             if self.game.replays == 899:
                 number = 0
-            self.delay(name="card2_replay_step_up", delay=0.1, handler=self.card2_replay_step_up, param=number)
+            self.delay(name="card2_replay_step_up", delay=0.25, handler=self.card2_replay_step_up, param=number)
         else:
             self.game.search_index.disengage()
             self.cancel_delayed(name="card2_replay_step_up")
+            self.search_sounds()
             self.search()
 
     def card3_replay_step_up(self, number):
+        self.game.sound.stop_music()
         if number >= 1:
             self.game.card3_replay_counter.step()
             number -= 1
             self.replay_step_up()
             if self.game.replays == 899:
                 number = 0
-            self.delay(name="card3_replay_step_up", delay=0.1, handler=self.card3_replay_step_up, param=number)
+            self.delay(name="card3_replay_step_up", delay=0.25, handler=self.card3_replay_step_up, param=number)
         else:
             self.game.search_index.disengage()
             self.cancel_delayed(name="card3_replay_step_up")
+            self.search_sounds()
             self.search()
 
     def corners_replay_step_up(self, number):
+        self.game.sound.stop_music()
         if number >= 1:
             self.game.corners_replay_counter.step()
             number -= 1
             self.replay_step_up()
             if self.game.replays == 899:
                 number = 0
-            self.delay(name="corners_replay_step_up", delay=0.1, handler=self.corners_replay_step_up, param=number)
+            self.delay(name="corners_replay_step_up", delay=0.25, handler=self.corners_replay_step_up, param=number)
         else:
             self.game.search_index.disengage()
             self.cancel_delayed(name="corners_replay_step_up")
+            self.search_sounds()
             self.search()
 
     def closed_search_relays(self, rivets, c):
@@ -1375,31 +1452,36 @@ class SinglecardBingo(procgame.game.Mode):
         self.all_probability()
 
     def all_probability(self):
+        initial = False
+        if self.game.odds.position <= 2:
+            initial = True
+            self.scan_odds()
         mix1 = self.game.mixer1.connected_rivet()
         if self.game.reflex.connected_rivet() == 0 and (mix1 in [1,6,8,11,13,16,18,22,24]):
-            self.scan_odds()
+            if initial != True:
+                self.scan_odds()
             self.scan_features()
         elif self.game.reflex.connected_rivet() == 1 and (mix1 not in [2,5,7,9,12,14,15,19,23]):
-            self.scan_odds()
+            if initial != True:
+                self.scan_odds()
             self.scan_features()
         elif self.game.reflex.connected_rivet() == 2 and (mix1 not in [5,9,12,15,19,23]):
-            self.scan_odds()
+            if initial != True:
+                self.scan_odds()
             self.scan_features()
         elif self.game.reflex.connected_rivet() == 3 and (mix1 not in [5,9,15,23]):
-            self.scan_odds()
+            if initial != True:
+                self.scan_odds()
             self.scan_features()
         elif self.game.reflex.connected_rivet() == 4:
-            self.scan_odds()
+            if initial != True:
+                self.scan_odds()
             self.scan_features()
-        else:
-            #s = random.randint(1,5)
-            #self.animate_odds_scan(s)
-            s = random.randint(1,6)
-            self.animate_feature_scan(s)
 
     def scan_odds(self):
-        #s = random.randint(1,5)
-        #self.animate_odds_scan(s)
+        if self.game.odds.position <= 2:
+            self.game.odds.step()
+            return
         p = self.odds_probability()
         if p == 1:
             es = self.check_extra_step()
@@ -1430,7 +1512,7 @@ class SinglecardBingo(procgame.game.Mode):
         # For first check, guaranteed single stepup.  Probability doesn't 
         # factor, so I will return as part of the initial check above.
         sd = self.game.spotting.position
-        if self.game.odds.position <= 1:
+        if self.game.odds.position <= 2:
             return 1
         else:
             if self.game.odds.position in [2]:
@@ -1470,8 +1552,6 @@ class SinglecardBingo(procgame.game.Mode):
         p = self.features_probability()
 
     def features_probability(self):
-        s = random.randint(1,6)
-        self.animate_feature_scan(s)
         mix2 = self.game.mixer2.connected_rivet()
         mix3 = self.game.mixer3.connected_rivet()
         if self.game.odds.position <= 3:
@@ -1487,24 +1567,36 @@ class SinglecardBingo(procgame.game.Mode):
         sd = self.game.spotting.position
         if sd in [2,3,10,12,13,17,21,28,32,38,39,45,48]:
             self.game.before_first.disengage()
-            self.game.before_fourth.engage(self.game)
+            if self.game.before_fourth.status == False:
+                self.game.before_fourth.engage(self.game)
+                self.game.sound.play('tilt')
         if self.game.hold_feature.position <= 7 or self.game.mixer3.connected_rivet == 10:
             if sd in [9,24,25]:
-                self.game.yellow_star.engage(self.game)
-                self.game.coils.redROLamp.enable()
+                if self.game.yellow_star.status == False:
+                    self.game.yellow_star.engage(self.game)
+                    self.game.coils.yellowROLamp.enable()
+                    self.game.sound.play('tilt')
         if self.game.red_star.status == False:
             if sd in [0,5]:
-                self.game.yellow_star.engage(self.game)
-                self.game.coils.redROLamp.enable()
+                if self.game.yellow_star.status == False:
+                    self.game.yellow_star.engage(self.game)
+                    self.game.coils.yellowROLamp.enable()
+                    self.game.sound.play('tilt')
         if sd in [4,40,41]:
-            self.game.red_star.engage(self.game)
-            self.game.coils.yellowROLamp.enable()
+            if self.game.red_star.status == False:
+                self.game.red_star.engage(self.game)
+                self.game.coils.redROLamp.enable()
+                self.game.sound.play('tilt')
         if self.game.yellow_star.status == False:
             if sd in [7,14]:
-                self.game.red_star.engage(self.game)
-                self.game.coils.yellowROLamp.enable()
+                if self.game.red_star.status == False:
+                    self.game.red_star.engage(self.game)
+                    self.game.coils.redROLamp.enable()
+                    self.game.sound.play('tilt')
         if sd in [1,15]:
-            self.game.corners.engage(self.game)
+            if self.game.corners.status == False:
+                self.game.corners.engage(self.game)
+                self.game.sound.play('tilt')
         if self.game.hold_feature.position < 5:
             if sd in [5,16,19,31,32,40,46,49]:
                 self.step_hold_feature(8)
@@ -1528,8 +1620,6 @@ class SinglecardBingo(procgame.game.Mode):
                 self.delay(name="step_hold_feature", delay=0.1, handler=self.step_hold_feature, param=number)
 
     def scan_eb(self):
-        s = random.randint(1,9)
-        self.animate_eb_scan(s)
         if self.game.extra_ball.position == 0:
             self.game.extra_ball.step()
             self.check_lifter_status()
@@ -1549,34 +1639,45 @@ class SinglecardBingo(procgame.game.Mode):
         # the task at hand.
         # TODO: implement thunk noises into the units.py to automatically play the noises.
         self.game.timer.reset()
+        self.game.eb_play.disengage()
         self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
 
-    def animate_odds_scan(self, s):
-        if s > 1:
-            self.delay(name="odds_animation", delay=0, handler=graphics.ice_frolics.odds_animation, param=s)
-            self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
-            s -= 1
-            self.delay(name="animate_odds", delay=0.1, handler=self.animate_odds_scan, param=s)
+    def animate_both(self, args):
+        start = args[0]
+        diff = args[1]
+        num = args[2]
+        if start + num >= 50:
+            start = 0
+        if diff >= 0:
+            num = num + 1
+            graphics.ice_frolics.both_animation([self, start + num])
+            self.cancel_delayed(name="display")
+            diff = diff - 1
+            args = [start,diff,num]
+            self.delay(name="both_animation", delay=0.08, handler=self.animate_both, param=args)
         else:
+            self.cancel_delayed(name="both_animation")
             self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
+            self.scan_all()
 
-    def animate_feature_scan(self, s):
-        if s > 1:
-            self.delay(name="feature_animation", delay=0.1, handler=graphics.ice_frolics.feature_animation, param=s)
-            self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
-            s -= 1
-            self.delay(name="animate_feature", delay=0.1, handler=self.animate_feature_scan, param=s)
+    def animate_eb_scan(self, args):
+        start = args[0]
+        diff = args[1]
+        num = args[2]
+        if start + num >= 50:
+            start = 0
+        if diff >= 0:
+            num = num + 1
+            graphics.ice_frolics.eb_animation([self, start + num])
+            self.cancel_delayed(name="display")
+            diff = diff - 1
+            args = [start,diff,num]
+            self.delay(name="eb_animation", delay=0.08, handler=self.animate_eb_scan, param=args)
         else:
+            self.cancel_delayed(name="eb_animation")
             self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
+            self.scan_eb()
 
-    def animate_eb_scan(self, s):
-        if s > 1:
-            self.delay(name="eb_animation", delay=0.1, handler=graphics.ice_frolics.eb_animation, param=s)
-            self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
-            s -= 1
-            self.delay(name="animate_eb", delay=0.1, handler=self.animate_eb_scan, param=s)
-        else:
-            self.delay(name="display", delay=0.1, handler=graphics.ice_frolics.display, param=self)
 
     def check_eb_spotting(self):
         sd = self.game.spotting.position

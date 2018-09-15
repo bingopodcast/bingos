@@ -87,26 +87,27 @@ class MulticardBingo(procgame.game.Mode):
         self.cancel_delayed(name="card4_replay_step_up")
         self.cancel_delayed(name="card5_replay_step_up")
         self.cancel_delayed(name="card6_replay_step_up")
+        self.cancel_delayed(name="both_animation")
         self.cancel_delayed(name="timeout")
         self.game.search_index.disengage()
         self.game.coils.counter.pulse()
         self.game.returned = False
         self.game.cu = not self.game.cu
+        begin = self.game.spotting.position
+        self.game.spotting.spin()
+        self.game.mixer1.spin()
+        self.game.mixer2.spin()
         self.game.sound.stop('add')
         self.game.sound.play('add')
-        self.game.mixer1.spin()
-        self.game.spotting.spin()
-        self.game.mixer2.spin()
+        if self.game.eb_play.status == False:
+            self.animate_both([begin,self.game.spotting.movement_amount,1])
         if self.game.start.status == True:
-            s = random.randint(1,2)
-            self.animate_feature_scan(s)
             if self.game.selector.position <= 5:
                 self.game.selector.step()
-            self.check_odds()
-            self.check_super()
             if self.game.switches.shutter.is_inactive():
                 self.game.coils.shutter.enable()
             self.replay_step_down()
+            graphics.frolics.display(self)
             self.check_lifter_status()
         else:
             self.game.start.engage(self.game)
@@ -169,102 +170,189 @@ class MulticardBingo(procgame.game.Mode):
         if i == True:
             if self.game.selector.position < 6:
                 if self.game.spotting.position == 31:
-                    self.game.super1.engage(self.game)
+                    if self.game.super1.status == False:
+                        self.game.super1.engage(self.game)
+                        self.game.sound.play('tilt')
                 if self.game.spotting.position == 13 and self.game.super4.status == False:
-                    self.game.super1.engage(self.game)
+                    if self.game.super1.status == False:
+                        self.game.super1.engage(self.game)
+                        self.game.sound.play('tilt')
                 if self.game.spotting.position == 8:
-                    self.game.super2.engage(self.game)
+                    if self.game.super2.status == False:
+                        self.game.super2.engage(self.game)
+                        self.game.sound.play('tilt')
                 if self.game.spotting.position == 18 and self.game.super5.status == False:
-                    self.game.super2.engage(self.game)
+                    if self.game.super2.status == False:
+                        self.game.super2.engage(self.game)
+                        self.game.sound.play('tilt')
                 if self.game.spotting.position == 48:
-                    self.game.super3.engage(self.game)
+                    if self.game.super3.status == False:
+                        self.game.super3.engage(self.game)
+                        self.game.sound.play('tilt')
                 if self.game.spotting.position == 7 and self.game.super6.status == False:
-                    self.game.super3.engage(self.game)
+                    if self.game.super3.status == False:
+                        self.game.super3.engage(self.game)
+                        self.game.sound.play('tilt')
                 if self.game.spotting.position == 20:
-                    self.game.super4.engage(self.game)
+                    if self.game.super4.status == False:
+                        self.game.super4.engage(self.game)
+                        self.game.sound.play('tilt')
                 if self.game.spotting.position == 23 and self.game.super1.status == False:
-                    self.game.super4.engage(self.game)
+                    if self.game.super4.status == False:
+                        self.game.super4.engage(self.game)
+                        self.game.sound.play('tilt')
                 if self.game.spotting.position == 12:
-                    self.game.super5.engage(self.game)
+                    if self.game.super5.status == False:
+                        self.game.super5.engage(self.game)
+                        self.game.sound.play('tilt')
                 if self.game.spotting.position == 25 and self.game.super2.status == False:
-                    self.game.super5.engage(self.game)
+                    if self.game.super5.status == False:
+                        self.game.super5.engage(self.game)
+                        self.game.sound.play('tilt')
                 if self.game.spotting.position == 35:
-                    self.game.super6.engage(self.game)
+                    if self.game.super6.status == False:
+                        self.game.super6.engage(self.game)
+                        self.game.sound.play('tilt')
                 if self.game.spotting.position == 38 and self.game.super3.status == False:
-                    self.game.super6.engage(self.game)
+                    if self.game.super6.status == False:
+                        self.game.super6.engage(self.game)
+                        self.game.sound.play('tilt')
                 if self.game.spotting.position == 22:
-                    self.game.yellow_star.engage(self.game)
-                    self.game.coils.redROLamp.enable()
+                    if self.game.yellow_star.status == False:
+                        self.game.yellow_star.engage(self.game)
+                        self.game.coils.redROLamp.enable()
+                        self.game.sound.play('tilt')
                 if self.game.spotting.position == 33:
-                    self.game.red_star.engage(self.game)
-                    self.game.coils.yellowROLamp.enable()
+                    if self.game.red_star.status == False:
+                        self.game.red_star.engage(self.game)
+                        self.game.coils.yellowROLamp.enable()
+                        self.game.sound.play('tilt')
             else:
                 #This adds another connection to the spotting disc.  When you have all six
                 #cards awarded, you can earn two advantages at once.
                 if self.game.spotting.position == 31:
-                    self.game.super1.engage(self.game)
-                    self.game.super6.engage(self.game)
-                if self.game.spotting.position == 13 and self.game.super4.status == False:
-                    self.game.super1.engage(self.game)
-                    if self.game.super3.status == False:
+                    if self.game.super1.status == False:
+                        self.game.super1.engage(self.game)
+                        self.game.sound.play('tilt')
+                    if self.game.super6.status == False:
                         self.game.super6.engage(self.game)
+                        self.game.sound.play('tilt')
+                if self.game.spotting.position == 13 and self.game.super4.status == False:
+                    if self.game.super1.status == False:
+                        self.game.super1.engage(self.game)
+                        self.game.sound.play('tilt')
+                    if self.game.super3.status == False:
+                        if self.game.super6.status == False:
+                            self.game.super6.engage(self.game)
+                            self.game.sound.play('tilt')
                 if self.game.spotting.position == 8:
-                    self.game.super2.engage(self.game)
-                    self.game.red_star.engage(self.game)
-                    self.game.coils.yellowROLamp.enable()
+                    if self.game.super2.status == False:
+                        self.game.super2.engage(self.game)
+                        self.game.sound.play('tilt')
+                    if self.game.red_star.status == False:
+                        self.game.red_star.engage(self.game)
+                        self.game.coils.yellowROLamp.enable()
+                        self.game.sound.play('tilt')
                 if self.game.spotting.position == 18:
                     if self.game.super5.status == False:
-                        self.game.super2.engage(self.game)
-                    self.game.yellow_star.engage(self.game)
-                    self.game.coils.redROLamp.enable()
+                        if self.game.super2.status == False:
+                            self.game.super2.engage(self.game)
+                            self.game.sound.play('tilt')
+                    if self.game.yellow_star.status == False:
+                        self.game.yellow_star.engage(self.game)
+                        self.game.coils.redROLamp.enable()
+                        self.game.sound.play('tilt')
                 if self.game.spotting.position == 48:
-                    self.game.super3.engage(self.game)
-                    self.game.super1.engage(self.game)
-                if self.game.spotting.position == 7 and self.game.super6.status == False:
-                    self.game.super3.engage(self.game)
-                    if self.game.super4.status == False:
+                    if self.game.super3.status == False:
+                        self.game.super3.engage(self.game)
+                        self.game.sound.play('tilt')
+                    if self.game.super1.status == False:
                         self.game.super1.engage(self.game)
+                        self.game.sound.play('tilt')
+                if self.game.spotting.position == 7 and self.game.super6.status == False:
+                    if self.game.super3.status == False:
+                        self.game.super3.engage(self.game)
+                        self.game.sound.play('tilt')
+                    if self.game.super4.status == False:
+                        if self.game.super1.status == False:
+                            self.game.super1.engage(self.game)
+                            self.game.sound.play('tilt')
                 if self.game.spotting.position == 20:
-                    self.game.super4.engage(self.game)
-                    self.game.super2.engage(self.game)
+                    if self.game.super4.status == False:
+                        self.game.super4.engage(self.game)
+                        self.game.sound.play('tilt')
+                    if self.game.super2.status == False:
+                        self.game.super2.engage(self.game)
+                        self.game.sound.play('tilt')
                 if self.game.spotting.position == 23:
                     if self.game.super1.status == False:
-                        self.game.super4.engage(self.game)
+                        if self.game.super4.status == False:
+                            self.game.super4.engage(self.game)
+                            self.game.sound.play('tilt')
                     if self.game.super5.status == False:
-                        self.game.super2.engage(self.game)
+                        if self.game.super2.status == False:
+                            self.game.super2.engage(self.game)
+                            self.game.sound.play('tilt')
                 if self.game.spotting.position == 12:
-                    self.game.super5.engage(self.game)
-                    self.game.super3.engage(self.game)
+                    if self.game.super5.status == False:
+                        self.game.super5.engage(self.game)
+                        self.game.sound.play('tilt')
+                    if self.game.super3.status == False:
+                        self.game.super3.engage(self.game)
+                        self.game.sound.play('tilt')
                 if self.game.spotting.position == 25:
                     if self.game.super2.status == False:
-                        self.game.super5.engage(self.game)
+                        if self.game.super5.status == False:
+                            self.game.super5.engage(self.game)
+                            self.game.sound.play('tilt')
                     if self.game.super6.status == False:
-                        self.game.super3.engage(self.game)
+                        if self.game.super3.status == False:
+                            self.game.super3.engage(self.game)
+                            self.game.sound.play('tilt')
                 if self.game.spotting.position == 35:
-                    self.game.super6.engage(self.game)
-                    self.game.super4.engage(self.game)
+                    if self.game.super6.status == False:
+                        self.game.super6.engage(self.game)
+                        self.game.sound.play('tilt')
+                    if self.game.super4.status == False:
+                        self.game.super4.engage(self.game)
+                        self.game.sound.play('tilt')
                 if self.game.spotting.position == 38:
                     if self.game.super3.status == False:
-                        self.game.super6.engage(self.game)
+                        if self.game.super6.status == False:
+                            self.game.super6.engage(self.game)
+                            self.game.sound.play('tilt')
                     if self.game.super1.status == False:
-                        self.game.super4.engage(self.game)
+                        if self.game.super4.status == False:
+                            self.game.super4.engage(self.game)
+                            self.game.sound.play('tilt')
                 if self.game.spotting.position == 22:
-                    self.game.yellow_star.engage(self.game)
-                    self.game.coils.redROLamp.enable()
+                    if self.game.yellow_star.status == False:
+                        self.game.yellow_star.engage(self.game)
+                        self.game.coils.redROLamp.enable()
+                        self.game.sound.play('tilt')
                     if self.game.super2.status == False:
-                        self.game.super5.engage(self.game)
+                        if self.game.super5.status == False:
+                            self.game.super5.engage(self.game)
+                            self.game.sound.play('tilt')
                 if self.game.spotting.position == 33:
-                    self.game.red_star.engage(self.game)
-                    self.game.coils.yellowROLamp.enable()
-                    self.game.super5.engage(self.game)
+                    if self.game.red_star.status == False:
+                        self.game.red_star.engage(self.game)
+                        self.game.coils.yellowROLamp.enable()
+                        self.game.sound.play('tilt')
+                    if self.game.super5.status == False:
+                        self.game.super5.engage(self.game)
+                        self.game.sound.play('tilt')
 
 
     def check_odds(self):
+        if self.game.odds.position < 2:
+            self.game.odds.step()
+            return
         p = self.odds_probability()
         if p == 1:
             es = self.check_extra_step()
             if es == 1:
-                i = random.randint(1,3)
+                i = random.randint(1,2)
                 self.extra_step(i)
             else:
                 self.game.odds.step()
@@ -282,7 +370,6 @@ class MulticardBingo(procgame.game.Mode):
     def extra_step(self, number):
         if number > 0:
             self.game.odds.step()
-            self.game.coils.counter.pulse()
             self.delay(name="display", delay=0.1, handler=graphics.frolics.display, param=self)
             number -= 1
             self.delay(name="extra_step", delay=0.1, handler=self.extra_step, param=number)
@@ -344,6 +431,8 @@ class MulticardBingo(procgame.game.Mode):
         if self.game.switches.shutter.is_active():
             self.game.coils.shutter.enable()
         self.game.ball_count.step()
+        if self.game.ball_count.position == 4:
+            self.game.sound.play('tilt')
         if self.game.ball_count.position >= 4:
             if self.game.search_index.status == False:
                 self.search()
@@ -607,25 +696,32 @@ class MulticardBingo(procgame.game.Mode):
     def sw_yellow_active(self, sw):
         self.game.cu = not self.game.cu
         if self.game.ball_count.position >= 4:
-            if self.game.eb_play.status == False:
-                self.game.eb_play.engage(self.game)
-                self.delay(name="display", delay=0.1, handler=graphics.frolics.display, param=self)
-                self.sw_yellow_active(sw)
             if self.game.eb_play.status == True and (self.game.replays > 0 or self.game.switches.freeplay.is_active() or self.game.switches.coin.is_active()):
+                self.cancel_delayed("eb_animation")
                 self.game.sound.stop('add')
                 self.game.sound.play('add')
                 self.game.cu = not self.game.cu
+                begin = self.game.spotting.position
                 self.game.spotting.spin()
                 self.game.mixer1.spin()
                 self.game.mixer2.spin()
-                self.scan_eb()
                 self.replay_step_down()
                 self.game.reflex.decrease()
+                self.game.coils.counter.pulse()
+                graphics.frolics.display(self)
+                self.animate_eb_scan([begin,self.game.spotting.movement_amount,self.game.spotting.movement_amount])
+                self.game.eb_play.disengage()
                 self.delay(name="display", delay=0.1, handler=graphics.frolics.display, param=self)
+                return
+            if self.game.eb_play.status == False:
+                self.game.eb_play.engage(self.game)
+                self.delay(name="display", delay=0.1, handler=graphics.frolics.display, param=self)
+                self.delay(name="yellow", delay=0.1, handler=self.sw_yellow_active, param=sw)
 
     def sw_redstar_active(self, sw):
         if self.game.red_star.status == True:
             self.game.top_score.engage(self.game)
+            self.game.sound.play('tilt')
             self.game.red_star.disengage()
             self.game.yellow_star.disengage()
             self.game.coils.redROLamp.disable()
@@ -635,6 +731,7 @@ class MulticardBingo(procgame.game.Mode):
     def sw_yellowstar_active(self, sw):
         if self.game.yellow_star.status == True:
             self.game.top_score.engage(self.game)
+            self.game.sound.play('tilt')
             self.game.yellow_star.disengage()
             self.game.red_star.disengage()
             self.game.coils.redROLamp.disable()
@@ -643,8 +740,6 @@ class MulticardBingo(procgame.game.Mode):
 
 
     def scan_eb(self):
-        s = random.randint(1,6)
-        self.animate_eb_scan(s)
         i = self.check_mixer()
         if i == True:
             if self.game.super1.status == False:
@@ -668,24 +763,42 @@ class MulticardBingo(procgame.game.Mode):
             self.game.spotting.spin()
             self.check_spotting()
 
-    def animate_feature_scan(self, s):
-        if s > 1:
-            self.delay(name="feature_animation", delay=0.1, handler=graphics.frolics.feature_animation, param=s)
-            self.delay(name="display", delay=0.1, handler=graphics.frolics.display, param=self)
-            s -= 1
-            #self.delay(name="animate_feature", delay=0.1, handler=self.animate_feature_scan, param=s)
+    def animate_both(self, args):
+        start = args[0]
+        diff = args[1]
+        num = args[2]
+        if start + num >= 50:
+            start = 0
+        if diff >= 0:
+            num = num + 1
+            graphics.frolics.both_animation([self, start + num])
+            self.cancel_delayed(name="display")
+            diff = diff - 1
+            args = [start,diff,num]
+            self.delay(name="both_animation", delay=0.08, handler=self.animate_both, param=args)
         else:
+            self.cancel_delayed(name="both_animation")
             self.delay(name="display", delay=0.1, handler=graphics.frolics.display, param=self)
+            self.check_odds()
+            self.check_super()
 
-    def animate_eb_scan(self, s):
-        if s > 1:
-            self.delay(name="eb_animation", delay=0.1, handler=graphics.frolics.eb_animation, param=s)
-            self.delay(name="display", delay=0.1, handler=graphics.frolics.display, param=self)
-            s -= 1
-            #self.delay(name="animate_eb", delay=0.1, handler=self.animate_eb_scan, param=s)
+    def animate_eb_scan(self, args):
+        start = args[0]
+        diff = args[1]
+        num = args[2]
+        if start + num >= 50:
+            start = 0
+        if diff >= 0:
+            num = num + 1
+            graphics.frolics.eb_animation([self, start + num])
+            self.cancel_delayed(name="display")
+            diff = diff - 1
+            args = [start,diff,num]
+            self.delay(name="eb_animation", delay=0.08, handler=self.animate_eb_scan, param=args)
         else:
+            self.cancel_delayed(name="eb_animation")
             self.delay(name="display", delay=0.1, handler=graphics.frolics.display, param=self)
-
+            self.scan_eb()
 
     def check_spotting(self):
         if self.game.spotting.position in [1,5,17]:

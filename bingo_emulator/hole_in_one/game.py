@@ -150,6 +150,9 @@ class MulticardBingo(procgame.game.Mode):
         if self.game.switches.shutter.is_active():
             self.game.coils.shutter.enable()
         self.game.ball_count.step()
+        if self.game.ball_count.position == 4:
+            self.game.sound.play('tilt')
+            self.game.sound.play('tilt')
         if self.game.ball_count.position >= 4:
             self.game.sound.stop_music()
             if self.game.search_index.status == False:
@@ -480,6 +483,7 @@ class MulticardBingo(procgame.game.Mode):
                         self.game.search_index.engage(self.game)
                         if self.game.excellent.status == False and self.game.superior.status == False:
                             self.game.good.engage(self.game)
+                            self.game.sound.play('tilt')
                         self.card1_replay_step_up(1 - self.game.card1_replay_counter.position)
                 if relays == 4:
                     if self.game.card1_replay_counter.position < 2:
@@ -487,6 +491,7 @@ class MulticardBingo(procgame.game.Mode):
                         self.game.good.disengage()
                         if self.game.superior.status == False:
                             self.game.excellent.engage(self.game)                        
+                            self.game.sound.play('tilt')
                         self.card1_replay_step_up(2 - self.game.card1_replay_counter.position)
                 if relays == 5:
                     if self.game.card1_replay_counter.position < 3:
@@ -494,6 +499,7 @@ class MulticardBingo(procgame.game.Mode):
                         self.game.good.disengage()
                         self.game.excellent.disengage()
                         self.game.superior.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.card1_replay_step_up(3 - self.game.card1_replay_counter.position)
             if card == 2:
                 if relays == 3:
@@ -501,6 +507,7 @@ class MulticardBingo(procgame.game.Mode):
                         self.game.search_index.engage(self.game)
                         if self.game.excellent.status == False and self.game.superior.status == False:
                             self.game.good.engage(self.game)
+                            self.game.sound.play('tilt')
                         self.card2_replay_step_up(1 - self.game.card2_replay_counter.position)
                 if relays == 4:
                     if self.game.card2_replay_counter.position < 2:
@@ -508,6 +515,7 @@ class MulticardBingo(procgame.game.Mode):
                         self.game.good.disengage()
                         if self.game.superior.status == False:
                             self.game.excellent.engage(self.game)                        
+                            self.game.sound.play('tilt')
                         self.card2_replay_step_up(2 - self.game.card2_replay_counter.position)
                 if relays == 5:
                     if self.game.card2_replay_counter.position < 3:
@@ -515,6 +523,7 @@ class MulticardBingo(procgame.game.Mode):
                         self.game.good.disengage()
                         self.game.excellent.disengage()
                         self.game.superior.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.card2_replay_step_up(3 - self.game.card2_replay_counter.position)
             if card == 3:
                 if relays == 3:
@@ -522,6 +531,7 @@ class MulticardBingo(procgame.game.Mode):
                         self.game.search_index.engage(self.game)
                         if self.game.excellent.status == False and self.game.superior.status == False:
                             self.game.good.engage(self.game)
+                            self.game.sound.play('tilt')
                         self.card3_replay_step_up(1 - self.game.card3_replay_counter.position)
                 if relays == 4:
                     if self.game.card3_replay_counter.position < 2:
@@ -529,6 +539,7 @@ class MulticardBingo(procgame.game.Mode):
                         self.game.good.disengage()
                         if self.game.superior.status == False:
                             self.game.excellent.engage(self.game)                        
+                            self.game.sound.play('tilt')
                         self.card3_replay_step_up(2 - self.game.card3_replay_counter.position)
                 if relays == 5:
                     if self.game.card3_replay_counter.position < 3:
@@ -536,6 +547,7 @@ class MulticardBingo(procgame.game.Mode):
                         self.game.good.disengage()
                         self.game.excellent.disengage()
                         self.game.superior.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.card3_replay_step_up(3 - self.game.card3_replay_counter.position)
             if card == 4:
                 if relays == 3:
@@ -543,6 +555,7 @@ class MulticardBingo(procgame.game.Mode):
                         self.game.search_index.engage(self.game)
                         if self.game.excellent.status == False and self.game.superior.status == False:
                             self.game.good.engage(self.game)
+                            self.game.sound.play('tilt')
                         self.card4_replay_step_up(1 - self.game.card4_replay_counter.position)
                 if relays == 4:
                     if self.game.card4_replay_counter.position < 2:
@@ -550,6 +563,7 @@ class MulticardBingo(procgame.game.Mode):
                         self.game.good.disengage()
                         if self.game.superior.status == False:
                             self.game.excellent.engage(self.game)                        
+                            self.game.sound.play('tilt')
                         self.card4_replay_step_up(2 - self.game.card4_replay_counter.position)
                 if relays == 5:
                     if self.game.card4_replay_counter.position < 3:
@@ -557,6 +571,7 @@ class MulticardBingo(procgame.game.Mode):
                         self.game.good.disengage()
                         self.game.excellent.disengage()
                         self.game.superior.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.card4_replay_step_up(3 - self.game.card4_replay_counter.position)
             if card == 5:
                 if relays == 3:
@@ -564,6 +579,7 @@ class MulticardBingo(procgame.game.Mode):
                         self.game.search_index.engage(self.game)
                         if self.game.excellent.status == False and self.game.superior.status == False:
                             self.game.good.engage(self.game)
+                            self.game.sound.play('tilt')
                         self.card5_replay_step_up(1 - self.game.card5_replay_counter.position)
                 if relays == 4:
                     if self.game.card5_replay_counter.position < 2:
@@ -571,6 +587,7 @@ class MulticardBingo(procgame.game.Mode):
                         self.game.good.disengage()
                         if self.game.superior.status == False:
                             self.game.excellent.engage(self.game)                        
+                            self.game.sound.play('tilt')
                         self.card5_replay_step_up(2 - self.game.card5_replay_counter.position)
                 if relays == 5:
                     if self.game.card5_replay_counter.position < 3:
@@ -578,6 +595,7 @@ class MulticardBingo(procgame.game.Mode):
                         self.game.good.disengage()
                         self.game.excellent.disengage()
                         self.game.superior.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.card5_replay_step_up(3 - self.game.card5_replay_counter.position)
             if card == 6:
                 if relays == 3:
@@ -585,6 +603,7 @@ class MulticardBingo(procgame.game.Mode):
                         self.game.search_index.engage(self.game)
                         if self.game.excellent.status == False and self.game.superior.status == False:
                             self.game.good.engage(self.game)
+                            self.game.sound.play('tilt')
                         self.card6_replay_step_up(1 - self.game.card6_replay_counter.position)
                 if relays == 4:
                     if self.game.card6_replay_counter.position < 2:
@@ -592,6 +611,7 @@ class MulticardBingo(procgame.game.Mode):
                         self.game.good.disengage()
                         if self.game.superior.status == False:
                             self.game.excellent.engage(self.game)                        
+                            self.game.sound.play('tilt')
                         self.card6_replay_step_up(2 - self.game.card6_replay_counter.position)
                 if relays == 5:
                     if self.game.card6_replay_counter.position < 3:
@@ -599,9 +619,11 @@ class MulticardBingo(procgame.game.Mode):
                         self.game.good.disengage()
                         self.game.excellent.disengage()
                         self.game.superior.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.card6_replay_step_up(3 - self.game.card6_replay_counter.position)
 
     def card1_replay_step_up(self, number):
+        self.game.sound.stop_music()
         if number >= 1:
             self.game.card1_replay_counter.step()
             number -= 1
@@ -615,6 +637,7 @@ class MulticardBingo(procgame.game.Mode):
             self.search()
 
     def card2_replay_step_up(self, number):
+        self.game.sound.stop_music()
         if number >= 1:
             self.game.card2_replay_counter.step()
             number -= 1
@@ -628,6 +651,7 @@ class MulticardBingo(procgame.game.Mode):
             self.search()
 
     def card3_replay_step_up(self, number):
+        self.game.sound.stop_music()
         if number >= 1:
             self.game.card3_replay_counter.step()
             number -= 1
@@ -641,6 +665,7 @@ class MulticardBingo(procgame.game.Mode):
             self.search()
 
     def card4_replay_step_up(self, number):
+        self.game.sound.stop_music()
         if number >= 1:
             self.game.card4_replay_counter.step()
             number -= 1
@@ -654,6 +679,7 @@ class MulticardBingo(procgame.game.Mode):
             self.search()
 
     def card5_replay_step_up(self, number):
+        self.game.sound.stop_music()
         if number >= 1:
             self.game.card5_replay_counter.step()
             number -= 1
@@ -667,6 +693,7 @@ class MulticardBingo(procgame.game.Mode):
             self.search()
 
     def card6_replay_step_up(self, number):
+        self.game.sound.stop_music()
         if number >= 1:
             self.game.card6_replay_counter.step()
             number -= 1

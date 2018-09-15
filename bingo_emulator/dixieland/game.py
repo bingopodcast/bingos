@@ -107,31 +107,45 @@ class MulticardBingo(procgame.game.Mode):
                 if self.check_corners() == True:
                     if self.game.selector.position == 1:
                         self.game.corners1.engage(self.game)
+                        self.game.sound.play('tilt')
                     elif self.game.selector.position == 2:
                         self.game.corners2.engage(self.game)
+                        self.game.sound.play('tilt')
                     elif self.game.selector.position == 3:
                         self.game.corners3.engage(self.game)
+                        self.game.sound.play('tilt')
                     elif self.game.selector.position == 4:
                         self.game.corners4.engage(self.game)
+                        self.game.sound.play('tilt')
                     elif self.game.selector.position == 5:
                         self.game.corners5.engage(self.game)
+                        self.game.sound.play('tilt')
                     elif self.game.selector.position == 6:
                         self.game.corners6.engage(self.game)
+                        self.game.sound.play('tilt')
                 if self.check_super() == True:
                     if self.game.selector.position == 1:
                         self.game.super1.engage(self.game)
+                        self.game.sound.play('tilt')
                     elif self.game.selector.position == 2:
                         self.game.super2.engage(self.game)
+                        self.game.sound.play('tilt')
                     elif self.game.selector.position == 3:
                         self.game.super3.engage(self.game)
+                        self.game.sound.play('tilt')
                     elif self.game.selector.position == 4:
                         self.game.super4.engage(self.game)
+                        self.game.sound.play('tilt')
                     elif self.game.selector.position == 5:
                         self.game.super5.engage(self.game)
+                        self.game.sound.play('tilt')
                     elif self.game.selector.position == 6:
                         self.game.super6.engage(self.game)
+                        self.game.sound.play('tilt')
                 if self.check_trip() == True:
-                    self.game.corners_rollover.engage(self.game)
+                    if self.game.corners_rollover.status == False:
+                        self.game.corners_rollover.engage(self.game)
+                        self.game.sound.play('tilt')
                 if self.game.switches.shutter.is_inactive():
                     self.game.coils.shutter.enable()
                 self.replay_step_down()
@@ -236,6 +250,7 @@ class MulticardBingo(procgame.game.Mode):
                 if self.game.magic == []:
                     begin = self.game.magic_motor.position
                     self.game.magic_motor.spin()
+                    self.game.sound.play('tilt')
                     r = random.randint(4,6)
                     self.animate_magic([begin,r,1])
             if self.game.selector.position == 11:
@@ -250,6 +265,8 @@ class MulticardBingo(procgame.game.Mode):
         self.game.ball_count.step()
         if self.game.ball_count.position == 4:
             self.game.sound.stop_music()
+            self.game.sound.play('tilt')
+            self.game.sound.play('tilt')
         self.game.probability.spin()
         if self.game.ball_count.position == 5:
             self.game.coils.redROLamp.disable()
@@ -377,6 +394,7 @@ class MulticardBingo(procgame.game.Mode):
             self.delay(name="pick_dd", delay=0, handler=self.pick_dd)
 
     def pick_magic(self):
+        self.game.sound.play('tilt')
         self.game.magic_motor.spin()
         if self.game.cu == 1:
             if self.game.magic_motor.position == 0:
@@ -408,17 +426,23 @@ class MulticardBingo(procgame.game.Mode):
         dpos = self.game.dd_motor.spin()
         if dpos == 1:
             self.game.dd1.engage(self.game)
+            self.game.sound.play('tilt')
         elif dpos == 2:
             self.game.dd2.engage(self.game)
+            self.game.sound.play('tilt')
         elif dpos == 3:
             self.game.dd3.engage(self.game)
+            self.game.sound.play('tilt')
         dpos = self.game.dd_motor.spin()
         if dpos == 1:
             self.game.dd4.engage(self.game)
+            self.game.sound.play('tilt')
         elif dpos == 2:
             self.game.dd5.engage(self.game)
+            self.game.sound.play('tilt')
         elif dpos == 3:
             self.game.dd6.engage(self.game)
+            self.game.sound.play('tilt')
         self.delay(name="display", delay=0.1, handler=graphics.dixieland.display, param=self)
 
     # This is really nasty, but it is how we render graphics for each individual hole.
@@ -430,9 +454,13 @@ class MulticardBingo(procgame.game.Mode):
             self.holes.append(1)
             if 1 in self.game.magic:
                 if self.game.selector.position >= 9:
-                    self.game.onetwothree.engage(self.game)
+                    if self.game.onetwothree.status == False:
+                        self.game.onetwothree.engage(self.game)
+                        self.game.sound.play('tilt')
                 if self.game.selector.position >= 10:
-                    self.game.fourfivesix.engage(self.game)
+                    if self.game.fourfivesix.status == False:
+                        self.game.fourfivesix.engage(self.game)
+                        self.game.sound.play('tilt')
             self.delay(name="display", delay=0.1, handler=graphics.dixieland.display, param=self)
 
     def sw_hole2_active_for_40ms(self, sw):
@@ -465,9 +493,13 @@ class MulticardBingo(procgame.game.Mode):
             self.holes.append(7)
             if 7 in self.game.magic:
                 if self.game.selector.position >= 9:
-                    self.game.onetwothree.engage(self.game)
+                    if self.game.onetwothree.status == False:
+                        self.game.onetwothree.engage(self.game)
+                        self.game.sound.play('tilt')
                 if self.game.selector.position >= 10:
-                    self.game.fourfivesix.engage(self.game)
+                    if self.game.fourfivesix.status == False:
+                        self.game.fourfivesix.engage(self.game)
+                        self.game.sound.play('tilt')
             self.delay(name="display", delay=0.1, handler=graphics.dixieland.display, param=self)
 
     def sw_hole8_active_for_40ms(self, sw):
@@ -475,9 +507,13 @@ class MulticardBingo(procgame.game.Mode):
             self.holes.append(8)
             if 8 in self.game.magic:
                 if self.game.selector.position >= 9:
-                    self.game.onetwothree.engage(self.game)
+                    if self.game.onetwothree.status == False:
+                        self.game.onetwothree.engage(self.game)
+                        self.game.sound.play('tilt')
                 if self.game.selector.position >= 10:
-                    self.game.fourfivesix.engage(self.game)
+                    if self.game.fourfivesix.status == False:
+                        self.game.fourfivesix.engage(self.game)
+                        self.game.sound.play('tilt')
             self.delay(name="display", delay=0.1, handler=graphics.dixieland.display, param=self)
 
     def sw_hole9_active_for_40ms(self, sw):
@@ -485,9 +521,13 @@ class MulticardBingo(procgame.game.Mode):
             self.holes.append(9)
             if 9 in self.game.magic:
                 if self.game.selector.position >= 9:
-                    self.game.onetwothree.engage(self.game)
+                    if self.game.onetwothree.status == False:
+                        self.game.onetwothree.engage(self.game)
+                        self.game.sound.play('tilt')
                 if self.game.selector.position >= 10:
-                    self.game.fourfivesix.engage(self.game)
+                    if self.game.fourfivesix.status == False:
+                        self.game.fourfivesix.engage(self.game)
+                        self.game.sound.play('tilt')
             self.delay(name="display", delay=0.1, handler=graphics.dixieland.display, param=self)
 
     def sw_hole10_active_for_40ms(self, sw):
@@ -555,9 +595,13 @@ class MulticardBingo(procgame.game.Mode):
             self.holes.append(22)
             if 22 in self.game.magic:
                 if self.game.selector.position >= 9:
-                    self.game.onetwothree.engage(self.game)
+                    if self.game.onetwothree.status == False:
+                        self.game.onetwothree.engage(self.game)
+                        self.game.sound.play('tilt')
                 if self.game.selector.position >= 10:
-                    self.game.fourfivesix.engage(self.game)
+                    if self.game.fourfivesix.status == False:
+                        self.game.fourfivesix.engage(self.game)
+                        self.game.sound.play('tilt')
             self.delay(name="display", delay=0.1, handler=graphics.dixieland.display, param=self)
 
     def sw_hole23_active_for_40ms(self, sw):
@@ -575,31 +619,37 @@ class MulticardBingo(procgame.game.Mode):
             self.holes.append(25)
             if 25 in self.game.magic:
                 if self.game.selector.position >= 9:
-                    self.game.onetwothree.engage(self.game)
+                    if self.game.onetwothree.status == False:
+                        self.game.onetwothree.engage(self.game)
+                        self.game.sound.play('tilt')
                 if self.game.selector.position >= 10:
-                    self.game.fourfivesix.engage(self.game)
+                    if self.game.fourfivesix.status == False:
+                        self.game.fourfivesix.engage(self.game)
+                        self.game.sound.play('tilt')
             self.delay(name="display", delay=0.1, handler=graphics.dixieland.display, param=self)
 
     def sw_redstar_active(self, sw):
         if self.game.corners_rollover.status == True:
+            self.game.sound.play('tilt')
             self.game.corners1.engage(self.game)
             self.game.corners2.engage(self.game)
             self.game.corners3.engage(self.game)
             self.game.corners4.engage(self.game)
             self.game.corners5.engage(self.game)
             self.game.corners6.engage(self.game)
-            self.game.coils.yellowROLamp.disable()
+            self.game.coils.redROLamp.disable()
             self.delay(name="display", delay=0.1, handler=graphics.dixieland.display, param=self)
 
     def sw_yellowstar_active(self, sw):
         if self.game.corners_rollover.status == True:
+            self.game.sound.play('tilt')
             self.game.super1.engage(self.game)
             self.game.super2.engage(self.game)
             self.game.super3.engage(self.game)
             self.game.super4.engage(self.game)
             self.game.super5.engage(self.game)
             self.game.super6.engage(self.game)
-            self.game.coils.redROLamp.disable()
+            self.game.coils.yellowROLamp.disable()
             self.delay(name="display", delay=0.1, handler=graphics.dixieland.display, param=self)
 
     def sw_replayReset_active(self, sw):
@@ -796,7 +846,7 @@ class MulticardBingo(procgame.game.Mode):
                                     self.wait_for_input((2, 4))
                     if relays == 4:
                         if corners == True:
-                            if self.corners2.status == True:
+                            if self.game.corners2.status == True:
                                 if self.game.card2_replay_counter.position < 100:
                                     self.game.search_index.engage(self.game)
                                     self.game.sound.stop('search')
@@ -1132,56 +1182,68 @@ class MulticardBingo(procgame.game.Mode):
                 if dp == True:
                     if i[0] == 1:
                         self.game.card1_double.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.card1_replay_step_up((rc * 2) - self.game.card1_replay_counter.position)
                     elif i[0] == 2:
                         self.game.card2_double.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.card2_replay_step_up((rc * 2) - self.game.card2_replay_counter.position)
                     elif i[0] == 3:
                         self.game.card3_double.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.card3_replay_step_up((rc * 2) - self.game.card3_replay_counter.position)
                     elif i[0] == 4:
                         self.game.card4_double.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.card4_replay_step_up((rc * 2) - self.game.card4_replay_counter.position)
                     elif i[0] == 5:
                         self.game.card5_double.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.card5_replay_step_up((rc * 2) - self.game.card5_replay_counter.position)
                     elif i[0] == 6:
                         self.game.card6_double.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.card6_replay_step_up((rc * 2) - self.game.card6_replay_counter.position)
                     self.delay(name="display", delay=0.1, handler=graphics.dixieland.display, param=self)
                 else:
                     if i[0] == 1:
                         self.game.card1_missed.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.game.search_index.disengage()
                         self.cancel_delayed(name="blink_double")
                         self.delay(name="display", delay=0.1, handler=graphics.dixieland.display, param=self)
                         self.delay(name="research", delay=1, handler=self.search)
                     elif i[0] == 2:
                         self.game.card2_missed.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.game.search_index.disengage()
                         self.cancel_delayed(name="blink_double")
                         self.delay(name="display", delay=0.1, handler=graphics.dixieland.display, param=self)
                         self.delay(name="research", delay=1, handler=self.search)
                     elif i[0] == 3:
                         self.game.card3_missed.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.game.search_index.disengage()
                         self.cancel_delayed(name="blink_double")
                         self.delay(name="display", delay=0.1, handler=graphics.dixieland.display, param=self)
                         self.delay(name="research", delay=1, handler=self.search)
                     elif i[0] == 4:
                         self.game.card4_missed.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.game.search_index.disengage()
                         self.cancel_delayed(name="blink_double")
                         self.delay(name="display", delay=0.1, handler=graphics.dixieland.display, param=self)
                         self.delay(name="research", delay=1, handler=self.search)
                     elif i[0] == 5:
                         self.game.card5_missed.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.game.search_index.disengage()
                         self.cancel_delayed(name="blink_double")
                         self.delay(name="display", delay=0.1, handler=graphics.dixieland.display, param=self)
                         self.delay(name="research", delay=1, handler=self.search)
                     elif i[0] == 6:
                         self.game.card6_missed.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.game.search_index.disengage()
                         self.cancel_delayed(name="blink_double")
                         self.delay(name="display", delay=0.1, handler=graphics.dixieland.display, param=self)
@@ -1299,56 +1361,68 @@ class MulticardBingo(procgame.game.Mode):
                 if dp == True:
                     if i[0] == 1:
                         self.game.card1_double.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.card1_replay_step_up((rc * 2) - self.game.card1_replay_counter.position)
                     elif i[0] == 2:
                         self.game.card2_double.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.card2_replay_step_up((rc * 2) - self.game.card2_replay_counter.position)
                     elif i[0] == 3:
                         self.game.card3_double.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.card3_replay_step_up((rc * 2) - self.game.card3_replay_counter.position)
                     elif i[0] == 4:
                         self.game.card4_double.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.card4_replay_step_up((rc * 2) - self.game.card4_replay_counter.position)
                     elif i[0] == 5:
                         self.game.card5_double.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.card5_replay_step_up((rc * 2) - self.game.card5_replay_counter.position)
                     elif i[0] == 6:
                         self.game.card6_double.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.card6_replay_step_up((rc * 2) - self.game.card6_replay_counter.position)
                     self.delay(name="display", delay=0.1, handler=graphics.dixieland.display, param=self)
                 else:
                     if i[0] == 1:
                         self.game.card1_missed.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.game.search_index.disengage()
                         self.cancel_delayed(name="blink_double")
                         self.delay(name="display", delay=0.1, handler=graphics.dixieland.display, param=self)
                         self.delay(name="research", delay=1, handler=self.search)
                     elif i[0] == 2:
                         self.game.card2_missed.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.game.search_index.disengage()
                         self.cancel_delayed(name="blink_double")
                         self.delay(name="display", delay=0.1, handler=graphics.dixieland.display, param=self)
                         self.delay(name="research", delay=1, handler=self.search)
                     elif i[0] == 3:
                         self.game.card3_missed.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.game.search_index.disengage()
                         self.cancel_delayed(name="blink_double")
                         self.delay(name="display", delay=0.1, handler=graphics.dixieland.display, param=self)
                         self.delay(name="research", delay=1, handler=self.search)
                     elif i[0] == 4:
                         self.game.card4_missed.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.game.search_index.disengage()
                         self.cancel_delayed(name="blink_double")
                         self.delay(name="display", delay=0.1, handler=graphics.dixieland.display, param=self)
                         self.delay(name="research", delay=1, handler=self.search)
                     elif i[0] == 5:
                         self.game.card5_missed.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.game.search_index.disengage()
                         self.cancel_delayed(name="blink_double")
                         self.delay(name="display", delay=0.1, handler=graphics.dixieland.display, param=self)
                         self.delay(name="research", delay=1, handler=self.search)
                     elif i[0] == 6:
                         self.game.card6_missed.engage(self.game)
+                        self.game.sound.play('tilt')
                         self.game.search_index.disengage()
                         self.cancel_delayed(name="blink_double")
                         self.delay(name="display", delay=0.1, handler=graphics.dixieland.display, param=self)
@@ -1410,6 +1484,7 @@ class MulticardBingo(procgame.game.Mode):
             return 0
 
     def card1_replay_step_up(self, number):
+        self.game.sound.stop_music()
         if number >= 1:
             self.game.card1_replay_counter.step()
             number -= 1
@@ -1421,6 +1496,7 @@ class MulticardBingo(procgame.game.Mode):
             self.search()
 
     def card2_replay_step_up(self, number):
+        self.game.sound.stop_music()
         if number >= 1:
             self.game.card2_replay_counter.step()
             number -= 1
@@ -1434,6 +1510,7 @@ class MulticardBingo(procgame.game.Mode):
             self.search()
 
     def card3_replay_step_up(self, number):
+        self.game.sound.stop_music()
         if number >= 1:
             self.game.card3_replay_counter.step()
             number -= 1
@@ -1447,6 +1524,7 @@ class MulticardBingo(procgame.game.Mode):
             self.search()
 
     def card4_replay_step_up(self, number):
+        self.game.sound.stop_music()
         if number >= 1:
             self.game.card4_replay_counter.step()
             number -= 1
@@ -1460,6 +1538,7 @@ class MulticardBingo(procgame.game.Mode):
             self.search()
 
     def card5_replay_step_up(self, number):
+        self.game.sound.stop_music()
         if number >= 1:
             self.game.card5_replay_counter.step()
             number -= 1
@@ -1473,6 +1552,7 @@ class MulticardBingo(procgame.game.Mode):
             self.search()
 
     def card6_replay_step_up(self, number):
+        self.game.sound.stop_music()
         if number >= 1:
             self.game.card6_replay_counter.step()
             number -= 1

@@ -501,54 +501,247 @@ def display(s, replays=0, menu=False):
 
     pygame.display.update()
 
-def eb_animation(num):
+def eb_animation(args):
     global screen
-    if num == 6:
-        p = [82,1029]
-        screen.blit(i, p)
-        pygame.display.update()
-    if num == 5:
-        p = [169,1029]
-        screen.blit(i, p)
-        pygame.display.update()
-    if num == 4:
-        p = [256,1027]
-        screen.blit(i, p)
-        pygame.display.update()
-    if num == 3:
-        p = [378,1029]
-        screen.blit(i, p)
-        pygame.display.update()
-    if num == 2:
-        p = [464,1029]
-        screen.blit(i, p)
-        pygame.display.update()
-    if num == 1:
-        p = [550,1029]
-        screen.blit(i, p)
-        pygame.display.update()
 
-def feature_animation(num):
+    dirty_rects = []
+    s = args[0]
+    num = args[1]
+
+    if s.game.extra_ball.position < 1:
+        dirty_rects.append(screen.blit(bg_gi, (82,1029), pygame.Rect(82,1029,90,37)))
+    if s.game.extra_ball.position < 2:
+        dirty_rects.append(screen.blit(bg_gi, (169,1029), pygame.Rect(169,1029,90,37)))
+    if s.game.extra_ball.position < 3:
+        dirty_rects.append(screen.blit(bg_gi, (256,1029), pygame.Rect(256,1029,90,37)))
+    if s.game.extra_ball.position < 4:
+        dirty_rects.append(screen.blit(bg_gi, (378,1029), pygame.Rect(378,1029,90,37)))
+    if s.game.extra_ball.position < 5:
+        dirty_rects.append(screen.blit(bg_gi, (464,1029), pygame.Rect(464,1029,90,37)))
+    if s.game.extra_ball.position < 6:
+        dirty_rects.append(screen.blit(bg_gi, (550,1029), pygame.Rect(550,1029,90,37)))
+
+    pygame.display.update(dirty_rects)
+
+    if num in [0,24,25,49,11,36]:
+        if s.game.extra_ball.position < 1:
+            p = [82,1029]
+            dirty_rects.append(screen.blit(i, p))
+            pygame.display.update(dirty_rects) 
+            return
+    elif num in [1,15,26,40,21,46,13,38]:
+        if s.game.extra_ball.position < 2:
+            p = [169,1029]
+            dirty_rects.append(screen.blit(i, p))
+            pygame.display.update(dirty_rects) 
+            return
+    elif num in [3,4,17,28,29,42,12,37,16,41]:
+        if s.game.extra_ball.position < 3:
+            p = [256,1029]
+            dirty_rects.append(screen.blit(i, p))
+            pygame.display.update(dirty_rects)
+            return
+    elif num in [5,18,30,43,22,47,23,48]:
+        if s.game.extra_ball.position < 4:
+            p = [378,1029]
+            dirty_rects.append(screen.blit(i, p))
+            pygame.display.update(dirty_rects) 
+            return
+    elif num in [7,8,19,32,33,44,2,27]:
+        if s.game.extra_ball.position < 5:
+            p = [464,1029]
+            dirty_rects.append(screen.blit(i, p))
+            pygame.display.update(dirty_rects) 
+            return
+    elif num in [9,10,20,34,35,45,6,31]:
+        if s.game.extra_ball.position < 6:
+            p = [550,1029]
+            dirty_rects.append(screen.blit(i, p))
+            pygame.display.update(dirty_rects) 
+            return
+
+def clear_odds(s, num):
     global screen
-    if num == 5:
-        p = [176,778]
-        screen.blit(odds1, p)
-        pygame.display.update()
-    if num == 4:
-        p = [253,778]
-        i = pygame.image.load('frolics/assets/odds2.png').convert_alpha()
-        screen.blit(odds2, p)
-        pygame.display.update()
-    if num == 3:
-        p = [325,778]
-        screen.blit(odds3, p)
-        pygame.display.update()
-    if num == 2:
-        p = [393,775]
-        screen.blit(odds4, p)
-        pygame.display.update()
-    if num == 1:
-        p = [468,778]
-        screen.blit(odds5, p)
-        pygame.display.update()
+
+    dirty_rects = []
+
+    if s.game.odds.position != 1:
+        dirty_rects.append(screen.blit(bg_gi, (176,778), pygame.Rect(176,778,77,221)))
+    if s.game.odds.position != 2:
+        dirty_rects.append(screen.blit(bg_gi, (253,775), pygame.Rect(253,775,74,220)))
+    if s.game.odds.position != 3:
+        dirty_rects.append(screen.blit(bg_gi, (325,775), pygame.Rect(325,775,68,220)))
+    if s.game.odds.position != 4:
+        dirty_rects.append(screen.blit(bg_gi, (393,775), pygame.Rect(393,775,71,217)))
+    if s.game.odds.position != 5:
+        dirty_rects.append(screen.blit(bg_gi, (468,778), pygame.Rect(468,778,76,213)))
+
+    pygame.display.update(dirty_rects)
+
+def draw_odds_animation(s, num):
+    global screen
+    dirty_rects = []
+
+    if num in [1,6,11,16,21,26,31,36,41]:
+        if s.game.odds.position != 1:
+            p = [176,778]
+            dirty_rects.append(screen.blit(odds1, p))
+            pygame.display.update(dirty_rects)
+            return
+    if num in [2,7,12,17,22,27,32,37,42]:
+        if s.game.odds.position != 2:
+            p = [253,775]
+            dirty_rects.append(screen.blit(odds2, p))
+            pygame.display.update(dirty_rects)
+            return
+    if num in [3,8,13,18,23,28,33,38,43]:
+        if s.game.odds.position != 3:
+            p = [325,775]
+            dirty_rects.append(screen.blit(odds3, p))
+            pygame.display.update(dirty_rects)
+            return
+    if num in [4,9,14,19,24,29,34,39,44]:
+        if s.game.odds.position != 4:
+            p = [393,775]
+            dirty_rects.append(screen.blit(odds4, p))
+            pygame.display.update(dirty_rects)
+            return
+    if num in [5,10,15,20,25,30,35,40,45]:
+        if s.game.odds.position != 5:
+            p = [468,778]
+            dirty_rects.append(screen.blit(odds5, p))
+            pygame.display.update(dirty_rects)
+            return
+
+def odds_animation(args):
+    global screen
+
+    dirty_rects = []
+    s = args[0]
+    num = args[1]
+
+    clear_odds(s, num)
+
+    draw_odds_animation(s, num)
+
+def clear_features(s, num):
+    global screen
+
+    dirty_rects = []
+
+    if s.game.super1.status == False:
+        dirty_rects.append(screen.blit(bg_gi, (66,305), pygame.Rect(66,305,144,32)))
+    if s.game.super2.status == False:
+        dirty_rects.append(screen.blit(bg_gi, (289,305), pygame.Rect(289,305,144,32)))
+    if s.game.super3.status == False:
+        dirty_rects.append(screen.blit(bg_gi, (511,305), pygame.Rect(511,305,144,32)))
+    if s.game.super4.status == False:
+        dirty_rects.append(screen.blit(bg_gi, (65,555), pygame.Rect(65,555,144,32)))
+    if s.game.super5.status == False:
+        dirty_rects.append(screen.blit(bg_gi, (287,555), pygame.Rect(287,555,144,32)))
+    if s.game.super6.status == False:
+        dirty_rects.append(screen.blit(bg_gi, (509,555), pygame.Rect(509,555,144,32)))
+    if s.game.red_star.status == False:
+        dirty_rects.append(screen.blit(bg_gi, (573,824), pygame.Rect(573,824,38,39)))
+
+    if s.game.yellow_star.status == False:
+        dirty_rects.append(screen.blit(bg_gi, (632,824), pygame.Rect(632,824,38,39)))
+
+
+    pygame.display.update(dirty_rects)
+
+
+def draw_feature_animation(s, num):
+    global screen
+    dirty_rects = []
+
+    if num in [1,7,13,19,25,31,37,43,49]:
+        if s.game.super6.status == False:
+            p = [509,555]
+            dirty_rects.append(screen.blit(super_score, p))
+            pygame.display.update(dirty_rects)
+            return
+    if num in [2,8,14,20,26,32,38,44]:
+        if s.game.super5.status == False:
+            p = [287,555]
+            dirty_rects.append(screen.blit(super_score, p))
+            if s.game.red_star.status == False:
+                p = [573,824]
+                dirty_rects.append(screen.blit(star, p))
+                s.game.coils.redROLamp.pulse(85)
+                s.game.coils.yellowROLamp.pulse(85)
+            pygame.display.update(dirty_rects)
+            return
+    if num in [3,9,15,21,27,33,39,45]:
+        if s.game.super4.status == False:
+            p = [65,555]
+            dirty_rects.append(screen.blit(super_score, p))
+            pygame.display.update(dirty_rects)
+            return
+    if num in [4,10,16,22,28,34,40,46]:
+        if s.game.super3.status == False:
+            p = [511,305]
+            dirty_rects.append(screen.blit(super_score, p))
+            pygame.display.update(dirty_rects)
+            return
+    if num in [5,11,17,23,29,35,41,47]:
+        if s.game.super2.status == False:
+            p = [289,305]
+            dirty_rects.append(screen.blit(super_score, p))
+            if s.game.yellow_star.status == False:
+                p = [632,824]
+                dirty_rects.append(screen.blit(star, p))
+            pygame.display.update(dirty_rects)
+            return
+    if num in [6,12,18,24,30,36,42,48]:
+        if s.game.super1.status == False:
+            p = [66,305]
+            dirty_rects.append(screen.blit(super_score, p))
+            pygame.display.update(dirty_rects)
+            return
+
+def feature_animation(args):
+    global screen
+
+    dirty_rects = []
+    s = args[0]
+    num = args[1]
+
+    clear_features(s, num)
+
+    draw_feature_animation(s, num)
+
+def both_animation(args):
+    global screen
+
+    dirty_rects = []
+    s = args[0]
+    num = args[1]
+
+    clear_features(s, num)
+    clear_odds(s, num)
+
+    draw_odds_animation(s, num)
+    draw_feature_animation(s, num)
+
+
+def blink(args):
+    dirty_rects = []
+    s = args[0]
+    b = args[1]
+    sn = args[2]
+
+    if b == 0:
+        if sn == 1:
+            p = [258,738]
+            dirty_rects.append(screen.blit(select_now, p))
+        pygame.display.update(dirty_rects)
+    else:
+        dirty_rects.append(screen.blit(bg_gi, (258,738), pygame.Rect(258,738,200,35)))
+        pygame.display.update(dirty_rects)
+    b = not b
+
+    args = [s,b,sn]
+
+    s.delay(name="blink", delay=0.1, handler=blink, param=args)
 

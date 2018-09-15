@@ -323,83 +323,287 @@ def display(s, replays=0, menu=False):
 
     pygame.display.update()
 
-def eb_animation(num):
+def eb_animation(args):
     global screen
-    if num == 9:
-        eb_position = [48,898]
-        screen.blit(eb, eb_position)
-        pygame.display.update()
-    if num == 8:
-        eb_position = [120,897]
-        screen.blit(eb, eb_position)
-        pygame.display.update()
-    if num == 7:
-        eb_position = [195,896]
-        screen.blit(eb, eb_position)
-        pygame.display.update()
-    if num == 6:
-        eb_position = [265,897]
-        screen.blit(eb, eb_position)
-        pygame.display.update()
-    if num == 5:
-        eb_position = [337,897]
-        screen.blit(eb, eb_position)
-        pygame.display.update()
-    if num == 4:
-        eb_position = [410,897]
-        screen.blit(eb, eb_position)
-        pygame.display.update()
-    if num == 3:
-        eb_position = [481,898]
-        screen.blit(eb, eb_position)
-        pygame.display.update()
-    if num == 2:
-        eb_position = [553,898]
-        screen.blit(eb, eb_position)
-        pygame.display.update()
-    if num == 1:
-        eb_position = [623,898]
-        screen.blit(eb, eb_position)
-        pygame.display.update()
 
-def feature_animation(num):
+    dirty_rects = []
+    s = args[0]
+    num = args[1]
+
+    if s.game.extra_ball.position not in [2,11,20]:
+        dirty_rects.append(screen.blit(bg_gi, (120,897), pygame.Rect(120,897,47,44)))
+    if s.game.extra_ball.position not in [3,12,21]:
+        dirty_rects.append(screen.blit(bg_gi, (195,896), pygame.Rect(195,896,47,44)))
+    if s.game.extra_ball.position not in [4,13,22]:
+        dirty_rects.append(screen.blit(bg_gi, (265,897), pygame.Rect(265,897,47,44)))
+    if s.game.extra_ball.position not in [5,14,23]:
+        dirty_rects.append(screen.blit(bg_gi, (337,897), pygame.Rect(337,897,47,44)))
+    if s.game.extra_ball.position not in [6,15]:
+        dirty_rects.append(screen.blit(bg_gi, (410,897), pygame.Rect(410,897,47,44)))
+    if s.game.extra_ball.position not in [7,16]:
+        dirty_rects.append(screen.blit(bg_gi, (481,898), pygame.Rect(481,898,47,44)))
+    if s.game.extra_ball.position not in [8,17]:
+        dirty_rects.append(screen.blit(bg_gi, (553,898), pygame.Rect(553,898,47,44)))
+    if s.game.extra_ball.position not in [9,18]:
+        dirty_rects.append(screen.blit(bg_gi, (623,898), pygame.Rect(623,898,47,44)))
+    if s.game.extra_ball.position < 8:
+        dirty_rects.append(screen.blit(bg_gi, (45,943), pygame.Rect(45,943,201,33)))
+    if s.game.extra_ball.position < 17:
+        dirty_rects.append(screen.blit(bg_gi, (262,944), pygame.Rect(262,944,201,33)))
+    if s.game.extra_ball.position < 24:
+        dirty_rects.append(screen.blit(bg_gi, (478,943), pygame.Rect(478,943,201,33)))
+    pygame.display.update(dirty_rects)
+    if num in [1,9,17]:
+        if s.game.extra_ball.position not in [2,11,20]:
+            p = [120,897]
+            dirty_rects.append(screen.blit(eb, p))
+            pygame.display.update(dirty_rects) 
+    elif num in [2,10,18]:
+        if s.game.extra_ball.position not in [3,12,21]:
+            p = [195,896]
+            dirty_rects.append(screen.blit(eb, p))
+            if s.game.extra_ball.position not in range(8,19):
+                p = [45,943]
+                screen.blit(extra_ball, p)
+            pygame.display.update(dirty_rects)
+    elif num in [3,11,18]:
+        if s.game.extra_ball.position not in [4,13,22]:
+            p = [265,897]
+            dirty_rects.append(screen.blit(eb, p))
+            pygame.display.update(dirty_rects)
+    elif num in [4,12,20]:
+        if s.game.extra_ball.position not in [5,14,23]:
+            p = [337,897]
+            dirty_rects.append(screen.blit(eb, p))
+            pygame.display.update(dirty_rects)
+    elif num in [5,13,21]:
+        if s.game.extra_ball.position not in [6,15]:
+            p = [410,897]
+            dirty_rects.append(screen.blit(eb, p))
+            if s.game.extra_ball.position not in range(17,25):
+                p = [262,944]
+                screen.blit(extra_ball, p)
+            pygame.display.update(dirty_rects)
+    elif num in [6,14,22]:
+        if s.game.extra_ball.position not in [7,16]:
+            p = [481,898]
+            dirty_rects.append(screen.blit(eb, p))
+            pygame.display.update(dirty_rects)
+    elif num in [7,15,23]:
+        if s.game.extra_ball.position not in [8,17]:
+            p = [553,898]
+            dirty_rects.append(screen.blit(eb, p))
+            pygame.display.update(dirty_rects)
+    elif num in [8,16,24]:
+        if s.game.extra_ball.position not in [9,18]:
+            p = [623,898]
+            dirty_rects.append(screen.blit(eb, p))
+            if s.game.extra_ball.position != 24:
+                p = [478,943]
+                screen.blit(extra_ball, p)
+            pygame.display.update(dirty_rects)
+
+def clear_mixers(s):
     global screen
-    if num == 10:
-        ad_position = [283,467]
-        screen.blit(ad, ad_position)
-        pygame.display.update()
-    if num == 9:
-        ad_position = [283,509]
-        screen.blit(ad, ad_position)
-        pygame.display.update()
-    if num == 8:
-        ad_position = [283,392]
-        screen.blit(ad, ad_position)
-        pygame.display.update()
-    if num == 7:
-        ad_position = [283,431]
-        screen.blit(ad, ad_position)
-        pygame.display.update()
-    if num == 6:
-        c1d_position = [62,606]
-        screen.blit(double_triple, c1d_position)
-        pygame.display.update()
-    if num == 5:
-        c2d_position = [277,861]
-        screen.blit(double_triple, c2d_position)
-        pygame.display.update()
-    if num == 4:
-        c3d_position = [491,606]
-        screen.blit(double_triple, c3d_position)
-        pygame.display.update()
-    if num == 3:
-        c1d_position = [150,605]
-        screen.blit(double_triple, c1d_position)
-        pygame.display.update()
-    if num == 2:
-        c2d_position = [360,861]
-        screen.blit(double_triple, c2d_position)
-        pygame.display.update()
-    if num == 1:
-        c3d_position = [576,604]
-        screen.blit(double_triple, c3d_position)
+    dirty_rects = []
+
+    if s.game.c1_double.status == False:
+        dirty_rects.append(screen.blit(bg_gi, (60,604), pygame.Rect(60,604,86,36)))
+    if s.game.c2_double.status == False:
+        dirty_rects.append(screen.blit(bg_gi, (275,859), pygame.Rect(275,859,86,36)))
+    if s.game.c3_double.status == False:
+        dirty_rects.append(screen.blit(bg_gi, (489,604), pygame.Rect(489,604,86,36)))
+    if s.game.c1_triple.status == False:
+        dirty_rects.append(screen.blit(bg_gi, (148,603), pygame.Rect(148,603,86,36)))
+    if s.game.c2_triple.status == False:
+        dirty_rects.append(screen.blit(bg_gi, (360,858), pygame.Rect(360,858,86,36)))
+    if s.game.c3_triple.status == False:
+        dirty_rects.append(screen.blit(bg_gi, (575,602), pygame.Rect(575,602,86,36)))
+    if s.game.fss.status == False:
+        dirty_rects.append(screen.blit(bg_gi, (283,467), pygame.Rect(283,467,153,42)))
+    if s.game.fnt.status == False:
+        dirty_rects.append(screen.blit(bg_gi, (283,509), pygame.Rect(283,509,153,42)))
+    if s.game.all_double.status == False:
+        dirty_rects.append(screen.blit(bg_gi, (283,392), pygame.Rect(283,392,153,42)))
+    if s.game.all_triple.status == False:
+        dirty_rects.append(screen.blit(bg_gi, (283,431), pygame.Rect(283,431,153,42)))
+    pygame.display.update(dirty_rects)
+    return
+
+def animate_mixer1(s):
+    global screen
+    dirty_rects = []
+
+    if s.game.c1_double.status == False:
+        p = [60,604]
+        dirty_rects.append(screen.blit(double_triple, p))
+    if s.game.c2_triple.status == False:
+        p = [360,858]
+        dirty_rects.append(screen.blit(double_triple, p))
+    if s.game.fss.status == False:
+        p = [283,467]
+        dirty_rects.append(screen.blit(ad, p))
+    pygame.display.update(dirty_rects)
+    return
+
+def animate_mixer2(s):
+    global screen
+    dirty_rects = []
+    if s.game.c2_double.status == False:
+        p = [275,859]
+        dirty_rects.append(screen.blit(double_triple, p))
+    if s.game.c3_triple.status == False:
+        p = [575,602]
+        dirty_rects.append(screen.blit(double_triple, p))
+    if s.game.fnt.status == False:
+        p = [283,509]
+        dirty_rects.append(screen.blit(ad, p))
+    pygame.display.update(dirty_rects)
+    return
+
+def animate_mixer3(s):
+    global screen
+    dirty_rects = []
+
+    if s.game.c3_double.status == False:
+        p = [489,604]
+        dirty_rects.append(screen.blit(double_triple, p))
+    if s.game.all_triple.status == False:
+        p = [283,431]
+        dirty_rects.append(screen.blit(ad, p))
+    pygame.display.update(dirty_rects)
+    return
+
+def animate_mixer4(s):
+    global screen
+    dirty_rects = []
+
+    if s.game.all_double.status == False:
+        p = [283,392]
+        dirty_rects.append(screen.blit(ad, p))
+    if s.game.c1_triple.status == False:
+        p = [148,603]
+        dirty_rects.append(screen.blit(double_triple, p))
+    pygame.display.update(dirty_rects)
+    return
+
+def clear_features(s, num):
+    global screen
+    dirty_rects = []
+    if 14 not in s.holes:
+        dirty_rects.append(screen.blit(bg_gi, (126,512), pygame.Rect(126,512,46,44)))
+        dirty_rects.append(screen.blit(bg_gi, (340,680), pygame.Rect(340,680,46,44)))
+        dirty_rects.append(screen.blit(bg_gi, (502,468), pygame.Rect(502,468,46,44)))
+    if 15 not in s.holes:
+        dirty_rects.append(screen.blit(bg_gi, (178,556), pygame.Rect(178,556,46,44)))
+        dirty_rects.append(screen.blit(bg_gi, (340,724), pygame.Rect(340,724,46,44)))
+        dirty_rects.append(screen.blit(bg_gi, (452,424), pygame.Rect(452,424,46,44)))
+    if 16 not in s.holes:
+        dirty_rects.append(screen.blit(bg_gi, (126,468), pygame.Rect(126,468,46,44)))
+        dirty_rects.append(screen.blit(bg_gi, (390,636), pygame.Rect(390,636,46,44)))
+        dirty_rects.append(screen.blit(bg_gi, (602,556), pygame.Rect(602,556,46,44)))
+    if 17 not in s.holes:
+        dirty_rects.append(screen.blit(bg_gi, (226,424), pygame.Rect(226,424,46,44)))
+        dirty_rects.append(screen.blit(bg_gi, (440,767), pygame.Rect(440,767,46,44)))
+        dirty_rects.append(screen.blit(bg_gi, (552,468), pygame.Rect(552,468,46,44)))
+    if 19 not in s.holes:
+        dirty_rects.append(screen.blit(bg_gi, (176,424), pygame.Rect(176,424,46,44)))
+        dirty_rects.append(screen.blit(bg_gi, (290,680), pygame.Rect(290,680,46,44)))
+        dirty_rects.append(screen.blit(bg_gi, (602,512), pygame.Rect(602,512,46,44)))
+    if 22 not in s.holes:
+        dirty_rects.append(screen.blit(bg_gi, (75,424), pygame.Rect(75,424,46,44)))
+        dirty_rects.append(screen.blit(bg_gi, (291,768), pygame.Rect(291,768,46,44)))
+        dirty_rects.append(screen.blit(bg_gi, (602,424), pygame.Rect(602,424,46,44)))
+
+    pygame.display.update(dirty_rects)
+
+def draw_feature_animation(s, num):
+    global screen
+    dirty_rects = []
+    if num in [1,13]:
+        if 14 not in s.holes:
+            p = [126,512]
+            dirty_rects.append(screen.blit(number, p))
+            p = [340,680]
+            dirty_rects.append(screen.blit(number, p))
+            p = [502,468]
+            dirty_rects.append(screen.blit(number, p))
+            pygame.display.update(dirty_rects)
+            return
+    if num in [3,15]:
+        if 15 not in s.holes:
+            p = [178,556]
+            dirty_rects.append(screen.blit(number, p))
+            p = [340,724]
+            dirty_rects.append(screen.blit(number, p))
+            p = [452,424]
+            dirty_rects.append(screen.blit(number, p))
+            pygame.display.update(dirty_rects)
+            return
+    if num in [5,17]:
+        if 16 not in s.holes:
+            p = [126,468]
+            dirty_rects.append(screen.blit(number, p))
+            p = [390,636]
+            dirty_rects.append(screen.blit(number, p))
+            p = [602,556]
+            dirty_rects.append(screen.blit(number, p))
+            pygame.display.update(dirty_rects)
+            return
+    if num in [7,19]:
+        if 17 not in s.holes:
+            p = [226,424]
+            dirty_rects.append(screen.blit(number, p))
+            p = [440,767]
+            dirty_rects.append(screen.blit(number, p))
+            p = [552,468]
+            dirty_rects.append(screen.blit(number, p))
+            pygame.display.update(dirty_rects)
+            return
+    if num in [9,21]:
+        if 19 not in s.holes:
+            p = [176,424]
+            dirty_rects.append(screen.blit(number, p))
+            p = [290,680]
+            dirty_rects.append(screen.blit(number, p))
+            p = [602,512]
+            dirty_rects.append(screen.blit(number, p))
+            pygame.display.update(dirty_rects)
+            return
+    if num in [11,23]:
+        if 22 not in s.holes:
+            p = [75,424]
+            dirty_rects.append(screen.blit(number, p))
+            p = [291,768]
+            dirty_rects.append(screen.blit(number, p))
+            p = [602,424]
+            dirty_rects.append(screen.blit(number, p))
+            pygame.display.update(dirty_rects)
+            return
+
+
+def feature_animation(args):
+    global screen
+
+    dirty_rects = []
+    s = args[0]
+    num = args[1]
+
+    clear_features(s, num)
+
+    draw_feature_animation(s, num)
+
+def both_animation(args):
+    global screen
+
+    dirty_rects = []
+    s = args[0]
+    num = args[1]
+
+    clear_features(s, num)
+
+    if num % 2 == 0:
+        clear_mixers(s)
+
+    draw_feature_animation(s, num)
+

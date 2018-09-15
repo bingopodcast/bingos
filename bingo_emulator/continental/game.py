@@ -21,7 +21,7 @@ class MulticardBingo(procgame.game.Mode):
         self.game.sound.register_music('motor', "audio/six_card_motor.wav")
         self.game.sound.register_sound('search', "audio/six_card_search_old.wav")
         self.game.sound.register_sound('add', "audio/six_card_add_card.wav")
-        self.game.sound.register_sound('tilt', "audio/tilt.wav")
+        self.game.sound.register_sound('tilt', "audio/search_index.wav")
         self.game.sound.register_sound('step', "audio/step.wav")
 
     def sw_coin_active(self, sw):
@@ -47,7 +47,31 @@ class MulticardBingo(procgame.game.Mode):
             self.check_lifter_status()
         else:
             self.check_lifter_status()
+    
+    def sw_regular_inactive_for_1ms(self,sw):
+        if self.game.switches.drawer.is_active():
+            if self.game.search_index.status == True:
+                self.game.search_index.disengage()
+                self.search()
 
+    def sw_double_inactive_for_1ms(self,sw):
+        if self.game.switches.drawer.is_active():
+            if self.game.search_index.status == True:
+                self.game.search_index.disengage()
+                self.search()
+
+    def sw_left_inactive_for_1ms(self,sw):
+        if self.game.switches.drawer.is_inactive():
+            if self.game.search_index.status == True:
+                self.game.search_index.disengage()
+                self.search()
+
+    def sw_right_inactive_for_1ms(self,sw):
+        if self.game.switches.drawer.is_inactive():
+            if self.game.search_index.status == True:
+                self.game.search_index.disengage()
+                self.search()
+    
     def sw_enter_active(self, sw):
         if self.game.switches.left.is_active() and self.game.switches.right.is_active():
             self.game.end_run_loop()
@@ -56,7 +80,7 @@ class MulticardBingo(procgame.game.Mode):
             if self.game.ball_count.position >= 4:
                 #self.game.sound.stop_music()
                 if self.game.search_index.status == False:
-                    self.game.sound.play('search')
+                    #self.game.sound.play('search')
                     self.search()
 
     def check_shutter(self, start=0):
@@ -81,8 +105,8 @@ class MulticardBingo(procgame.game.Mode):
         self.game.search_index.disengage()
         self.game.coils.counter.pulse()
         self.game.returned = False
-        self.game.sound.stop('add')
-        self.game.sound.play('add')
+        #self.game.sound.stop('add')
+        #self.game.sound.play('add')
         self.game.reflex.decrease()
         if self.game.reflex.position < 40:
             self.game.cu = 1
@@ -91,7 +115,7 @@ class MulticardBingo(procgame.game.Mode):
         self.game.probability.spin()
         if self.game.start.status == True:
             if self.game.selector.position < 11:
-                self.game.selector.step()
+                self.game.selector.position = self.game.selector.position + 1
                 if self.check_corners() == True:
                     if self.game.selector.position == 1:
                         self.game.corners1.engage(self.game)
@@ -235,7 +259,7 @@ class MulticardBingo(procgame.game.Mode):
         self.game.start.disengage()
         if self.game.switches.shutter.is_active():
             self.game.coils.shutter.enable()
-        self.game.ball_count.step()
+        self.game.ball_count.position = self.game.ball_count.position + 1
         self.game.probability.spin()
         if self.game.ball_count.position == 5:
             self.game.coils.redROLamp.disable()
@@ -574,7 +598,7 @@ class MulticardBingo(procgame.game.Mode):
             self.game.corners4.engage(self.game)
             self.game.corners5.engage(self.game)
             self.game.corners6.engage(self.game)
-            self.game.coils.yellowROLamp.disable()
+            self.game.coils.redROLamp.disable()
             self.delay(name="display", delay=0.1, handler=graphics.continental.display, param=self)
 
     def sw_yellowstar_active(self, sw):
@@ -585,7 +609,7 @@ class MulticardBingo(procgame.game.Mode):
             self.game.super4.engage(self.game)
             self.game.super5.engage(self.game)
             self.game.super6.engage(self.game)
-            self.game.coils.redROLamp.disable()
+            self.game.coils.yellowROLamp.disable()
             self.delay(name="display", delay=0.1, handler=graphics.continental.display, param=self)
 
     def sw_replayReset_active(self, sw):
@@ -647,12 +671,13 @@ class MulticardBingo(procgame.game.Mode):
                 self.delay(name="display", delay=0.1, handler=graphics.continental.display, param=self)
             self.game.coils.registerDown.pulse()
 
-    def replay_step_up(self):
-        if self.game.replays < 8999:
-            self.game.replays += 1
-            graphics.replay_step_up(self.game.replays, graphics.continental.reel1, graphics.continental.reel10, graphics.continental.reel100, graphics.continental.reel1000)
-        self.game.reflex.increase()
-        self.game.coils.registerUp.pulse()
+    def replay_step_up(self, number):
+        if self.game.replays + number < 8999:
+            self.game.replays += number
+        else:
+            self.game.replays = 8999
+        graphics.digital_replay_step_up(self.game.replays, graphics.continental.reel1, graphics.continental.reel10, graphics.continental.reel100, graphics.continental.reel1000)
+        #self.game.reflex.increase()
         graphics.continental.display(self)
  
     def search(self):
@@ -726,39 +751,75 @@ class MulticardBingo(procgame.game.Mode):
                         else:
                             if super_line == True and self.game.super1.status == True:
                                     if self.game.card1_replay_counter.position < 16:
+                                        self.game.sound.play('tilt')
                                         self.game.search_index.engage(self.game)
                                         self.game.sound.stop('search')
-                                        self.wait_for_input((1, 16))
+                                        replays = 16
+                                        if self.game.onetwothree.status == True:
+                                            replays = 32
+                                        if self.game.dd1.status == True:
+                                            replays = 64
+                                        self.wait_for_input((1, replays))
                             else:
                                 if self.game.card1_replay_counter.position < 4:
+                                    self.game.sound.play('tilt')
                                     self.game.search_index.engage(self.game)
                                     self.game.sound.stop('search')
-                                    self.wait_for_input((1, 4))
+                                    replays = 4
+                                    if self.game.onetwothree.status == True:
+                                        replays = 8
+                                    if self.game.dd1.status == True:
+                                        replays = 16
+                                    self.wait_for_input((1, replays))
                     if relays == 4:
                         if corners == True:
                             if self.game.corners1.status == True:
                                 if self.game.card1_replay_counter.position < 100:
+                                    self.game.sound.play('tilt')
                                     self.game.search_index.engage(self.game)
                                     self.game.sound.stop('search')
-                                    self.wait_for_input((1, 100))
+                                    replays = 100
+                                    if self.game.onetwothree.status == True:
+                                        replays = 200
+                                    if self.game.dd1.status == True:
+                                        replays = 400
+                                    self.wait_for_input((1, replays))
                         elif red_diagonal == True and self.game.selector.position < 7:
                             pass
                         else:
                             if self.game.super1.status == True and super_line == True:
                                     if self.game.card1_replay_counter.position < 100:
+                                        self.game.sound.play('tilt')
                                         self.game.search_index.engage(self.game)
                                         self.game.sound.stop('search')
-                                        self.wait_for_input((1, 100))
+                                        replays = 100
+                                        if self.game.onetwothree.status == True:
+                                            replays = 200
+                                        if self.game.dd1.status == True:
+                                            replays = 400
+                                        self.wait_for_input((1, replays))
                             else:
                                 if self.game.card1_replay_counter.position < 16:
+                                    self.game.sound.play('tilt')
                                     self.game.search_index.engage(self.game)
                                     self.game.sound.stop('search')
-                                    self.wait_for_input((1, 16))
+                                    replays = 16
+                                    if self.game.onetwothree.status == True:
+                                        replays = 32
+                                    if self.game.dd1.status == True:
+                                        replays = 64
+                                    self.wait_for_input((1, replays))
                     if relays == 5:
                         if self.game.card1_replay_counter.position < 100:
+                            self.game.sound.play('tilt')
                             self.game.search_index.engage(self.game)
                             self.game.sound.stop('search')
-                            self.wait_for_input((1, 100))
+                            replays = 100
+                            if self.game.onetwothree.status == True:
+                                replays = 200
+                            if self.game.dd1.status == True:
+                                replays = 400
+                            self.wait_for_input((1, replays))
             if self.game.card2_missed.status == False:
                 if card == 2:
                     if relays == 3:
@@ -769,39 +830,75 @@ class MulticardBingo(procgame.game.Mode):
                         else:
                             if super_line == True and self.game.super2.status == True:
                                     if self.game.card2_replay_counter.position < 20:
+                                        self.game.sound.play('tilt')
                                         self.game.search_index.engage(self.game)
                                         self.game.sound.stop('search')
-                                        self.wait_for_input((2, 20))
+                                        replays = 20
+                                        if self.game.onetwothree.status == True:
+                                            replays = 40
+                                        if self.game.dd2.status == True:
+                                            replays = 80
+                                        self.wait_for_input((2, replays))
                             else:
                                 if self.game.card2_replay_counter.position < 4:
+                                    self.game.sound.play('tilt')
                                     self.game.search_index.engage(self.game)
                                     self.game.sound.stop('search')
-                                    self.wait_for_input((2, 4))
+                                    replays = 4
+                                    if self.game.onetwothree.status == True:
+                                        replays = 8
+                                    if self.game.dd2.status == True:
+                                        replays = 16
+                                    self.wait_for_input((2, replays))
                     if relays == 4:
                         if corners == True:
-                            if self.corners2.status == True:
+                            if self.game.corners2.status == True:
                                 if self.game.card2_replay_counter.position < 100:
+                                    self.game.sound.play('tilt')
                                     self.game.search_index.engage(self.game)
                                     self.game.sound.stop('search')
-                                    self.wait_for_input((2, 100))
+                                    replays = 100
+                                    if self.game.onetwothree.status == True:
+                                        replays = 200
+                                    if self.game.dd2.status == True:
+                                        replays = 400
+                                    self.wait_for_input((2, replays))
                         elif red_diagonal == True and self.game.selector.position < 7:
                             pass
                         else:
                             if super_line == True and self.game.super2.status == True:
                                     if self.game.card2_replay_counter.position < 100:
+                                        self.game.sound.play('tilt')
                                         self.game.search_index.engage(self.game)
                                         self.game.sound.stop('search')
-                                        self.wait_for_input((2, 100))
+                                        replays = 100
+                                        if self.game.onetwothree.status == True:
+                                            replays = 200
+                                        if self.game.dd2.status == True:
+                                            replays = 400
+                                        self.wait_for_input((2, replays))
                             else:
                                 if self.game.card2_replay_counter.position < 20:
+                                    self.game.sound.play('tilt')
                                     self.game.search_index.engage(self.game)
                                     self.game.sound.stop('search')
-                                    self.wait_for_input((2, 20))
+                                    replays = 20
+                                    if self.game.onetwothree.status == True:
+                                        replays = 40
+                                    if self.game.dd2.status == True:
+                                        replays = 80
+                                    self.wait_for_input((2, replays))
                     if relays == 5:
                         if self.game.card2_replay_counter.position < 100:
+                            self.game.sound.play('tilt')
                             self.game.search_index.engage(self.game)
                             self.game.sound.stop('search')
-                            self.wait_for_input((2, 100))
+                            replays = 100
+                            if self.game.onetwothree.status == True:
+                                replays = 200
+                            if self.game.dd2.status == True:
+                                replays = 400
+                            self.wait_for_input((2, replays))
             if self.game.card3_missed.status == False:
                 if card == 3:
                     if relays == 3:
@@ -812,39 +909,75 @@ class MulticardBingo(procgame.game.Mode):
                         else:
                             if super_line == True and self.game.super3.status == True:
                                     if self.game.card3_replay_counter.position < 20:
+                                        self.game.sound.play('tilt')
                                         self.game.search_index.engage(self.game)
                                         self.game.sound.stop('search')
-                                        self.wait_for_input((3, 20))
+                                        replays = 20
+                                        if self.game.onetwothree.status == True:
+                                            replays = 40
+                                        if self.game.dd3.status == True:
+                                            replays = 80
+                                        self.wait_for_input((3, replays))
                             else:
                                 if self.game.card3_replay_counter.position < 4:
+                                    self.game.sound.play('tilt')
                                     self.game.search_index.engage(self.game)
                                     self.game.sound.stop('search')
-                                    self.wait_for_input((3, 4))
+                                    replays = 4
+                                    if self.game.onetwothree.status == True:
+                                        replays = 8
+                                    if self.game.dd3.status == True:
+                                        replays = 16
+                                    self.wait_for_input((3, replays))
                     if relays == 4:
                         if corners == True:
                             if self.game.corners3.status == True:
                                 if self.game.card3_replay_counter.position < 120:
+                                    self.game.sound.play('tilt')
                                     self.game.search_index.engage(self.game)
                                     self.game.sound.stop('search')
-                                    self.wait_for_input((3, 120))
+                                    replays = 120
+                                    if self.game.onetwothree.status == True:
+                                        replays = 240
+                                    if self.game.dd3.status == True:
+                                        replays = 480
+                                    self.wait_for_input((3, replays))
                         elif red_diagonal == True and self.game.selector.position < 7:
                             pass
                         else:
                             if super_line == True and self.game.super3.status == True:
                                     if self.game.card3_replay_counter.position < 120:
+                                        self.game.sound.play('tilt')
                                         self.game.search_index.engage(self.game)
                                         self.game.sound.stop('search')
-                                        self.wait_for_input((3, 120))
+                                        replays = 120
+                                        if self.game.onetwothree.status == True:
+                                            replays = 240
+                                        if self.game.dd3.status == True:
+                                            replays = 480
+                                        self.wait_for_input((3, replays))
                             else:
                                 if self.game.card3_replay_counter.position < 20:
+                                    self.game.sound.play('tilt')
                                     self.game.search_index.engage(self.game)
                                     self.game.sound.stop('search')
-                                    self.wait_for_input((3, 20))
+                                    replays = 20
+                                    if self.game.onetwothree.status == True:
+                                        replays = 40
+                                    if self.game.dd3.status == True:
+                                        replays = 80
+                                    self.wait_for_input((3, replays))
                     if relays == 5:
                         if self.game.card3_replay_counter.position < 120:
+                            self.game.sound.play('tilt')
                             self.game.search_index.engage(self.game)
                             self.game.sound.stop('search')
-                            self.wait_for_input((3, 120))
+                            replays = 120
+                            if self.game.onetwothree.status == True:
+                                replays = 240
+                            if self.game.dd3.status == True:
+                                replays = 480
+                            self.wait_for_input((3, replays))
             if self.game.card4_missed.status == False:
                 if card == 4:
                     if relays == 3:
@@ -855,39 +988,75 @@ class MulticardBingo(procgame.game.Mode):
                         else:
                             if super_line == True and self.game.super4.status == True:
                                     if self.game.card4_replay_counter.position < 24:
+                                        self.game.sound.play('tilt')
                                         self.game.search_index.engage(self.game)
                                         self.game.sound.stop('search')
-                                        self.wait_for_input((4, 24))
+                                        replays = 24
+                                        if self.game.fourfivesix.status == True:
+                                            replays = 48
+                                        if self.game.dd4.status == True:
+                                            replays = 96
+                                        self.wait_for_input((4, replays))
                             else:
                                 if self.game.card4_replay_counter.position < 4:
+                                    self.game.sound.play('tilt')
                                     self.game.search_index.engage(self.game)
                                     self.game.sound.stop('search')
-                                    self.wait_for_input((4, 4))
+                                    replays = 4
+                                    if self.game.fourfivesix.status == True:
+                                        replays = 8
+                                    if self.game.dd4.status == True:
+                                        replays = 16
+                                    self.wait_for_input((4, replays))
                     if relays == 4:
                         if corners == True:
                             if self.game.corners4.status == True:
                                 if self.game.card4_replay_counter.position < 140:
+                                    self.game.sound.play('tilt')
                                     self.game.search_index.engage(self.game)
                                     self.game.sound.stop('search')
-                                    self.wait_for_input((4, 140))
+                                    replays = 140
+                                    if self.game.fourfivesix.status == True:
+                                        replays = 280
+                                    if self.game.dd4.status == True:
+                                        replays = 560
+                                    self.wait_for_input((4, replays))
                         elif red_diagonal == True and self.game.selector.position < 8:
                             pass
                         else:
                             if super_line == True and self.game.super4.status == True:
                                     if self.game.card4_replay_counter.position < 140:
+                                        self.game.sound.play('tilt')
                                         self.game.search_index.engage(self.game)
                                         self.game.sound.stop('search')
-                                        self.wait_for_input((4, 140))
+                                        replays = 140
+                                        if self.game.fourfivesix.status == True:
+                                            replays = 280
+                                        if self.game.dd4.status == True:
+                                            replays = 560
+                                        self.wait_for_input((4, replays))
                             else:
                                 if self.game.card4_replay_counter.position < 24:
+                                    self.game.sound.play('tilt')
                                     self.game.search_index.engage(self.game)
                                     self.game.sound.stop('search')
-                                    self.wait_for_input((4, 24))
+                                    replays = 24
+                                    if self.game.fourfivesix.status == True:
+                                        replays = 48
+                                    if self.game.dd4.status == True:
+                                        replays = 96
+                                    self.wait_for_input((4, replays))
                     if relays == 5:
                         if self.game.card4_replay_counter.position < 140:
+                            self.game.sound.play('tilt')
                             self.game.search_index.engage(self.game)
                             self.game.sound.stop('search')
-                            self.wait_for_input((4, 140))
+                            replays = 140
+                            if self.game.fourfivesix.status == True:
+                                replays = 280
+                            if self.game.dd4.status == True:
+                                replays = 560
+                            self.wait_for_input((4, replays))
             if self.game.card5_missed.status == False:
                 if card == 5:
                     if relays == 3:
@@ -898,39 +1067,75 @@ class MulticardBingo(procgame.game.Mode):
                         else:
                             if super_line == True and self.game.super5.status == True:
                                     if self.game.card5_replay_counter.position < 36:
+                                        self.game.sound.play('tilt')
                                         self.game.search_index.engage(self.game)
                                         self.game.sound.stop('search')
-                                        self.wait_for_input((5, 36))
+                                        replays = 36
+                                        if self.game.fourfivesix.status == True:
+                                            replays = 72
+                                        if self.game.dd5.status == True:
+                                            replays = 144
+                                        self.wait_for_input((5, replays))
                             else:
                                 if self.game.card5_replay_counter.position < 4:
+                                    self.game.sound.play('tilt')
                                     self.game.search_index.engage(self.game)
                                     self.game.sound.stop('search')
-                                    self.wait_for_input((5, 4))
+                                    replays = 4
+                                    if self.game.fourfivesix.status == True:
+                                        replays = 8
+                                    if self.game.dd5.status == True:
+                                        replays = 16
+                                    self.wait_for_input((5, replays))
                     if relays == 4:
                         if corners == True:
                             if self.game.corners5.status == True:
                                 if self.game.card5_replay_counter.position < 240:
+                                    self.game.sound.play('tilt')
                                     self.game.search_index.engage(self.game)
                                     self.game.sound.stop('search')
-                                    self.wait_for_input((5, 240))
+                                    replays = 240
+                                    if self.game.fourfivesix.status == True:
+                                        replays = 480
+                                    if self.game.dd5.status == True:
+                                        replays = 960
+                                    self.wait_for_input((5, replays))
                         elif red_diagonal == True and self.game.selector.position < 8:
                             pass
                         else:
                             if super_line == True and self.game.super5.status == True:
                                     if self.game.card5_replay_counter.position < 240:
+                                        self.game.sound.play('tilt')
                                         self.game.search_index.engage(self.game)
                                         self.game.sound.stop('search')
-                                        self.wait_for_input((5, 240))
+                                        replays = 240
+                                        if self.game.fourfivesix.status == True:
+                                            replays = 480
+                                        if self.game.dd5.status == True:
+                                            replays = 960
+                                        self.wait_for_input((5, replays))
                             else:
                                 if self.game.card5_replay_counter.position < 36:
+                                    self.game.sound.play('tilt')
                                     self.game.search_index.engage(self.game)
                                     self.game.sound.stop('search')
-                                    self.wait_for_input((5, 36))
+                                    replays = 36
+                                    if self.game.fourfivesix.status == True:
+                                        replays = 72
+                                    if self.game.dd5.status == True:
+                                        replays = 144
+                                    self.wait_for_input((5, replays))
                     if relays == 5:
                         if self.game.card5_replay_counter.position < 240:
+                            self.game.sound.play('tilt')
                             self.game.search_index.engage(self.game)
                             self.game.sound.stop('search')
-                            self.wait_for_input((5, 240))
+                            replays = 240
+                            if self.game.fourfivesix.status == True:
+                                replays = 480
+                            if self.game.dd5.status == True:
+                                replays = 960
+                            self.wait_for_input((5, replays))
             if self.game.card6_missed.status == False:
                 if card == 6:
                     if relays == 3:
@@ -941,66 +1146,78 @@ class MulticardBingo(procgame.game.Mode):
                         else:
                             if super_line == True and self.game.super6.status == True:
                                     if self.game.card6_replay_counter.position < 44:
+                                        self.game.sound.play('tilt')
                                         self.game.search_index.engage(self.game)
                                         self.game.sound.stop('search')
-                                        self.wait_for_input((6, 44))
+                                        replays = 44
+                                        if self.game.fourfivesix.status == True:
+                                            replays = 88
+                                        if self.game.dd6.status == True:
+                                            replays = 176
+                                        self.wait_for_input((6, replays))
                             else:
                                 if self.game.card6_replay_counter.position < 4:
+                                    self.game.sound.play('tilt')
                                     self.game.search_index.engage(self.game)
                                     self.game.sound.stop('search')
-                                    self.wait_for_input((6, 4))
+                                    replays = 4
+                                    if self.game.fourfivesix.status == True:
+                                        replays = 8
+                                    if self.game.dd6.status == True:
+                                        replays = 16
+                                    self.wait_for_input((6, replays))
                     if relays == 4:
                         if corners == True:
                             if self.game.corners6.status == True:
                                 if self.game.card6_replay_counter.position < 300:
+                                    self.game.sound.play('tilt')
                                     self.game.search_index.engage(self.game)
                                     self.game.sound.stop('search')
-                                    self.wait_for_input((6, 300))
+                                    replays = 300
+                                    if self.game.fourfivesix.status == True:
+                                        replays = 600
+                                    if self.game.dd6.status == True:
+                                        replays = 1200
+                                    self.wait_for_input((6, replays))
                         elif red_diagonal == True and self.game.selector.position < 8:
                             pass
                         else:
                             if super_line == True and self.game.super6.status == True:
                                     if self.game.card6_replay_counter.position < 300:
+                                        self.game.sound.play('tilt')
                                         self.game.search_index.engage(self.game)
                                         self.game.sound.stop('search')
-                                        self.wait_for_input((6, 300))
+                                        replays = 300
+                                        if self.game.fourfivesix.status == True:
+                                            replays = 600
+                                        if self.game.dd6.status == True:
+                                            replays = 1200
+                                        self.wait_for_input((6, replays))
                             else:
                                 if self.game.card6_replay_counter.position < 44:
+                                    self.game.sound.play('tilt')
                                     self.game.search_index.engage(self.game)
                                     self.game.sound.stop('search')
-                                    self.wait_for_input((6, 44))
+                                    replays = 44
+                                    if self.game.fourfivesix.status == True:
+                                        replays = 88
+                                    if self.game.dd6.status == True:
+                                        replays = 176
+                                    self.wait_for_input((6, replays))
                     if relays == 5:
                         if self.game.card6_replay_counter.position < 300:
+                            self.game.sound.play('tilt')
                             self.game.search_index.engage(self.game)
                             self.game.sound.stop('search')
-                            self.wait_for_input((6, 300))
+                            replays = 300
+                            if self.game.fourfivesix.status == True:
+                                replays = 600
+                            if self.game.dd6.status == True:
+                                replays = 1200
+                            self.wait_for_input((6, replays))
 
     def wait_for_input(self, i):
-        if (i[0] == 1 or i[0] == 2 or i[0] == 3) and self.game.onetwothree.status == True:
-            rc = i[1] * 2
-        elif (i[0] == 4 or i[0] == 5 or i[0] == 6) and self.game.fourfivesix.status == True:
-            rc = i[1] * 2
-        else:
-            rc = i[1]
-
-        if i[0] == 1:
-            if self.game.dd1.status == True and self.game.onetwothree.status == True:
-                rc = rc * 2
-        if i[0] == 2:
-            if self.game.dd2.status == True and self.game.onetwothree.status == True:
-                rc = rc * 2
-        if i[0] == 3:
-            if self.game.dd3.status == True and self.game.onetwothree.status == True:
-                rc = rc * 2
-        if i[0] == 4:
-            if self.game.dd4.status == True and self.game.fourfivesix.status == True:
-                rc = rc * 2
-        if i[0] == 5:
-            if self.game.dd5.status == True and self.game.fourfivesix.status == True:
-                rc = rc * 2
-        if i[0] == 6:
-            if self.game.dd6.status == True and self.game.fourfivesix.status == True:
-                rc = rc * 2
+        rc = i[1]
    
         if self.game.switches.drawer.is_inactive():
             if self.game.switches.left.is_inactive() and self.game.switches.right.is_inactive():
@@ -1135,37 +1352,31 @@ class MulticardBingo(procgame.game.Mode):
                 else:
                     if i[0] == 1:
                         self.game.card1_missed.engage(self.game)
-                        self.game.search_index.disengage()
                         self.cancel_delayed(name="blink_double")
                         self.delay(name="display", delay=0.1, handler=graphics.continental.display, param=self)
                         self.delay(name="research", delay=1, handler=self.search)
                     elif i[0] == 2:
                         self.game.card2_missed.engage(self.game)
-                        self.game.search_index.disengage()
                         self.cancel_delayed(name="blink_double")
                         self.delay(name="display", delay=0.1, handler=graphics.continental.display, param=self)
                         self.delay(name="research", delay=1, handler=self.search)
                     elif i[0] == 3:
                         self.game.card3_missed.engage(self.game)
-                        self.game.search_index.disengage()
                         self.cancel_delayed(name="blink_double")
                         self.delay(name="display", delay=0.1, handler=graphics.continental.display, param=self)
                         self.delay(name="research", delay=1, handler=self.search)
                     elif i[0] == 4:
                         self.game.card4_missed.engage(self.game)
-                        self.game.search_index.disengage()
                         self.cancel_delayed(name="blink_double")
                         self.delay(name="display", delay=0.1, handler=graphics.continental.display, param=self)
                         self.delay(name="research", delay=1, handler=self.search)
                     elif i[0] == 5:
                         self.game.card5_missed.engage(self.game)
-                        self.game.search_index.disengage()
                         self.cancel_delayed(name="blink_double")
                         self.delay(name="display", delay=0.1, handler=graphics.continental.display, param=self)
                         self.delay(name="research", delay=1, handler=self.search)
                     elif i[0] == 6:
                         self.game.card6_missed.engage(self.game)
-                        self.game.search_index.disengage()
                         self.cancel_delayed(name="blink_double")
                         self.delay(name="display", delay=0.1, handler=graphics.continental.display, param=self)
                         self.delay(name="research", delay=1, handler=self.search)
@@ -1302,37 +1513,31 @@ class MulticardBingo(procgame.game.Mode):
                 else:
                     if i[0] == 1:
                         self.game.card1_missed.engage(self.game)
-                        self.game.search_index.disengage()
                         self.cancel_delayed(name="blink_double")
                         self.delay(name="display", delay=0.1, handler=graphics.continental.display, param=self)
                         self.delay(name="research", delay=1, handler=self.search)
                     elif i[0] == 2:
                         self.game.card2_missed.engage(self.game)
-                        self.game.search_index.disengage()
                         self.cancel_delayed(name="blink_double")
                         self.delay(name="display", delay=0.1, handler=graphics.continental.display, param=self)
                         self.delay(name="research", delay=1, handler=self.search)
                     elif i[0] == 3:
                         self.game.card3_missed.engage(self.game)
-                        self.game.search_index.disengage()
                         self.cancel_delayed(name="blink_double")
                         self.delay(name="display", delay=0.1, handler=graphics.continental.display, param=self)
                         self.delay(name="research", delay=1, handler=self.search)
                     elif i[0] == 4:
                         self.game.card4_missed.engage(self.game)
-                        self.game.search_index.disengage()
                         self.cancel_delayed(name="blink_double")
                         self.delay(name="display", delay=0.1, handler=graphics.continental.display, param=self)
                         self.delay(name="research", delay=1, handler=self.search)
                     elif i[0] == 5:
                         self.game.card5_missed.engage(self.game)
-                        self.game.search_index.disengage()
                         self.cancel_delayed(name="blink_double")
                         self.delay(name="display", delay=0.1, handler=graphics.continental.display, param=self)
                         self.delay(name="research", delay=1, handler=self.search)
                     elif i[0] == 6:
                         self.game.card6_missed.engage(self.game)
-                        self.game.search_index.disengage()
                         self.cancel_delayed(name="blink_double")
                         self.delay(name="display", delay=0.1, handler=graphics.continental.display, param=self)
                         self.delay(name="research", delay=1, handler=self.search)
@@ -1393,80 +1598,40 @@ class MulticardBingo(procgame.game.Mode):
             return 0
 
     def card1_replay_step_up(self, number):
-        if number >= 1:
-            self.game.card1_replay_counter.step()
-            number -= 1
-            self.replay_step_up()
-            self.delay(name="card1_replay_step_up", delay=0.1, handler=self.card1_replay_step_up, param=number)
-        else:
-            self.game.search_index.disengage()
-            self.cancel_delayed(name="card1_replay_step_up")
-            self.search()
+        self.game.card1_replay_counter.position += number
+        self.replay_step_up(number)
+        self.cancel_delayed(name="card1_replay_step_up")
+        self.search()
 
     def card2_replay_step_up(self, number):
-        if number >= 1:
-            self.game.card2_replay_counter.step()
-            number -= 1
-            self.replay_step_up()
-            if self.game.replays == 8999:
-                number = 0
-            self.delay(name="card2_replay_step_up", delay=0.1, handler=self.card2_replay_step_up, param=number)
-        else:
-            self.game.search_index.disengage()
-            self.cancel_delayed(name="card2_replay_step_up")
-            self.search()
+        self.game.card2_replay_counter.position += number
+        self.replay_step_up(number)
+        self.cancel_delayed(name="card2_replay_step_up")
+        self.search()
 
     def card3_replay_step_up(self, number):
-        if number >= 1:
-            self.game.card3_replay_counter.step()
-            number -= 1
-            self.replay_step_up()
-            if self.game.replays == 8999:
-                number = 0
-            self.delay(name="card3_replay_step_up", delay=0.1, handler=self.card3_replay_step_up, param=number)
-        else:
-            self.game.search_index.disengage()
-            self.cancel_delayed(name="card3_replay_step_up")
-            self.search()
+        self.game.card3_replay_counter.position += number
+        self.replay_step_up(number)
+        self.cancel_delayed(name="card3_replay_step_up")
+        self.search()
 
     def card4_replay_step_up(self, number):
-        if number >= 1:
-            self.game.card4_replay_counter.step()
-            number -= 1
-            self.replay_step_up()
-            if self.game.replays == 8999:
-                number = 0
-            self.delay(name="card4_replay_step_up", delay=0.1, handler=self.card4_replay_step_up, param=number)
-        else:
-            self.game.search_index.disengage()
-            self.cancel_delayed(name="card4_replay_step_up")
-            self.search()
+        self.game.card4_replay_counter.position += number
+        self.replay_step_up(number)
+        self.cancel_delayed(name="card4_replay_step_up")
+        self.search()
 
     def card5_replay_step_up(self, number):
-        if number >= 1:
-            self.game.card5_replay_counter.step()
-            number -= 1
-            self.replay_step_up()
-            if self.game.replays == 8999:
-                number = 0
-            self.delay(name="card5_replay_step_up", delay=0.1, handler=self.card5_replay_step_up, param=number)
-        else:
-            self.game.search_index.disengage()
-            self.cancel_delayed(name="card5_replay_step_up")
-            self.search()
+        self.game.card5_replay_counter.position += number
+        self.replay_step_up(number)
+        self.cancel_delayed(name="card5_replay_step_up")
+        self.search()
 
     def card6_replay_step_up(self, number):
-        if number >= 1:
-            self.game.card6_replay_counter.step()
-            number -= 1
-            self.replay_step_up()
-            if self.game.replays == 8999:
-                number = 0
-            self.delay(name="card6_replay_step_up", delay=0.1, handler=self.card6_replay_step_up, param=number)
-        else:
-            self.game.search_index.disengage()
-            self.cancel_delayed(name="card6_replay_step_up")
-            self.search()
+        self.game.card6_replay_counter.position += number
+        self.replay_step_up(number)
+        self.cancel_delayed(name="card6_replay_step_up")
+        self.search()
 
     def closed_search_relays(self, rivets, c1, c2, s1, s2):
         # This function is critical, as it will determine which card is returned, etc.  I need to check both the position of the

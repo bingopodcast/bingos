@@ -20,7 +20,7 @@ class MulticardBingo(procgame.game.Mode):
         self.game.anti_cheat.engage(self.game)
         self.startup()
         self.game.sound.register_music('motor', "audio/six_card_motor.wav")
-        self.game.sound.register_music('search', "audio/six_card_search_old.wav")
+        self.game.sound.register_sound('search', "audio/six_card_search_old.wav")
         self.game.sound.register_sound('add', "audio/six_card_add_card.wav")
         self.game.sound.register_sound('tilt', "audio/tilt.wav")
         self.game.sound.register_sound('step', "audio/step.wav")
@@ -29,8 +29,6 @@ class MulticardBingo(procgame.game.Mode):
     def sw_coin_active(self, sw):
         self.game.tilt.disengage()
         self.regular_play()
-        self.game.sound.stop('add')
-        self.game.sound.play('add')
         self.delay(name="display", delay=0.1, handler=graphics.shoot_a_line_63.display, param=self)
 
     def sw_startButton_active(self, sw):
@@ -45,6 +43,7 @@ class MulticardBingo(procgame.game.Mode):
     
     def timeout_actions(self):
         if (self.game.timer.position < 7):
+            self.game.sound.play_music('motor', -1)
             self.game.timer.step()
             self.delay(name="timeout", delay=5.0, handler=self.timeout_actions)
         else:
@@ -92,6 +91,8 @@ class MulticardBingo(procgame.game.Mode):
         self.cancel_delayed(name="card5_replay_step_up")
         self.cancel_delayed(name="card6_replay_step_up")
         self.cancel_delayed(name="timeout")
+        self.game.sound.stop('add')
+        self.game.sound.play('add')
         self.game.search_index.disengage()
         self.game.coils.counter.pulse()
         self.game.returned = False
@@ -158,6 +159,10 @@ class MulticardBingo(procgame.game.Mode):
         if self.game.switches.shutter.is_active():
             self.game.coils.shutter.enable()
         self.game.ball_count.step()
+        if self.game.ball_count.position == 4:
+            self.game.sound.stop_music()
+            self.game.sound.play('tilt')
+            self.game.sound.play('tilt')
         if self.game.ball_count.position <= 4:
             self.check_lifter_status()
 
@@ -382,8 +387,8 @@ class MulticardBingo(procgame.game.Mode):
         # search activity.  For each revolution of the search disc (which happens about every 5-7 seconds), the
         # game will activate() each search relay for each 'hot' rivet on the search disc.  This can be on a different
         # wiper finger for each set of rivets on the search disc.
-        self.game.sound.stop_music()
-        self.game.sound.play_music('search', -1)
+        self.game.sound.stop('search')
+        self.game.sound.play('search')
 
         if self.game.search_index.status == False and self.game.replays < 200:
             for i in range(0, 100):
@@ -586,6 +591,7 @@ class MulticardBingo(procgame.game.Mode):
                             self.card6_replay_step_up(510 - self.game.card6_replay_counter.position)
 
     def card1_replay_step_up(self, number):
+        self.game.sound.stop_music()
         if number >= 1:
             self.game.card1_replay_counter.step()
             number -= 1
@@ -599,6 +605,7 @@ class MulticardBingo(procgame.game.Mode):
             self.search()
 
     def card2_replay_step_up(self, number):
+        self.game.sound.stop_music()
         if number >= 1:
             self.game.card2_replay_counter.step()
             number -= 1
@@ -612,6 +619,7 @@ class MulticardBingo(procgame.game.Mode):
             self.search()
 
     def card3_replay_step_up(self, number):
+        self.game.sound.stop_music()
         if number >= 1:
             self.game.card3_replay_counter.step()
             number -= 1
@@ -625,6 +633,7 @@ class MulticardBingo(procgame.game.Mode):
             self.search()
 
     def card4_replay_step_up(self, number):
+        self.game.sound.stop_music()
         if number >= 1:
             self.game.card4_replay_counter.step()
             number -= 1
@@ -638,6 +647,7 @@ class MulticardBingo(procgame.game.Mode):
             self.search()
 
     def card5_replay_step_up(self, number):
+        self.game.sound.stop_music()
         if number >= 1:
             self.game.card5_replay_counter.step()
             number -= 1
@@ -651,6 +661,7 @@ class MulticardBingo(procgame.game.Mode):
             self.search()
 
     def card6_replay_step_up(self, number):
+        self.game.sound.stop_music()
         if number >= 1:
             self.game.card6_replay_counter.step()
             number -= 1

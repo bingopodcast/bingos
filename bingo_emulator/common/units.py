@@ -33,19 +33,35 @@ class Stepper:
                     self.diagonal = self.get_diagonal()
                     self.four = self.get_four()
                     self.five = self.get_five()
-            self.sound.play('step')
+            if self.name not in ["square_a", "square_b", "square_c", "square_d", "square_e", "line_f", "line1", "line2", "line3", "line4", "line5", "magic_screen", "numbera", "numberb", "numberc", "numberd", "ring", "line", "roto", "roto2", "special_replay_counter", "super_card_replay_counter", "red_replay_counter", "yellow_replay_counter", "green_replay_counter", "skill_shot_replay_counter", "card1_replay_counter", "card2_replay_counter", "card3_replay_counter", "card4_replay_counter", "card5_replay_counter", "card6_replay_counter", "blue_replay_counter", "orange_replay_counter", "horizontal_replay_counter", "diagonal_replay_counter", "corners_replay_counter"]:
+                self.sound.play('step')
+            if self.name in ["special_replay_counter", "super_card_replay_counter", "red_replay_counter", "yellow_replay_counter", "green_replay_counter", "skill_shot_replay_counter", "card1_replay_counter", "card2_replay_counter", "card3_replay_counter", "card4_replay_counter", "card5_replay_counter", "card6_replay_counter", "blue_replay_counter", "orange_replay_counter", "horizontal_replay_counter", "diagonal_replay_counter", "corners_replay_counter"]:
+                if self.position % 3 == 0:
+                    self.sound.play('step')
         else:
             if self.t == "continuous":
-                self.sound.play('step')
+                if self.name not in ["square_a", "square_b", "square_c", "square_d", "square_e", "line_f", "line1", "line2", "line3", "line4", "line5", "magic_screen", "numbera", "numberb", "numberc", "numberd", "ring", "line", "roto", "roto2", "special_replay_counter", "super_card_replay_counter", "red_replay_counter", "yellow_replay_counter", "green_replay_counter", "skill_shot_replay_counter", "card1_replay_counter", "card2_replay_counter", "card3_replay_counter", "card4_replay_counter", "card5_replay_counter", "card6_replay_counter", "blue_replay_counter", "orange_replay_counter", "horizontal_replay_counter", "diagonal_replay_counter", "corners_replay_counter"]:
+                    self.sound.play('step')
+                if self.name in ["special_replay_counter", "super_card_replay_counter", "red_replay_counter", "yellow_replay_counter", "green_replay_counter", "skill_shot_replay_counter", "card1_replay_counter", "card2_replay_counter", "card3_replay_counter", "card4_replay_counter", "card5_replay_counter", "card6_replay_counter", "blue_replay_counter", "orange_replay_counter", "horizontal_replay_counter", "diagonal_replay_counter", "corners_replay_counter"]:
+                    if self.position % 3 == 0:
+                        self.sound.play('step')
                 self.position = 0
         return self.position
     def stepdown(self):
         if self.position != 0:
             self.position -= 1
-            self.sound.play('step')
+            if self.name not in ["square_a", "square_b", "square_c", "square_d", "square_e", "line_f", "line1", "line2", "line3", "line4", "line5", "magic_screen", "numbera", "numberb", "numberc", "numberd", "ring", "line", "roto", "roto2", "special_replay_counter", "super_card_replay_counter", "red_replay_counter", "yellow_replay_counter", "green_replay_counter", "skill_shot_replay_counter", "card1_replay_counter", "card2_replay_counter", "card3_replay_counter", "card4_replay_counter", "card5_replay_counter", "card6_replay_counter", "blue_replay_counter", "orange_replay_counter", "horizontal_replay_counter", "diagonal_replay_counter", "corners_replay_counter"]:
+                self.sound.play('step')
+            if self.name in ["special_replay_counter", "super_card_replay_counter", "red_replay_counter", "yellow_replay_counter", "green_replay_counter", "skill_shot_replay_counter", "card1_replay_counter", "card2_replay_counter", "card3_replay_counter", "card4_replay_counter", "card5_replay_counter", "card6_replay_counter", "blue_replay_counter", "orange_replay_counter", "horizontal_replay_counter", "diagonal_replay_counter", "corners_replay_counter"]:
+                if self.position % 3 == 0:
+                    self.sound.play('step')
         else:
             if self.t == "continuous":
-                self.sound.play('step')
+                if self.name not in ["square_a", "square_b", "square_c", "square_d", "square_e", "line_f", "line1", "line2", "line3", "line4", "line5", "magic_screen", "numbera", "numberb", "numberc", "numberd", "ring", "line", "roto", "roto2", "special_replay_counter", "super_card_replay_counter", "red_replay_counter", "yellow_replay_counter", "green_replay_counter", "skill_shot_replay_counter", "card1_replay_counter", "card2_replay_counter", "card3_replay_counter", "card4_replay_counter", "card5_replay_counter", "card6_replay_counter", "blue_replay_counter", "orange_replay_counter", "horizontal_replay_counter", "diagonal_replay_counter", "corners_replay_counter"]:
+                    self.sound.play('step')
+                if self.name in ["special_replay_counter", "super_card_replay_counter", "red_replay_counter", "yellow_replay_counter", "green_replay_counter", "skill_shot_replay_counter", "card1_replay_counter", "card2_replay_counter", "card3_replay_counter", "card4_replay_counter", "card5_replay_counter", "card6_replay_counter", "blue_replay_counter", "orange_replay_counter", "horizontal_replay_counter", "diagonal_replay_counter", "corners_replay_counter"]:
+                    if self.position % 3 == 0:
+                        self.sound.play('step')
                 self.position = self.top
         return self.position
     def reset(self):
@@ -164,7 +180,10 @@ class Spotting:
         self.top = top
         self.movement_amount = 0
     def spin(self):
-        self.movement_amount = random.randint(15,30)
+        if self.name == 'flash':
+            self.movement_amount = random.randint(7,18)
+        else:
+            self.movement_amount = random.randint(8,20)
         if self.position + self.movement_amount > self.top:
             self.position = (self.position + self.movement_amount) - self.top
         else: 
@@ -271,12 +290,18 @@ class Relay:
     def __init__(self, name):
         self.name = name
         self.status = False
+        self.sound = procgame.sound.SoundController(self)
+        self.sound.set_volume(1.5)
+        self.sound.register_sound('search_index', "audio/search_index.wav")
     def engage(self, game):
         self.status = True
+        if self.name == "search_index":
+            self.sound.play('search_index',-1)
         return self.status
-		#play a small buzzing noise - not huge, but enough to hear if you're listening for it.
     def disengage(self):
         self.status = False
+        if self.name == "search_index":
+            self.sound.stop('search_index')
         return self.status
 
 class Reflex:

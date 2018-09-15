@@ -57,6 +57,31 @@ number16 = pygame.image.load('acapulco/assets/number16.png').convert()
 bg_menu = pygame.image.load('acapulco/assets/acapulco_menu.png')
 bg_gi = pygame.image.load('acapulco/assets/acapulco_gi.png')
 bg_off = pygame.image.load('acapulco/assets/acapulco_off.png')
+a_1 = pygame.image.load('acapulco/assets/a-1.png').convert_alpha()
+a_2 = pygame.image.load('acapulco/assets/a-2.png').convert_alpha()
+a_3 = pygame.image.load('acapulco/assets/a-3.png').convert_alpha()
+a_4 = pygame.image.load('acapulco/assets/a-4.png').convert_alpha()
+a_5 = pygame.image.load('acapulco/assets/a-5.png').convert_alpha()
+a_6 = pygame.image.load('acapulco/assets/a-6.png').convert_alpha()
+b_1 = pygame.image.load('acapulco/assets/b-1.png').convert_alpha()
+b_2 = pygame.image.load('acapulco/assets/b-2.png').convert_alpha()
+b_3 = pygame.image.load('acapulco/assets/b-3.png').convert_alpha()
+b_4 = pygame.image.load('acapulco/assets/b-4.png').convert_alpha()
+b_5 = pygame.image.load('acapulco/assets/b-5.png').convert_alpha()
+b_6 = pygame.image.load('acapulco/assets/b-6.png').convert_alpha()
+c_1 = pygame.image.load('acapulco/assets/c-1.png').convert_alpha()
+c_2 = pygame.image.load('acapulco/assets/c-2.png').convert_alpha()
+c_3 = pygame.image.load('acapulco/assets/c-3.png').convert_alpha()
+c_4 = pygame.image.load('acapulco/assets/c-4.png').convert_alpha()
+c_5 = pygame.image.load('acapulco/assets/c-5.png').convert_alpha()
+c_6 = pygame.image.load('acapulco/assets/c-6.png').convert_alpha()
+d_1 = pygame.image.load('acapulco/assets/d-1.png').convert_alpha()
+d_2 = pygame.image.load('acapulco/assets/d-2.png').convert_alpha()
+d_3 = pygame.image.load('acapulco/assets/d-3.png').convert_alpha()
+d_4 = pygame.image.load('acapulco/assets/d-4.png').convert_alpha()
+d_5 = pygame.image.load('acapulco/assets/d-5.png').convert_alpha()
+d_6 = pygame.image.load('acapulco/assets/d-6.png').convert_alpha()
+
 
 class scorereel():
     """ Score Reels are used to count replays """
@@ -672,7 +697,7 @@ def display(s, replays=0, menu=False):
         if s.game.red_star.status == True:
             p = [551,480]
             screen.blit(time, p)
-        elif s.game.before_fifth.status == True:
+        if s.game.before_fifth.status == True:
             p = [551,422]
             screen.blit(time, p)
             if s.game.ball_count.position == 4:
@@ -725,6 +750,314 @@ def blink(args):
     args = [s,b,sl,sn]
 
     s.delay(name="blink", delay=0.1, handler=blink, param=args)
+
+def numbera_animation(args):
+    dirty_rects = []
+    s = args[0]
+    num = args[1]
+    number = args[2]
+    
+    if number == 1:
+        p = [225,357]
+        if s.game.numbera.position == 0:
+            image = numbera5
+            topleft = a_2
+            topright = a_4
+            middleleft = a_1
+            middleright = a_6
+            bottomleft = a_3
+            bottomright = a_5
+        elif s.game.numbera.position == 1:
+            image = numbera0
+            topleft = a_1
+            topright = a_2
+            middleleft = a_3
+            middleright = a_4
+            bottomleft = a_5
+            bottomright = a_6
+        elif s.game.numbera.position == 2:
+            image = numbera1
+            topleft = a_3
+            topright = a_1
+            middleleft = a_5
+            middleright = a_2
+            bottomleft = a_6
+            bottomright = a_4
+        elif s.game.numbera.position == 3:
+            image = numbera2
+            topleft = a_5
+            topright = a_3
+            middleleft = a_6
+            middleright = a_1
+            bottomleft = a_4
+            bottomright = a_2
+        elif s.game.numbera.position == 4:
+            image = numbera3
+            topleft = a_6
+            topright = a_5
+            middleleft = a_4
+            middleright = a_3
+            bottomleft = a_2
+            bottomright = a_1
+        elif s.game.numbera.position == 5:
+            image = numbera4
+            topleft = a_4
+            topright = a_6
+            middleleft = a_2
+            middleright = a_5
+            bottomleft = a_1
+            bottomright = a_3
+
+    rect = pygame.Rect(p[0],p[1],200,200)
+
+    #letter A
+    if number == 1: 
+        dirty_rects.append(screen.blit(topleft, (230  - num, 365)))
+        dirty_rects.append(screen.blit(topright, (288, 360 - num - 2)))
+        dirty_rects.append(screen.blit(middleleft, (230, 417 + num + 10)))
+        dirty_rects.append(screen.blit(middleright, (286, 416 - num - 10)))
+        dirty_rects.append(screen.blit(bottomleft, (230, 474 + num + 10)))
+        dirty_rects.append(screen.blit(bottomright, (286  + num + 10, 474)))
+
+    if (s.game.anti_cheat.status == True):
+        dirty_rects.append(screen.blit(bg_gi, p, pygame.Rect(p[0],p[1],113,166)))
+    else:
+        dirty_rects.append(screen.blit(bg_off, p, pygame.Rect(p[0],p[1],113,166)))
+
+    pygame.display.update(dirty_rects)
+
+def numberb_animation(args):
+    dirty_rects = []
+    s = args[0]
+    num = args[1]
+    number = args[2]
+    
+    if number == 2:
+        p = [225,528]
+        if s.game.numberb.position == 0:
+            image = numberb5
+            topleft = b_2
+            topmiddle = b_3
+            topright = b_4
+            bottomright = b_5
+            bottommiddle = b_6
+            bottomleft = b_1
+        elif s.game.numberb.position == 1:
+            image = numberb0
+            topleft = b_1
+            topmiddle = b_2
+            topright = b_3
+            bottomright = b_4
+            bottommiddle = b_5
+            bottomleft = b_6
+        elif s.game.numberb.position == 2:
+            image = numberb1
+            topleft = b_6
+            topmiddle = b_1
+            topright = b_2
+            bottomright = b_3
+            bottommiddle = b_4
+            bottomleft = b_5
+        elif s.game.numberb.position == 3:
+            image = numberb2
+            topleft = b_5
+            topmiddle = b_6
+            topright = b_1
+            bottomright = b_2
+            bottommiddle = b_3
+            bottomleft = b_4
+        elif s.game.numberb.position == 4:
+            image = numberb3
+            topleft = b_4
+            topmiddle = b_5
+            topright = b_6
+            bottomright = b_1
+            bottommiddle = b_2
+            bottomleft = b_3
+        elif s.game.numberb.position == 5:
+            image = numberb4
+            topleft = b_3
+            topmiddle = b_4
+            topright = b_5
+            bottomright = b_6
+            bottommiddle = b_1
+            bottomleft = b_2
+
+    rect = pygame.Rect(p[0],p[1],200,200)
+
+    if number == 2: 
+        dirty_rects.append(screen.blit(topleft, (223  - num, 537)))
+        dirty_rects.append(screen.blit(topmiddle, (282 - num, 537)))
+        dirty_rects.append(screen.blit(topright, (340, 543 - num - 15)))
+        dirty_rects.append(screen.blit(bottomright, (343 + num + 10, 582)))
+        dirty_rects.append(screen.blit(bottommiddle, (283 + num + 10, 582)))
+        dirty_rects.append(screen.blit(bottomleft, (229, 582 + num + 15)))
+
+    if (s.game.anti_cheat.status == True):
+        dirty_rects.append(screen.blit(bg_gi, p, pygame.Rect(p[0],p[1],171,111)))
+    else:
+        dirty_rects.append(screen.blit(bg_off, p, pygame.Rect(p[0],p[1],171,111)))
+
+    p = [293,627]
+    dirty_rects.append(screen.blit(bg_gi, p, pygame.Rect(p[0],p[1],25,37)))
+    dirty_rects.append(screen.blit(letter_b, p))
+
+    pygame.display.update(dirty_rects)
+
+
+def numberc_animation(args):
+    dirty_rects = []
+    s = args[0]
+    num = args[1]
+    number = args[2]
+    
+    p = [393,470]
+    if number == 3:
+        if s.game.numberc.position == 0:
+            image = numberc5
+            topleft = c_2
+            topright = c_4
+            middleleft = c_1
+            middleright = c_6
+            bottomleft = c_3
+            bottomright = c_5
+        elif s.game.numberc.position == 1:
+            image = numberc0
+            topleft = c_1
+            topright = c_2
+            middleleft = c_3
+            middleright = c_4
+            bottomleft = c_5
+            bottomright = c_6
+        elif s.game.numberc.position == 2:
+            image = numberc1
+            topleft = c_3
+            topright = c_1
+            middleleft = c_5
+            middleright = c_2
+            bottomleft = c_6
+            bottomright = c_4
+        elif s.game.numberc.position == 3:
+            image = numberc2
+            topleft = c_5
+            topright = c_3
+            middleleft = c_6
+            middleright = c_1
+            bottomleft = c_4
+            bottomright = c_2
+        elif s.game.numberc.position == 4:
+            image = numberc3
+            topleft = c_6
+            topright = c_5
+            middleleft = c_4
+            middleright = c_3
+            bottomleft = c_2
+            bottomright = c_1
+        elif s.game.numberc.position == 5:
+            image = numberc4
+            topleft = c_4
+            topright = c_6
+            middleleft = c_2
+            middleright = c_5
+            bottomleft = c_1
+            bottomright = c_3
+
+    rect = pygame.Rect(p[0],p[1],200,200)
+
+    if number == 3: 
+        dirty_rects.append(screen.blit(topleft, (398  - num, 478)))
+        dirty_rects.append(screen.blit(topright, (458, 472 - num - 2)))
+        dirty_rects.append(screen.blit(middleleft, (398,531 + num + 10)))
+        dirty_rects.append(screen.blit(middleright, (458,530 - num - 10)))
+        dirty_rects.append(screen.blit(bottomleft, (398,588 + num + 10)))
+        dirty_rects.append(screen.blit(bottomright, (458  + num + 10, 588)))
+
+    if (s.game.anti_cheat.status == True):
+        dirty_rects.append(screen.blit(bg_gi, p, pygame.Rect(p[0],p[1],113,166)))
+    else:
+        dirty_rects.append(screen.blit(bg_off, p, pygame.Rect(p[0],p[1],113,166)))
+
+    p = [433,627]
+    dirty_rects.append(screen.blit(bg_gi, p, pygame.Rect(p[0],p[1],25,37)))
+    dirty_rects.append(screen.blit(letter_c, p))
+    
+    pygame.display.update(dirty_rects)
+
+
+def numberd_animation(args):
+    dirty_rects = []
+    s = args[0]
+    num = args[1]
+    number = args[2]
+    
+    if number == 4:
+        p = [339,358]
+        if s.game.numberd.position == 0:
+            image = numberd5
+            topleft = d_2
+            topmiddle = d_3
+            topright = d_4
+            bottomright = d_5
+            bottommiddle = d_6
+            bottomleft = d_1
+        elif s.game.numberd.position == 1:
+            image = numberd0
+            topleft = d_1
+            topmiddle = d_2
+            topright = d_3
+            bottomright = d_4
+            bottommiddle = d_5
+            bottomleft = d_6
+        elif s.game.numberd.position == 2:
+            image = numberd1
+            topleft = d_6
+            topmiddle = d_1
+            topright = d_2
+            bottomright = d_3
+            bottommiddle = d_4
+            bottomleft = d_5
+        elif s.game.numberd.position == 3:
+            image = numberd2
+            topleft = d_5
+            topmiddle = d_6
+            topright = d_1
+            bottomright = d_2
+            bottommiddle = d_3
+            bottomleft = d_4
+        elif s.game.numberd.position == 4:
+            image = numberd3
+            topleft = d_4
+            topmiddle = d_5
+            topright = d_6
+            bottomright = d_1
+            bottommiddle = d_2
+            bottomleft = d_3
+        elif s.game.numberd.position == 5:
+            image = numberd4
+            topleft = d_3
+            topmiddle = d_4
+            topright = d_5
+            bottomright = d_6
+            bottommiddle = d_1
+            bottomleft = d_2
+
+    rect = pygame.Rect(p[0],p[1],200,200)
+
+    if number == 4: 
+        dirty_rects.append(screen.blit(topleft, (337  - num, 368)))
+        dirty_rects.append(screen.blit(topmiddle, (398 - num, 368)))
+        dirty_rects.append(screen.blit(topright, (456, 372 - num - 15)))
+        dirty_rects.append(screen.blit(bottomright, (457 + num + 10, 416)))
+        dirty_rects.append(screen.blit(bottommiddle, (397 + num + 10, 416)))
+        dirty_rects.append(screen.blit(bottomleft, (340, 416 + num + 15)))
+
+    if (s.game.anti_cheat.status == True):
+        dirty_rects.append(screen.blit(bg_gi, p, pygame.Rect(p[0],p[1],171,111)))
+    else:
+        dirty_rects.append(screen.blit(bg_off, p, pygame.Rect(p[0],p[1],171,111)))
+
+    pygame.display.update(dirty_rects)
+
 
 def eb_animation(args):
     global screen
@@ -1087,12 +1420,14 @@ def draw_feature_animation(s, num):
         if s.game.yellow_star.status == False:
             p = [551,539]
             dirty_rects.append(screen.blit(time, p))
+            s.game.coils.yellowROLamp.pulse(85)
             pygame.display.update(dirty_rects)
             return
     if num in [6,14,22,31,39,47]:
         if s.game.red_star.status == False:
             p = [551,480]
             dirty_rects.append(screen.blit(time, p))
+            s.game.coils.redROLamp.pulse(85)
             pygame.display.update(dirty_rects)
             return
     if num in [8,16,24,33,41]:

@@ -420,6 +420,92 @@ def blink(args):
 
     s.delay(name="blink", delay=0.1, handler=blink, param=args)
 
+def screen_animation(args):
+    dirty_rects = []
+    s = args[0]
+    num = args[1]
+    direction = args[2]
+    
+    number_card_position = [235,363]
+
+    dirty_rects.append(screen.blit(number_card, number_card_position))
+
+    magic_screen.set_colorkey((255,0,252))
+
+    if s.game.magic_screen.position == 0:
+        p = [240,358]
+    elif s.game.magic_screen.position == 1:
+        p = [192,358]
+    elif s.game.magic_screen.position == 2:
+        p = [145,358]
+    elif s.game.magic_screen.position == 3:
+        p = [96,358]
+    elif s.game.magic_screen.position == 4:
+        p = [49,358]
+    elif s.game.magic_screen.position == 5:
+        p = [3,358]
+    elif s.game.magic_screen.position == 6:
+        p = [-45,358]
+    elif s.game.magic_screen.position == 7:
+        p = [-92,358]
+    elif s.game.magic_screen.position == 8:
+        p = [-139,358]
+    elif s.game.magic_screen.position == 9:
+        p = [-187,358]
+
+    if direction == "left":
+       p[0] = p[0] + num
+    else:
+       p[0] = p[0] - num
+ 
+    dirty_rects.append(screen.blit(magic_screen, p))
+    
+    backglass_position = [0, 0]
+    if (s.game.anti_cheat.status == True):
+        dirty_rects.append(screen.blit(bg_gi, p, pygame.Rect(p[0],p[1],612,280)))
+    else:
+        dirty_rects.append(screen.blit(bg_off, p, pygame.Rect(p[0],p[1],612,280)))
+    
+    if s.game.magic_screen_feature.position >= 9:
+        if s.game.three_blue.status == True:
+            bp = [51,359]
+            dirty_rects.append(screen.blit(bg_gi, bp, pygame.Rect(bp[0],bp[1],46,77)))
+            dirty_rects.append(screen.blit(three_blue, bp))
+        elif s.game.two_blue.status == True:
+            bp = [112,357]
+            dirty_rects.append(screen.blit(bg_gi, bp, pygame.Rect(bp[0],bp[1],46,77)))
+            dirty_rects.append(screen.blit(three_blue, bp))
+
+    if s.game.magic_screen_feature.position >= 4:
+        if s.game.before_fourth.status == True:
+            p = [551,572]
+            dirty_rects.append(screen.blit(bg_gi, p, pygame.Rect(p[0],p[1],124,54)))
+            dirty_rects.append(screen.blit(feature, p))
+        if s.game.rollovers.status == True:
+            p = [549,519]
+            dirty_rects.append(screen.blit(bg_gi, p, pygame.Rect(p[0],p[1],124,54)))
+            dirty_rects.append(screen.blit(feature, p))
+        if s.game.before_fifth.status == True:
+            p = [549,465]
+            dirty_rects.append(screen.blit(bg_gi, p, pygame.Rect(p[0],p[1],124,54)))
+            dirty_rects.append(screen.blit(feature, p))
+        if s.game.after_fifth.status == True:
+            p = [550,409]
+            dirty_rects.append(screen.blit(bg_gi, p, pygame.Rect(p[0],p[1],124,54)))
+            dirty_rects.append(screen.blit(feature, p))
+
+    if s.game.red_super_section.status == True:
+        yss = [50,539]
+        dirty_rects.append(screen.blit(bg_gi, (50,539), pygame.Rect(50,539,121,81)))
+        dirty_rects.append(screen.blit(super_section, rss))
+    if s.game.yellow_super_section.status == True:
+        rss = [50,452]
+        dirty_rects.append(screen.blit(bg_gi, (50,452), pygame.Rect(50,452,121,81)))
+        dirty_rects.append(screen.blit(super_section, yss))
+
+    pygame.display.update(dirty_rects)
+
+
 def eb_animation(args):
     global screen
 
@@ -797,14 +883,14 @@ def draw_feature_animation(s, num):
         if s.game.yellow_super_section.status == False:
             if s.game.red_super_section.status == False:
                 p = [50,452]
-                dirty_rects.append(screen.blit(feature, p))
+                dirty_rects.append(screen.blit(super_section, p))
                 pygame.display.update(dirty_rects)
                 return
     if num in [18,24,49,43]:
         if s.game.red_super_section.status == False:
             if s.game.yellow_super_section.status == False:
                 p = [50,539]
-                dirty_rects.append(screen.blit(feature, p))
+                dirty_rects.append(screen.blit(super_section, p))
                 pygame.display.update(dirty_rects)
                 return
     if num in [2,12,27,37]:

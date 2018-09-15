@@ -18,9 +18,12 @@ class SinglecardBingo(procgame.game.Mode):
         super(SinglecardBingo, self).__init__(game=game, priority=5)
         self.holes = []
         self.startup()
-        self.game.sound.register_music('motor', "audio/other_motor.wav")
-        self.game.sound.register_sound('search', "audio/six_card_search_old.wav")
-        self.game.sound.register_sound('add', "audio/six_card_add_card.wav")
+        self.game.sound.register_music('motor', "audio/magic_screen_control_unit.wav")
+        self.game.sound.register_sound('search', "audio/automatic_search_five_ball.wav")
+        self.game.sound.register_sound('coin1', "audio/magic_screen_coin1.wav")
+        self.game.sound.register_sound('coin2', "audio/magic_screen_coin2.wav")
+        self.game.sound.register_sound('coin3', "audio/magic_screen_coin3.wav")
+        self.game.sound.register_sound('magic_square', "audio/magic_square.wav")
         self.game.sound.register_sound('tilt', "audio/tilt.wav")
         self.game.sound.register_sound('step', "audio/step.wav")
         self.game.sound.register_sound('eb_search', "audio/EB_Search.wav")
@@ -29,60 +32,48 @@ class SinglecardBingo(procgame.game.Mode):
         if self.game.start.status == True:
             if self.game.all_advantages.status == True:
                 self.cancel_delayed(name="blink")
-                self.game.sound.stop('add')
-                self.game.sound.play('add')
-                self.game.cu = not self.game.cu
-                self.regular_play()
                 self.game.odds_only.disengage()
                 self.game.eb_play.disengage()
                 self.game.features.disengage()
-                self.scan_all()
+                self.regular_play()
             elif self.game.features.status == True:
                 self.cancel_delayed(name="blink")
-                self.game.sound.stop('add')
-                self.game.sound.play('add')
-                self.game.cu = not self.game.cu
-                self.regular_play()
                 self.game.odds_only.disengage()
                 self.game.eb_play.disengage()
                 self.game.all_advantages.disengage()
-                self.scan_features()
+                self.regular_play()
             elif self.game.odds_only.status == True:
                 self.cancel_delayed(name="blink")
-                self.game.sound.stop('add')
-                self.game.sound.play('add')
-                self.game.cu = not self.game.cu
-                self.regular_play()
                 self.game.eb_play.disengage()
                 self.game.features.disengage()
                 self.game.all_advantages.disengage()
-                self.scan_odds()
+                self.regular_play()
         elif self.game.eb_play.status == True:
-            self.game.sound.stop('add')
-            self.game.sound.play('add')
+            self.cancel_delayed("eb_animation")
+            self.game.sound.play('eb_search')
+            if self.game.timer.position >= 8:
+                self.game.timer.reset()
+                self.game.sound.play_music('motor', -1)
+                self.timeout_actions()
             begin = self.game.spotting.position
             self.game.features.disengage()
             self.game.all_advantages.disengage()
             self.game.odds_only.disengage()
             self.game.cu = not self.game.cu
             self.game.spotting.spin()
-            self.animate_eb_scan([begin,self.game.spotting.movement_amount,1])
             self.game.mixer1.spin()
             self.game.mixer2.spin()
             self.game.mixer3.spin()
             self.game.mixer4.spin()
-            self.scan_eb()
+            self.game.coils.counter.pulse()
+            self.animate_eb_scan([begin,self.game.spotting.movement_amount,1])
         else:
             self.cancel_delayed(name="blink")
-            self.game.sound.stop('add')
-            self.game.sound.play('add')
-            self.game.cu = not self.game.cu
             self.game.all_advantages.engage(self.game)
             self.regular_play()
             self.game.odds_only.disengage()
             self.game.eb_play.disengage()
             self.game.features.disengage()
-            self.scan_all()
         self.cancel_delayed(name="display")
         self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
 
@@ -95,44 +86,31 @@ class SinglecardBingo(procgame.game.Mode):
         self.game.odds_only.disengage()
         self.game.features.disengage()
         self.game.all_advantages.engage(self.game)
+        self.cancel_delayed(name="display")
+        self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
         if self.game.replays > 0 or self.game.switches.freeplay.is_active():
-            self.game.sound.stop('add')
-            self.game.sound.play('add')
-            self.game.cu = not self.game.cu
-            self.game.spotting.spin()
-            self.game.mixer1.spin()
-            self.game.mixer2.spin()
-            self.game.mixer3.spin()
-            self.game.mixer4.spin()
             self.game.tilt.disengage()
             self.regular_play()
-            self.scan_all()
-        self.cancel_delayed(name="display")
         self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
 
     def sw_blue_active(self, sw):
         self.cancel_delayed(name="both_animation")
         self.cancel_delayed(name="odds_animation")
         self.cancel_delayed(name="feature_animation")
+        if self.game.start.status == False:
+            self.delay(name="startup", delay=0.1, handler=self.sw_startButton_active, param=sw)
         if self.game.start.status == True:
             self.game.features.disengage()
             self.game.all_advantages.disengage()
             self.game.eb_play.disengage()
             self.game.odds_only.engage(self.game)
+            self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
         if self.game.replays > 0 or self.game.switches.freeplay.is_active():
-            #if self.game.start.status == False:
-            #    self.delay(name="startup", delay=0.1, handler=self.sw_startButton_active, param=sw)
-            #else:
-            #Adding this to handle moving numbers during gameplay
-            if self.game.start.status == True:
-                self.game.sound.stop('add')
-                self.game.sound.play('add')
-                self.game.odds_only.engage(self.game)
+            if self.game.odds_only.status == True:
                 self.cancel_delayed(name="display")
                 self.cancel_delayed(name="both_animation")
                 self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
                 self.regular_play()
-                self.scan_odds()
                 self.cancel_delayed(name="display")
                 self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
         if self.game.switches.drawer.is_inactive():
@@ -146,9 +124,32 @@ class SinglecardBingo(procgame.game.Mode):
                     if self.game.after_fifth.status == True:
                         max_ball = 6
                 if self.game.ball_count.position < max_ball:
+                    self.game.sound.play('magic_square')
                     self.game.numberc.step()
+                    self.cancel_delayed("numberc_animation")
+                    self.animate_numberc([self.game,1,3])
             self.cancel_delayed(name="display")
             self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
+
+    def sw_blue_active_for_500ms(self,sw):
+        if self.game.switches.drawer.is_inactive():
+            if self.game.ball_count.position > 0:
+                max_ball = 0
+                if self.game.before_fourth.status == True:
+                    max_ball = 4
+                elif self.game.before_fifth.status == True:
+                    max_ball = 5
+                else:
+                    if self.game.after_fifth.status == True:
+                        max_ball = 6
+                if self.game.ball_count.position < max_ball:
+                    self.game.sound.play('magic_square')
+                    self.game.numberc.step()
+                    self.cancel_delayed("numberc_animation")
+                    self.animate_numberc([self.game,1,3])
+            self.cancel_delayed(name="display")
+            self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
+            self.delay(name="blue", delay=0.6, handler=self.sw_blue_active_for_500ms, param=sw)
 
     def sw_letterc_active(self, sw):
         if self.game.switches.drawer.is_active():
@@ -162,37 +163,54 @@ class SinglecardBingo(procgame.game.Mode):
                     if self.game.after_fifth.status == True:
                         max_ball = 6
                 if self.game.ball_count.position < max_ball:
+                    self.game.sound.play('magic_square')
                     self.game.numberc.step()
+                    self.cancel_delayed("numberc_animation")
+                    self.animate_numberc([self.game,1,3])
             self.cancel_delayed(name="display")
             self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
+
+    def sw_letterc_active_for_500ms(self,sw):
+        if self.game.switches.drawer.is_active():
+            if self.game.ball_count.position > 0:
+                max_ball = 0
+                if self.game.before_fourth.status == True:
+                    max_ball = 4
+                elif self.game.before_fifth.status == True:
+                    max_ball = 5
+                else:
+                    if self.game.after_fifth.status == True:
+                        max_ball = 6
+                if self.game.ball_count.position < max_ball:
+                    self.game.sound.play('magic_square')
+                    self.game.numberc.step()
+                    self.cancel_delayed("numberc_animation")
+                    self.animate_numberc([self.game,1,3])
+            self.cancel_delayed(name="display")
+            self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
+            self.delay(name="letterc", delay=0.6, handler=self.sw_letterc_active_for_500ms, param=sw)
 
     def sw_orange_active(self, sw):
         self.cancel_delayed(name="both_animation")
         self.cancel_delayed(name="odds_animation")
         self.cancel_delayed(name="feature_animation")
-        if self.game.switches.drawer.is_active():
-            if self.game.start.status == True:
-                self.game.features.engage(self.game)
-                self.game.all_advantages.disengage()
-                self.game.odds_only.disengage()
-                self.game.eb_play.disengage()
-
-            if self.game.replays > 0 or self.game.switches.freeplay.is_active():
-                #if self.game.start.status == False:
-                #    self.delay(name="startup", delay=0.1, handler=self.sw_startButton_active, param=sw)
-                #else:
-                if self.game.start.status == True:
-                    self.game.sound.stop('add')
-                    self.game.sound.play('add')
-                    self.game.features.engage(self.game)
+        if self.game.start.status == True:
+            self.game.features.engage(self.game)
+            self.game.all_advantages.disengage()
+            self.game.odds_only.disengage()
+            self.game.eb_play.disengage()
+            self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
+        if self.game.replays > 0 or self.game.switches.freeplay.is_active():
+            if self.game.start.status == False:
+                self.delay(name="startup", delay=0.1, handler=self.sw_startButton_active, param=sw)
+            if self.game.switches.drawer.is_active():
+                if self.game.features.status == True:
                     self.cancel_delayed(name="display")
                     self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
                     self.regular_play()
-                    self.scan_features()
                     self.cancel_delayed(name="display")
                     self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
-
-
+            
     def sw_green_active(self, sw):
         self.cancel_delayed(name="both_animation")
         self.cancel_delayed(name="odds_animation")
@@ -203,19 +221,14 @@ class SinglecardBingo(procgame.game.Mode):
                 self.game.all_advantages.disengage()
                 self.game.odds_only.disengage()
                 self.game.eb_play.disengage()
-
+                self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
             if self.game.replays > 0 or self.game.switches.freeplay.is_active():
-                #if self.game.start.status == False:
-                #    self.delay(name="startup", delay=0.1, handler=self.sw_startButton_active, param=sw)
-                #else:
-                if self.game.start.status == True:
-                    self.game.sound.stop('add')
-                    self.game.sound.play('add')
-                    self.game.features.engage(self.game)
+                if self.game.start.status == False:
+                    self.delay(name="startup", delay=0.1, handler=self.sw_startButton_active, param=sw)
+                if self.game.features.status == True:
                     self.cancel_delayed(name="display")
                     self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
                     self.regular_play()
-                    self.scan_features()
                     self.cancel_delayed(name="display")
                     self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
         if self.game.switches.drawer.is_inactive():
@@ -229,10 +242,35 @@ class SinglecardBingo(procgame.game.Mode):
                     if self.game.after_fifth.status == True:
                         max_ball = 6
                 if self.game.ball_count.position < max_ball:
+                    self.game.sound.play('magic_square')
                     self.game.numberd.step()
+                    self.cancel_delayed("numberd_animation")
+                    self.animate_numberd([self.game,1,4])
 
             self.cancel_delayed(name="display")
             self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
+
+    def sw_green_active_for_500ms(self,sw):
+        if self.game.switches.drawer.is_inactive():
+            if self.game.ball_count.position >= 1:
+                max_ball = 0
+                if self.game.before_fourth.status == True:
+                    max_ball = 4
+                elif self.game.before_fifth.status == True:
+                    max_ball = 5
+                else:
+                    if self.game.after_fifth.status == True:
+                        max_ball = 6
+                if self.game.ball_count.position < max_ball:
+                    self.game.sound.play('magic_square')
+                    self.game.numberd.step()
+                    self.cancel_delayed("numberd_animation")
+                    self.animate_numberd([self.game,1,4])
+
+            self.cancel_delayed(name="display")
+            self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
+            self.delay(name="green", delay=0.6, handler=self.sw_green_active_for_500ms, param=sw)
+
 
     def sw_letterd_active(self, sw):
         if self.game.switches.drawer.is_active():
@@ -246,10 +284,34 @@ class SinglecardBingo(procgame.game.Mode):
                     if self.game.after_fifth.status == True:
                         max_ball = 6
                 if self.game.ball_count.position < max_ball:
+                    self.game.sound.play('magic_square')
                     self.game.numberd.step()
+                    self.cancel_delayed("numberd_animation")
+                    self.animate_numberd([self.game,1,4])
 
             self.cancel_delayed(name="display")
             self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
+
+    def sw_letterd_active_for_500ms(self,sw):
+        if self.game.switches.drawer.is_active():
+            if self.game.ball_count.position >= 1:
+                max_ball = 0
+                if self.game.before_fourth.status == True:
+                    max_ball = 4
+                elif self.game.before_fifth.status == True:
+                    max_ball = 5
+                else:
+                    if self.game.after_fifth.status == True:
+                        max_ball = 6
+                if self.game.ball_count.position < max_ball:
+                    self.game.sound.play('magic_square')
+                    self.game.numberd.step()
+                    self.cancel_delayed("numberd_animation")
+                    self.animate_numberd([self.game,1,4])
+
+            self.cancel_delayed(name="display")
+            self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
+            self.delay(name="letterd", delay=0.6, handler=self.sw_letterd_active_for_500ms, param=sw)
 
     def sw_enter_active(self, sw):
         if self.game.switches.left.is_active() and self.game.switches.right.is_active():
@@ -297,9 +359,32 @@ class SinglecardBingo(procgame.game.Mode):
                     if self.game.after_fifth.status == True:
                         max_ball = 6
                 if self.game.ball_count.position < max_ball:
+                    self.game.sound.play('magic_square')
                     self.game.numberb.step()
+                    self.cancel_delayed("numberb_animation")
+                    self.animate_numberb([self.game,1,2])
                 self.cancel_delayed(name="display")
                 self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
+
+    def sw_right_active_for_500ms(self,sw):
+        if self.game.switches.drawer.is_inactive():
+            if self.game.ball_count.position > 0:
+                max_ball = 0
+                if self.game.before_fourth.status == True:
+                    max_ball = 4
+                elif self.game.before_fifth.status == True:
+                    max_ball = 5
+                else:
+                    if self.game.after_fifth.status == True:
+                        max_ball = 6
+                if self.game.ball_count.position < max_ball:
+                    self.game.sound.play('magic_square')
+                    self.game.numberb.step()
+                    self.cancel_delayed("numberb_animation")
+                    self.animate_numberb([self.game,1,2])
+                self.cancel_delayed(name="display")
+                self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
+                self.delay(name="right", delay=0.6, handler=self.sw_right_active_for_500ms, param=sw)
 
     def sw_letterb_active(self, sw):
         if self.game.switches.drawer.is_active():
@@ -313,9 +398,32 @@ class SinglecardBingo(procgame.game.Mode):
                     if self.game.after_fifth.status == True:
                         max_ball = 6
                 if self.game.ball_count.position < max_ball:
+                    self.game.sound.play('magic_square')
                     self.game.numberb.step()
+                    self.cancel_delayed("numberb_animation")
+                    self.animate_numberb([self.game,1,2])
                 self.cancel_delayed(name="display")
                 self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
+
+    def sw_letterb_active_for_500ms(self,sw):
+        if self.game.switches.drawer.is_active():
+            if self.game.ball_count.position > 0:
+                max_ball = 0
+                if self.game.before_fourth.status == True:
+                    max_ball = 4
+                elif self.game.before_fifth.status == True:
+                    max_ball = 5
+                else:
+                    if self.game.after_fifth.status == True:
+                        max_ball = 6
+                if self.game.ball_count.position < max_ball:
+                    self.game.sound.play('magic_square')
+                    self.game.numberb.step()
+                    self.cancel_delayed("numberb_animation")
+                    self.animate_numberb([self.game,1,2])
+                self.cancel_delayed(name="display")
+                self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
+                self.delay(name="letterb", delay=0.6, handler=self.sw_letterb_active_for_500ms, param=sw)
 
     def sw_left_active(self, sw):
         if self.game.switches.drawer.is_inactive():
@@ -329,9 +437,32 @@ class SinglecardBingo(procgame.game.Mode):
                     if self.game.after_fifth.status == True:
                         max_ball = 6
                 if self.game.ball_count.position < max_ball:
+                    self.game.sound.play('magic_square')
                     self.game.numbera.step()
+                    self.cancel_delayed("numbera_animation")
+                    self.animate_numbera([self.game,1,1])
                 self.cancel_delayed(name="display")
                 self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
+
+    def sw_left_active_for_500ms(self,sw):
+        if self.game.switches.drawer.is_inactive():
+            if self.game.ball_count.position > 0:
+                max_ball = 0
+                if self.game.before_fourth.status == True:
+                    max_ball = 4
+                elif self.game.before_fifth.status == True:
+                    max_ball = 5
+                else:
+                    if self.game.after_fifth.status == True:
+                        max_ball = 6
+                if self.game.ball_count.position < max_ball:
+                    self.game.sound.play('magic_square')
+                    self.game.numbera.step()
+                    self.cancel_delayed("numbera_animation")
+                    self.animate_numbera([self.game,1,1])
+                self.cancel_delayed(name="display")
+                self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
+                self.delay(name="left", delay=0.6, handler=self.sw_left_active_for_500ms, param=sw)
 
     def sw_lettera_active(self, sw):
         if self.game.switches.drawer.is_active():
@@ -345,9 +476,32 @@ class SinglecardBingo(procgame.game.Mode):
                     if self.game.after_fifth.status == True:
                         max_ball = 6
                 if self.game.ball_count.position < max_ball:
+                    self.game.sound.play('magic_square')
                     self.game.numbera.step()
+                    self.cancel_delayed("numbera_animation")
+                    self.animate_numbera([self.game,1,1])
                 self.cancel_delayed(name="display")
                 self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
+
+    def sw_lettera_active_for_500ms(self,sw):
+        if self.game.switches.drawer.is_active():
+            if self.game.ball_count.position > 0:
+                max_ball = 0
+                if self.game.before_fourth.status == True:
+                    max_ball = 4
+                elif self.game.before_fifth.status == True:
+                    max_ball = 5
+                else:
+                    if self.game.after_fifth.status == True:
+                        max_ball = 6
+                if self.game.ball_count.position < max_ball:
+                    self.game.sound.play('magic_square')
+                    self.game.numbera.step()
+                    self.cancel_delayed("numbera_animation")
+                    self.animate_numbera([self.game,1,1])
+                self.cancel_delayed(name="display")
+                self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
+                self.delay(name="lettera", delay=0.6, handler=self.sw_lettera_active_for_500ms, param=sw)
 
     def check_shutter(self, start=0):
         if start == 1:
@@ -370,6 +524,13 @@ class SinglecardBingo(procgame.game.Mode):
         self.cancel_delayed(name="green_replay_step_up")
         self.cancel_delayed(name="timeout")
         self.cancel_delayed(name="blink")
+        r = random.randint(1,3)
+        if r == 1:
+            self.game.sound.play('coin1')
+        elif r == 2:
+            self.game.sound.play('coin2')
+        elif r == 3:
+            self.game.sound.play('coin3')
         self.game.search_index.disengage()
         self.game.coils.counter.pulse()
 
@@ -394,7 +555,9 @@ class SinglecardBingo(procgame.game.Mode):
                 self.game.selector.step()
             if self.game.switches.shutter.is_inactive():
                 self.game.coils.shutter.enable()
+            
             self.replay_step_down()
+            graphics.acapulco.display(self)
             self.check_lifter_status()
         else:
             self.holes = []
@@ -437,32 +600,44 @@ class SinglecardBingo(procgame.game.Mode):
         self.game.tilt.disengage()
 
     def numbera_reset(self, number):
-        if number > 0:
+        if number != 0:
+            self.game.sound.play('magic_square')
             self.game.numbera.step()
             self.delay(name="display", delay=0, handler=graphics.acapulco.display, param=self)
-            number -= 1
-            self.delay(name="numbera_reset", delay=0.1, handler=self.numbera_reset, param=number)
-    
+            self.cancel_delayed("squarea_animation")
+            self.animate_numbera([self.game,1,1])
+            number = self.game.numbera.position
+            self.delay(name="numbera_reset", delay=0.7, handler=self.numbera_reset, param=number)
+
     def numberb_reset(self, number):
-        if number > 0:
+        if number != 0:
+            self.game.sound.play('magic_square')
             self.game.numberb.step()
             self.delay(name="display", delay=0, handler=graphics.acapulco.display, param=self)
-            number -= 1
-            self.delay(name="numberb_reset", delay=0.1, handler=self.numberb_reset, param=number)
-            
+            self.cancel_delayed("squareb_animation")
+            self.animate_numberb([self.game,1,2])
+            number = self.game.numberb.position
+            self.delay(name="numberb_reset", delay=0.7, handler=self.numberb_reset, param=number)
+
     def numberc_reset(self, number):
-        if number > 0:
+        if number != 0:
+            self.game.sound.play('magic_square')
             self.game.numberc.step()
             self.delay(name="display", delay=0, handler=graphics.acapulco.display, param=self)
-            number -= 1
-            self.delay(name="numberc_reset", delay=0.1, handler=self.numberc_reset, param=number)
-            
+            self.cancel_delayed("squarec_animation")
+            self.animate_numberc([self.game,1,3])
+            number = self.game.numberc.position
+            self.delay(name="numberc_reset", delay=0.7, handler=self.numberc_reset, param=number)
+
     def numberd_reset(self, number):
-        if number > 0:
+        if number != 0:
+            self.game.sound.play('magic_square')
             self.game.numberd.step()
             self.delay(name="display", delay=0, handler=graphics.acapulco.display, param=self)
-            number -= 1
-            self.delay(name="numberd_reset", delay=0.1, handler=self.numberd_reset, param=number)
+            self.cancel_delayed("squared_animation")
+            self.animate_numberd([self.game,1,4])
+            number = self.game.numberd.position
+            self.delay(name="numberd_reset", delay=0.7, handler=self.numberd_reset, param=number)
 
     def check_lifter_status(self):
         if self.game.tilt.status == False:
@@ -528,8 +703,12 @@ class SinglecardBingo(procgame.game.Mode):
         self.game.ball_count.step()
         if self.game.switches.shutter.is_active():
             self.game.coils.shutter.enable()
-        if self.game.ball_count.position >= 5:
+        if self.game.ball_count.position == 4:
+            self.game.sound.play('tilt')
+            self.game.sound.play('tilt')
+        if self.game.ball_count.position >= 4:
             self.game.coils.yellowROLamp.disable()
+        if self.game.ball_count.position >= 5:
             self.game.coils.redROLamp.disable()
         if self.game.ball_count.position <= 7:
             self.check_lifter_status()
@@ -678,11 +857,13 @@ class SinglecardBingo(procgame.game.Mode):
 
     def sw_redstar_active(self, sw):
         if self.game.red_star.status == True:
-            self.game.before_fourth.disengage()
-            self.game.before_fifth.disengage()
-            self.game.after_fifth.engage(self.game)
-            self.game.red_star.disengage()
-            self.game.coils.yellowROLamp.disable()
+            if self.game.after_fifth.status == False:
+                self.game.before_fourth.disengage()
+                self.game.before_fifth.disengage()
+                self.game.after_fifth.engage(self.game)
+                self.game.red_star.disengage()
+                self.game.coils.redROLamp.disable()
+                self.game.sound.play('tilt')
         self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
 
     def sw_yellowstar_active(self, sw):
@@ -691,16 +872,17 @@ class SinglecardBingo(procgame.game.Mode):
                 self.game.before_fourth.disengage()
                 self.game.before_fifth.engage(self.game)
                 self.game.yellow_star.disengage()
-                self.game.coils.redROLamp.disable()
+                self.game.coils.yellowROLamp.disable()
+                self.game.sound.play('tilt')
         self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
 
     def tilt_actions(self):
         self.game.start.disengage()
-        self.cancel_delayed(name="blink")
         self.cancel_delayed(name="replay_reset")
         self.cancel_delayed(name="red_replay_step_up")
         self.cancel_delayed(name="yellow_replay_step_up")
         self.cancel_delayed(name="green_replay_step_up")
+        self.cancel_delayed(name="blink")
         self.cancel_delayed(name="timeout")
         self.game.coils.redROLamp.disable()
         self.game.coils.yellowROLamp.disable()
@@ -726,11 +908,15 @@ class SinglecardBingo(procgame.game.Mode):
         self.game.yellow_odds.reset()
         self.game.green_odds.reset()
         self.game.eb_play.disengage()
+        self.game.all_advantages.disengage()
+        self.game.odds_only.disengage()
+        self.game.features.disengage()
         self.game.extra_ball.reset()
         self.game.super_line_feature.disengage()
         self.game.hole_feature.disengage()
         self.game.anti_cheat.engage(game)
         self.game.tilt.engage(self.game)
+        self.game.all_advantages.engage(self.game)
         self.game.sound.stop_music()
         self.game.sound.play('tilt')
         # displays "Tilt" on the backglass, you have to recoin.
@@ -789,30 +975,32 @@ class SinglecardBingo(procgame.game.Mode):
                     self.game.super_line_select.step()
                     self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
         if self.game.ball_count.position >= 4:
-            if self.game.eb_play.status == False:
-                self.game.spotting.spin()
-                self.game.mixer1.spin()
-                self.game.mixer2.spin()
-                self.game.mixer3.spin()
-                self.game.mixer4.spin()
-                self.game.eb_play.engage(self.game)
-                self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
-                self.sw_yellow_active(sw)
             if self.game.eb_play.status == True and (self.game.replays > 0 or self.game.switches.freeplay.is_active()):
-                self.game.sound.stop('add')
-                self.game.sound.play('add')
+                self.cancel_delayed(name="eb_animation")
+                self.game.sound.play('eb_search')
+                if self.game.timer.position >= 8:
+                    self.game.timer.reset()
+                    self.game.sound.play_music('motor', -1)
+                    self.timeout_actions()
                 self.game.cu = not self.game.cu
                 begin = self.game.spotting.position
                 self.game.spotting.spin()
-                self.animate_eb_scan([begin,self.game.spotting.movement_amount,1])
                 self.game.mixer1.spin()
                 self.game.mixer2.spin()
                 self.game.mixer3.spin()
                 self.game.mixer4.spin()
-                self.scan_eb()
                 self.replay_step_down()
                 self.game.reflex.decrease()
+                self.game.coils.counter.pulse()
+                graphics.acapulco.display(self)
+                self.animate_eb_scan([begin,self.game.spotting.movement_amount,1])
                 self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
+                return
+            if self.game.eb_play.status == False:
+                self.game.eb_play.engage(self.game)
+                self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
+                self.delay(name="yellow", delay=0.1, handler=self.sw_yellow_active, param=sw)
+
             
     def search(self):
         # The search workflow/logic will determine if you actually have a winner, but it is a bit tricky.
@@ -1072,52 +1260,56 @@ class SinglecardBingo(procgame.game.Mode):
                             self.green_replay_step_up(greenfiveodds - self.game.green_replay_counter.position)
 
     def stars_replay_step_up(self, number):
+        self.game.sound.stop('search')
         if number >= 1:
             self.game.stars_replay_counter.step()
             number -= 1
             self.replay_step_up()
             if self.game.replays == 8999:
                 number = 0
-            self.delay(name="stars_replay_step_up", delay=0.1, handler=self.stars_replay_step_up, param=number)
+            self.delay(name="stars_replay_step_up", delay=0.25, handler=self.stars_replay_step_up, param=number)
         else:
             self.game.search_index.disengage()
             self.cancel_delayed(name="stars_replay_step_up")
             self.search()
 
     def red_replay_step_up(self, number):
+        self.game.sound.stop('search')
         if number >= 1:
             self.game.red_replay_counter.step()
             number -= 1
             self.replay_step_up()
             if self.game.replays == 8999:
                 number = 0
-            self.delay(name="red_replay_step_up", delay=0.1, handler=self.red_replay_step_up, param=number)
+            self.delay(name="red_replay_step_up", delay=0.25, handler=self.red_replay_step_up, param=number)
         else:
             self.game.search_index.disengage()
             self.cancel_delayed(name="red_replay_step_up")
             self.search()
             
     def yellow_replay_step_up(self, number):
+        self.game.sound.stop('search')
         if number >= 1:
             self.game.yellow_replay_counter.step()
             number -= 1
             self.replay_step_up()
             if self.game.replays == 8999:
                 number = 0
-            self.delay(name="yellow_replay_step_up", delay=0.1, handler=self.yellow_replay_step_up, param=number)
+            self.delay(name="yellow_replay_step_up", delay=0.25, handler=self.yellow_replay_step_up, param=number)
         else:
             self.game.search_index.disengage()
             self.cancel_delayed(name="yellow_replay_step_up")
             self.search()
 
     def green_replay_step_up(self, number):
+        self.game.sound.stop('search')
         if number >= 1:
             self.game.green_replay_counter.step()
             number -= 1
             self.replay_step_up()
             if self.game.replays == 8999:
                 number = 0
-            self.delay(name="green_replay_step_up", delay=0.1, handler=self.green_replay_step_up, param=number)
+            self.delay(name="green_replay_step_up", delay=0.25, handler=self.green_replay_step_up, param=number)
         else:
             self.game.search_index.disengage()
             self.cancel_delayed(name="green_replay_step_up")
@@ -1421,11 +1613,11 @@ class SinglecardBingo(procgame.game.Mode):
             if self.game.green_odds.position > 0:
                 self.scan_features()
         else:
-            if self.game.yellow_odds.position == 0:
+            if self.game.yellow_odds.position in [0,1]:
                 self.game.yellow_odds.step()
-            if self.game.red_odds.position == 0:
+            if self.game.red_odds.position in [0,1]:
                 self.game.red_odds.step()
-            if self.game.green_odds.position == 0:
+            if self.game.green_odds.position in [0,1]:
                 self.game.green_odds.step()
         graphics.acapulco.display(self)
 
@@ -1468,21 +1660,37 @@ class SinglecardBingo(procgame.game.Mode):
         return 0
 
     def scan_odds(self):
-        if self.game.yellow_odds.position <= 1:
-            if self.game.odds_only.status == True:
-                self.yellow_extra_step(2)
-            else:
-                self.game.yellow_odds.step()
-        if self.game.red_odds.position <= 1:
-            if self.game.odds_only.status == True:
-                self.red_extra_step(2)
-            else:
-                self.game.red_odds.step()
-        if self.game.green_odds.position <= 1:
-            if self.game.odds_only.status == True:
-                self.green_extra_step(2)
-            else:
-                self.game.green_odds.step()
+        if self.game.odds_only.status == True:
+            if self.game.yellow_odds.position < 3 or self.game.red_odds.position < 3 or self.game.green_odds.position < 3:
+                if self.game.yellow_odds.position <= 2:
+                    if self.game.yellow_odds.position == 1:
+                        self.yellow_extra_step(2)
+                    else:
+                        if self.game.yellow_odds.position == 2:
+                            self.yellow_extra_step(1)
+                if self.game.red_odds.position <= 2:
+                    if self.game.red_odds.position == 1:
+                        self.red_extra_step(2)
+                    else:
+                        if self.game.red_odds.position == 2:
+                            self.red_extra_step(1)
+                if self.game.green_odds.position <= 2:
+                    if self.game.green_odds.position == 1:
+                        self.green_extra_step(2)
+                    else:
+                        if self.game.green_odds.position == 2:
+                            self.green_extra_step(1)
+                return
+        else:
+            if self.game.all_advantages.status == True:
+                if self.game.yellow_odds.position in [0,1,2] or self.game.red_odds.position in [0,1] or self.game.green_odds.position in [0,1,2]:
+                    if self.game.yellow_odds.position < 3:
+                        self.yellow_extra_step(1)
+                    if self.game.red_odds.position < 3:
+                        self.red_extra_step(1)
+                    if self.game.green_odds.position < 3:
+                        self.green_extra_step(1)
+                    return
         if self.game.yellow_odds.position >= 2 and self.game.red_odds.position >= 2 and self.game.green_odds.position >= 2:
             p = self.red_odds_probability()
             if p == 1:
@@ -1723,31 +1931,51 @@ class SinglecardBingo(procgame.game.Mode):
         m = self.game.mixer3.position
         if sd == 23:
             if self.game.cu:
-                self.game.four_stars.engage(self.game)
+                if self.game.four_stars.status == False:
+                    self.game.four_stars.engage(self.game)
+                    self.game.sound.play('tilt')
             elif self.game.magic_numbers_feature.position < 10:
-                self.game.four_stars.engage(self.game)
+                if self.game.four_stars.status == False:
+                    self.game.four_stars.engage(self.game)
+                    self.game.sound.play('tilt')
         if sd in [4,30,32,36]:
+            if self.game.hole_feature.status == False:
                 self.game.hole_feature.engage(self.game)
+                self.game.sound.play('tilt')
         if sd == 31:
             if self.game.magic_numbers_feature.position >= 4:
                 if m in [1,4,7,9,13,15,19,22]:
-                    self.game.before_fifth.engage(self.game)
+                    if self.game.before_fifth.status == False:
+                        self.game.before_fifth.engage(self.game)
+                        self.game.yellow_star.disengage()
+                        self.game.sound.play('tilt')
                 if m in [3,5,8,10,14,18,20,23]:
-                    self.game.after_fifth.engage(self.game)
+                    if self.game.after_fifth.status == False:
+                        self.game.after_fifth.engage(self.game)
+                        self.game.red_star.disengage()
+                        self.game.sound.play('tilt')
         if sd in [9,37,45]:
-            self.game.super_line_feature.engage(self.game)
+            if self.game.super_line_feature.status == False:
+                self.game.super_line_feature.engage(self.game)
+                self.game.sound.play('tilt')
         if self.game.features.status == True:
             if sd == 45:
-                self.game.four_stars.engage(self.game)
+                if self.game.four_stars.status == False:
+                    self.game.four_stars.engage(self.game)
+                    self.game.sound.play('tilt')
             if sd == 13:
                 if self.game.cu:
-                    self.holes.append(16)
+                    if 16 not in self.holes:
+                        self.holes.append(16)
+                        self.game.sound.play('tilt')
             if sd == 36:
                 if self.game.magic_numbers_feature.position >= 4:
                     if m in [1,4,7,9,13,15,19,22]:
-                        self.game.before_fifth.engage(self.game)
+                        self.step_selection(7)
+                        self.game.yellow_star.disengage()
                     if m in [3,5,8,10,14,18,20,23]:
-                        self.game.after_fifth.engage(self.game)
+                        self.step_selection(9)
+                        self.game.red_star.disengage()
         if self.game.selection_feature.position < 1:
             self.game.selection_feature.step()
         else:
@@ -1831,6 +2059,7 @@ class SinglecardBingo(procgame.game.Mode):
         if number >= 1:
             self.game.magic_numbers_feature.step()
             number -= 1
+            self.check_lamps()
             self.cancel_delayed(name="display")
             self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
             self.delay(name="step_mn", delay=0.1, handler=self.step_magic_number, param=number)
@@ -1865,10 +2094,11 @@ class SinglecardBingo(procgame.game.Mode):
             self.cancel_delayed(name="display")
             diff = diff - 1
             args = [start,diff,num]
-            self.delay(name="odds_animation", delay=0.06, handler=self.animate_odds_scan, param=args)
+            self.delay(name="odds_animation", delay=0.08, handler=self.animate_odds_scan, param=args)
         else:
             self.cancel_delayed(name="odds_animation")
             self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
+            self.scan_odds() 
 
     def animate_features_scan(self, args):
         start = args[0]
@@ -1882,10 +2112,11 @@ class SinglecardBingo(procgame.game.Mode):
             self.cancel_delayed(name="display")
             diff = diff - 1
             args = [start,diff,num]
-            self.delay(name="feature_animation", delay=0.06, handler=self.animate_features_scan, param=args)
+            self.delay(name="feature_animation", delay=0.08, handler=self.animate_features_scan, param=args)
         else:
             self.cancel_delayed(name="feature_animation")
             self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
+            self.scan_features()
 
     def animate_both(self, args):
         start = args[0]
@@ -1899,9 +2130,66 @@ class SinglecardBingo(procgame.game.Mode):
             self.cancel_delayed(name="display")
             diff = diff - 1
             args = [start,diff,num]
-            self.delay(name="both_animation", delay=0.06, handler=self.animate_both, param=args)
+            self.delay(name="both_animation", delay=0.08, handler=self.animate_both, param=args)
         else:
             self.cancel_delayed(name="both_animation")
+            self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
+            self.scan_all()
+
+    def animate_numbera(self, args):
+        self.game = args[0]
+        num = args[1]
+        number = args[2]
+        if num < 65:
+            graphics.acapulco.numbera_animation([self, num * -1, number])
+            self.cancel_delayed(name="display")
+            num = num + 1
+            args = [self.game,num,number]
+            self.delay(name="numbera_animation", delay=0.009, handler=self.animate_numbera, param=args)
+        else:
+            self.cancel_delayed(name="numbera_animation")
+            self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
+
+    def animate_numberb(self, args):
+        self.game = args[0]
+        num = args[1]
+        number = args[2]
+        if num < 65:
+            graphics.acapulco.numberb_animation([self, num * -1, number])
+            self.cancel_delayed(name="display")
+            num = num + 1
+            args = [self.game,num,number]
+            self.delay(name="numberb_animation", delay=0.009, handler=self.animate_numberb, param=args)
+        else:
+            self.cancel_delayed(name="numberb_animation")
+            self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
+
+    def animate_numberc(self, args):
+        self.game = args[0]
+        num = args[1]
+        number = args[2]
+        if num < 65:
+            graphics.acapulco.numberc_animation([self, num * -1, number])
+            self.cancel_delayed(name="display")
+            num = num + 1
+            args = [self.game,num,number]
+            self.delay(name="numberc_animation", delay=0.009, handler=self.animate_numberc, param=args)
+        else:
+            self.cancel_delayed(name="numberc_animation")
+            self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
+
+    def animate_numberd(self, args):
+        self.game = args[0]
+        num = args[1]
+        number = args[2]
+        if num < 65:
+            graphics.acapulco.numberd_animation([self, num * -1, number])
+            self.cancel_delayed(name="display")
+            num = num + 1
+            args = [self.game,num,number]
+            self.delay(name="numberd_animation", delay=0.009, handler=self.animate_numberd, param=args)
+        else:
+            self.cancel_delayed(name="numberd_animation")
             self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
 
     def animate_eb_scan(self, args):
@@ -1916,10 +2204,11 @@ class SinglecardBingo(procgame.game.Mode):
             self.cancel_delayed(name="display")
             diff = diff - 1
             args = [start,diff,num]
-            self.delay(name="eb_animation", delay=0.06, handler=self.animate_eb_scan, param=args)
+            self.delay(name="eb_animation", delay=0.08, handler=self.animate_eb_scan, param=args)
         else:
             self.cancel_delayed(name="eb_animation")
             self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
+            self.scan_eb()
 
     def eb_probability(self):
         mix3 = self.game.mixer3.position
@@ -1945,24 +2234,32 @@ class SinglecardBingo(procgame.game.Mode):
             self.delay(name="display", delay=0.1, handler=graphics.acapulco.display, param=self)
             self.delay(name="step_eb", delay=0.1, handler=self.step_eb, param=number)
 
+    def check_lamps(self):
+        if self.game.magic_numbers_feature.position >= 4:
+            if self.game.yellow_star.status == True:
+                self.game.coils.yellowROLamp.enable()
+            if self.game.red_star.status == True:
+                self.game.coils.yellowROLamp.disable()
+                self.game.coils.redROLamp.enable()
+
     def step_selection(self, number):
         if number >= 1:
             self.game.selection_feature.step()
             if self.game.selection_feature.position == 3 or self.game.selection_feature.position == 4:
                 self.game.yellow_star.engage(self.game)
-                self.game.coils.redROLamp.enable()
+                self.check_lamps()
             elif self.game.selection_feature.position == 5 or self.game.selection_feature.position == 6:
                 self.game.yellow_star.disengage()
                 self.game.red_star.engage(self.game)
-                self.game.coils.redROLamp.disable()
-                self.game.coils.yellowROLamp.enable()
+                self.game.coils.yellowROLamp.disable()
+                self.check_lamps()
             elif self.game.selection_feature.position == 7 or self.game.selection_feature.position == 8:
                 self.game.before_fourth.disengage()
                 self.game.before_fifth.engage(self.game)
-                self.game.coils.yellowROLamp.disable()
-                self.game.red_star.disengage()
             elif self.game.selection_feature.position == 9:
                 self.game.before_fifth.disengage()
+                self.game.coils.redROLamp.disable()
+                self.game.red_star.disengage()
                 self.game.after_fifth.engage(self.game)
             number -= 1
             self.cancel_delayed(name="display")

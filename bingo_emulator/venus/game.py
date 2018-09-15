@@ -43,6 +43,7 @@ class MulticardBingo(procgame.game.Mode):
     
     def timeout_actions(self):
         if (self.game.timer.position < 7):
+            self.game.sound.play_music('motor', -1)
             self.game.timer.step()
             self.delay(name="timeout", delay=5.0, handler=self.timeout_actions)
         else:
@@ -63,7 +64,6 @@ class MulticardBingo(procgame.game.Mode):
             os.system("/home/nbaldridge/proc/bingo_emulator/start_game.sh venus")
         else:
             if self.game.ball_count.position >= 4:
-                self.game.sound.stop_music()
                 if self.game.search_index.status == False:
                     self.game.sound.play('search')
                     self.search()
@@ -183,6 +183,8 @@ class MulticardBingo(procgame.game.Mode):
         self.game.ball_count.step()
         if self.game.ball_count.position == 4:
             self.game.sound.stop_music()
+            self.game.sound.play('tilt')
+            self.game.sound.play('tilt')
         self.game.probability.spin()
         self.check_lifter_status()
 
@@ -653,32 +655,39 @@ class MulticardBingo(procgame.game.Mode):
             if dp == True:
                 if i[0] == 1:
                     self.game.card1_double.engage(self.game)
+                    self.game.sound.play('tilt')
                     self.game.double_win.engage(self.game)
                     self.card1_replay_step_up((i[1] * 2) - self.game.card1_replay_counter.position)
                 elif i[0] == 2:
                     self.game.card2_double.engage(self.game)
+                    self.game.sound.play('tilt')
                     self.game.double_win.engage(self.game)
                     self.card2_replay_step_up((i[1] * 2) - self.game.card2_replay_counter.position)
                 elif i[0] == 3:
                     self.game.card3_double.engage(self.game)
+                    self.game.sound.play('tilt')
                     self.game.double_win.engage(self.game)
                     self.card3_replay_step_up((i[1] * 2) - self.game.card3_replay_counter.position)
                 elif i[0] == 4:
                     self.game.card4_double.engage(self.game)
+                    self.game.sound.play('tilt')
                     self.game.double_win.engage(self.game)
                     self.card4_replay_step_up((i[1] * 2) - self.game.card4_replay_counter.position)
                 elif i[0] == 5:
                     self.game.card5_double.engage(self.game)
+                    self.game.sound.play('tilt')
                     self.game.double_win.engage(self.game)
                     self.card5_replay_step_up((i[1] * 2) - self.game.card5_replay_counter.position)
                 elif i[0] == 6:
                     self.game.card6_double.engage(self.game)
+                    self.game.sound.play('tilt')
                     self.game.double_win.engage(self.game)
                     self.card6_replay_step_up((i[1] * 2) - self.game.card6_replay_counter.position)
                 self.delay(name="display", delay=0.1, handler=graphics.venus.display, param=self)
             else:
                 if i[0] == 1:
                     self.game.card1_missed.engage(self.game)
+                    self.game.sound.play('tilt')
                     self.game.nothing.engage(self.game)
                     self.delay(name="display", delay=0, handler=graphics.venus.display, param=self)
                     self.cancel_delayed(name="blink_double")
@@ -687,6 +696,7 @@ class MulticardBingo(procgame.game.Mode):
                     self.delay(name="research", delay=1, handler=self.search)
                 elif i[0] == 2:
                     self.game.card2_missed.engage(self.game)
+                    self.game.sound.play('tilt')
                     self.game.nothing.engage(self.game)
                     self.delay(name="display", delay=0, handler=graphics.venus.display, param=self)
                     self.cancel_delayed(name="blink_double")
@@ -695,6 +705,7 @@ class MulticardBingo(procgame.game.Mode):
                     self.delay(name="research", delay=1, handler=self.search)
                 elif i[0] == 3:
                     self.game.card3_missed.engage(self.game)
+                    self.game.sound.play('tilt')
                     self.game.nothing.engage(self.game)
                     self.delay(name="display", delay=0, handler=graphics.venus.display, param=self)
                     self.cancel_delayed(name="blink_double")
@@ -703,6 +714,7 @@ class MulticardBingo(procgame.game.Mode):
                     self.delay(name="research", delay=1, handler=self.search)
                 elif i[0] == 4:
                     self.game.card4_missed.engage(self.game)
+                    self.game.sound.play('tilt')
                     self.game.nothing.engage(self.game)
                     self.delay(name="display", delay=0, handler=graphics.venus.display, param=self)
                     self.cancel_delayed(name="blink_double")
@@ -711,6 +723,7 @@ class MulticardBingo(procgame.game.Mode):
                     self.delay(name="research", delay=1, handler=self.search)
                 elif i[0] == 5:
                     self.game.card5_missed.engage(self.game)
+                    self.game.sound.play('tilt')
                     self.game.nothing.engage(self.game)
                     self.delay(name="display", delay=0, handler=graphics.venus.display, param=self)
                     self.cancel_delayed(name="blink_double")
@@ -719,6 +732,7 @@ class MulticardBingo(procgame.game.Mode):
                     self.delay(name="research", delay=1, handler=self.search)
                 elif i[0] == 6:
                     self.game.card6_missed.engage(self.game)
+                    self.game.sound.play('tilt')
                     self.game.nothing.engage(self.game)
                     self.delay(name="display", delay=0, handler=graphics.venus.display, param=self)
                     self.cancel_delayed(name="blink_double")
@@ -737,6 +751,7 @@ class MulticardBingo(procgame.game.Mode):
             return 0
 
     def card1_replay_step_up(self, number):
+        self.game.sound.play('tilt')
         if number >= 1:
             self.game.card1_replay_counter.step()
             number -= 1
@@ -751,6 +766,7 @@ class MulticardBingo(procgame.game.Mode):
             self.search()
 
     def card2_replay_step_up(self, number):
+        self.game.sound.play('tilt')
         if number >= 1:
             self.game.card2_replay_counter.step()
             number -= 1
@@ -765,6 +781,7 @@ class MulticardBingo(procgame.game.Mode):
             self.search()
 
     def card3_replay_step_up(self, number):
+        self.game.sound.play('tilt')
         if number >= 1:
             self.game.card3_replay_counter.step()
             number -= 1
@@ -779,6 +796,7 @@ class MulticardBingo(procgame.game.Mode):
             self.search()
 
     def card4_replay_step_up(self, number):
+        self.game.sound.play('tilt')
         if number >= 1:
             self.game.card4_replay_counter.step()
             number -= 1
@@ -793,6 +811,7 @@ class MulticardBingo(procgame.game.Mode):
             self.search()
 
     def card5_replay_step_up(self, number):
+        self.game.sound.play('tilt')
         if number >= 1:
             self.game.card5_replay_counter.step()
             number -= 1
@@ -807,6 +826,7 @@ class MulticardBingo(procgame.game.Mode):
             self.search()
 
     def card6_replay_step_up(self, number):
+        self.game.sound.play('tilt')
         if number >= 1:
             self.game.card6_replay_counter.step()
             number -= 1
